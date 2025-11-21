@@ -412,43 +412,61 @@ function registerCommands(
 			);
 			promptsExplorer.refresh();
 		}),
-		commands.registerCommand("kiro-codex-ide.prompts.create", async () => {
-			const ws = workspace.workspaceFolders?.[0];
-			if (!ws) {
-				window.showErrorMessage("No workspace folder found");
-				return;
+		commands.registerCommand(
+			"kiro-codex-ide.prompts.create",
+			async (item?: any) => {
+				const ws = workspace.workspaceFolders?.[0];
+				if (!ws) {
+					window.showErrorMessage("No workspace folder found");
+					return;
+				}
+				const configManager = ConfigManager.getInstance();
+
+				let targetDir: Uri;
+				let promptsPathLabel: string;
+
+				// Determine target directory based on the item source
+				if (item?.source === "global") {
+					const home = homedir();
+					const globalPath = join(home, ".github", "prompts");
+					targetDir = Uri.file(globalPath);
+					promptsPathLabel = globalPath;
+				} else {
+					// Default to project scope
+					promptsPathLabel = configManager.getPath("prompts");
+					targetDir = Uri.joinPath(ws.uri, ".codex", "prompts");
+					try {
+						targetDir = Uri.file(configManager.getAbsolutePath("prompts"));
+					} catch {
+						// fall back to default under workspace
+					}
+				}
+
+				const name = await window.showInputBox({
+					title: "Create Prompt",
+					placeHolder: "prompt name (kebab-case)",
+					prompt: `A markdown file will be created under ${promptsPathLabel}`,
+					validateInput: (v) => (v ? undefined : "Name is required"),
+				});
+				if (!name) {
+					return;
+				}
+
+				const file = Uri.joinPath(targetDir, `${name}.md`);
+				try {
+					await workspace.fs.createDirectory(targetDir);
+					const content = Buffer.from(
+						`# ${name}\n\nDescribe your prompt here. This file will be sent to Codex when executed.\n`
+					);
+					await workspace.fs.writeFile(file, content);
+					const doc = await workspace.openTextDocument(file);
+					await window.showTextDocument(doc);
+					promptsExplorer.refresh();
+				} catch (e) {
+					window.showErrorMessage(`Failed to create prompt: ${e}`);
+				}
 			}
-			const configManager = ConfigManager.getInstance();
-			const promptsPathLabel = configManager.getPath("prompts");
-			const name = await window.showInputBox({
-				title: "Create Prompt",
-				placeHolder: "prompt name (kebab-case)",
-				prompt: `A markdown file will be created under ${promptsPathLabel}`,
-				validateInput: (v) => (v ? undefined : "Name is required"),
-			});
-			if (!name) {
-				return;
-			}
-			let dir = Uri.joinPath(ws.uri, ".codex", "prompts");
-			try {
-				dir = Uri.file(configManager.getAbsolutePath("prompts"));
-			} catch {
-				// fall back to default under workspace
-			}
-			const file = Uri.joinPath(dir, `${name}.md`);
-			try {
-				await workspace.fs.createDirectory(dir);
-				const content = Buffer.from(
-					`# ${name}\n\nDescribe your prompt here. This file will be sent to Codex when executed.\n`
-				);
-				await workspace.fs.writeFile(file, content);
-				const doc = await workspace.openTextDocument(file);
-				await window.showTextDocument(doc);
-				promptsExplorer.refresh();
-			} catch (e) {
-				window.showErrorMessage(`Failed to create prompt: ${e}`);
-			}
-		}),
+		),
 		commands.registerCommand(
 			"kiro-codex-ide.prompts.run",
 			// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: ignore
