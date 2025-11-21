@@ -12,13 +12,14 @@ import {
 import type { SpecManager } from "../features/spec/spec-manager";
 
 export class SpecExplorerProvider implements TreeDataProvider<SpecItem> {
-	static readonly viewId = "kiro-codex-ide.views.specExplorer";
+	static readonly viewId = "openspec-for-copilot.views.specExplorer";
 	static readonly navigateRequirementsCommandId =
-		"kiro-codex-ide.spec.navigate.requirements";
+		"openspec-for-copilot.spec.navigate.requirements";
 	static readonly navigateDesignCommandId =
-		"kiro-codex-ide.spec.navigate.design";
-	static readonly navigateTasksCommandId = "kiro-codex-ide.spec.navigate.tasks";
-	static readonly openSpecCommandId = "kiro-codex-ide.spec.open";
+		"openspec-for-copilot.spec.navigate.design";
+	static readonly navigateTasksCommandId =
+		"openspec-for-copilot.spec.navigate.tasks";
+	static readonly openSpecCommandId = "openspec-for-copilot.spec.open";
 
 	private readonly _onDidChangeTreeData: EventEmitter<
 		SpecItem | undefined | null | void

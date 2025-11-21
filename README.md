@@ -1,9 +1,9 @@
 # OpenSpec for Copilot
 
-[![Visual Studio Marketplace](https://img.shields.io/vscode-marketplace/v/atman-dev.kiro-for-codex-ide.svg?style=flat-square)](https://marketplace.visualstudio.com/items?itemName=atman-dev.kiro-for-codex-ide)
-[![Downloads](https://img.shields.io/vscode-marketplace/d/atman-dev.kiro-for-codex-ide.svg?style=flat-square)](https://marketplace.visualstudio.com/items?itemName=atman-dev.kiro-for-codex-ide)
-[![GitHub stars](https://img.shields.io/github/stars/atman-33/kiro-for-codex-ide.svg?style=flat-square)](https://github.com/atman-33/kiro-for-codex-ide/stargazers)
-[![GitHub issues](https://img.shields.io/github/issues/atman-33/kiro-for-codex-ide.svg?style=flat-square)](https://github.com/atman-33/kiro-for-codex-ide/issues)
+[![Visual Studio Marketplace](https://img.shields.io/vscode-marketplace/v/atman-dev.openspec-for-copilot.svg?style=flat-square)](https://marketplace.visualstudio.com/items?itemName=atman-dev.openspec-for-copilot)
+[![Downloads](https://img.shields.io/vscode-marketplace/d/atman-dev.openspec-for-copilot.svg?style=flat-square)](https://marketplace.visualstudio.com/items?itemName=atman-dev.openspec-for-copilot)
+[![GitHub stars](https://img.shields.io/github/stars/atman-33/openspec-for-copilot.svg?style=flat-square)](https://github.com/atman-33/openspec-for-copilot/stargazers)
+[![GitHub issues](https://img.shields.io/github/issues/atman-33/openspec-for-copilot.svg?style=flat-square)](https://github.com/atman-33/openspec-for-copilot/issues)
 
 A VS Code extension that brings spec-driven development to Codex CLI, leveraging the powerful AI capabilities of the [VS Code Codex extension](https://marketplace.visualstudio.com/items?itemName=openai.chatgpt). Manage your specs, steering documents, and custom prompts visually.
 
@@ -13,7 +13,7 @@ A VS Code extension that brings spec-driven development to Codex CLI, leveraging
 
 ### 📝 Spec Management
 
-- Run `Kiro for Codex IDE: Create New Spec` (`kiro-codex-ide.spec.create`) to open the Create Spec dialog. Provide the required summary alongside optional product context, technical constraints, and open questions; drafts auto-save so you can resume later. Submitting sends the compiled request to the VS Code Codex extension's chat to finish generating the spec.
+- Run `OpenSpec for Copilot: Create New Spec` (`openspec-for-copilot.spec.create`) to open the Create Spec dialog. Provide the required summary alongside optional product context, technical constraints, and open questions; drafts auto-save so you can resume later. Submitting sends the compiled request to the VS Code Codex extension's chat to finish generating the spec.
 - Browse generated specs in the **Specs** view; each spec exposes Requirements, Design, and Tasks nodes with quick-open commands.
 - Execute individual checklist items from `tasks.md` via the "Start Task" CodeLens, which marks the checklist and passes the task context to the VS Code Codex extension's chat. You can then interact with the chat to execute the task.
 
@@ -36,16 +36,16 @@ A VS Code extension that brings spec-driven development to Codex CLI, leveraging
 - **[VS Code Codex extension](https://marketplace.visualstudio.com/items?itemName=openai.chatgpt) must be installed.** This extension utilizes the Codex Chat functionality provided by the ChatGPT extension to pass prompt contexts.
 
 ### Marketplace (when published)
-Search for "Kiro for Codex IDE" in the VS Code Marketplace and install the extension.
+Search for "OpenSpec for Copilot" in the VS Code Marketplace and install the extension.
 
 ### From Local VSIX
-1. Build the package with `npm run package` (produces `kiro-for-codex-ide-<version>.vsix`).
-2. Install via `code --install-extension kiro-for-codex-ide-<version>.vsix`.
+1. Build the package with `npm run package` (produces `openspec-for-copilot-<version>.vsix`).
+2. Install via `code --install-extension openspec-for-copilot-<version>.vsix`.
 
 ## Usage
 
 ### Create a Spec
-1. Open the Kiro for Codex IDE activity bar container.
+1. Open the OpenSpec for Copilot activity bar container.
 2. Choose **Specs** → **Create New Spec**.
 3. Fill out the Create Spec dialog: the summary is required, while product context, technical constraints, and open questions are optional. Drafts auto-save while you type, and closing the dialog prompts you to discard or resume later.
 4. Press **Create Spec** to send the compiled prompt to the VS Code Codex extension's chat, then continue the guided flow there.
@@ -67,7 +67,7 @@ Search for "Kiro for Codex IDE" in the VS Code Marketplace and install the exten
 3. Use **Run Prompt** to push the file into the Codex Chat (provided by the VS Code Codex extension). You can then interact with the chat to utilize the prompt.
 
 ## Configuration
-All settings live under the `kiro-codex-ide` namespace.
+All settings live under the `openspec-for-copilot` namespace.
 
 | Setting | Type | Default | Purpose |
 | --- | --- | --- | --- |
@@ -131,5 +131,3 @@ MIT License. See [`LICENSE`](LICENSE).
 
 ## Credits
 Inspired by the original Kiro project for Claude Code by @notdp, adapted here for Codex CLI workflows.
-
-- Original project: https://github.com/notdp/kiro-for-cc

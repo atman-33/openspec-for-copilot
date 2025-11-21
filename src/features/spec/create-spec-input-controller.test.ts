@@ -151,7 +151,7 @@ describe("CreateSpecInputController", () => {
 		await controller.open();
 
 		expect((window as any).createWebviewPanel).toHaveBeenCalledWith(
-			"kiro.createSpecDialog",
+			"openspec.createSpecDialog",
 			"Create New Spec",
 			{
 				viewColumn: ViewColumn.Active,

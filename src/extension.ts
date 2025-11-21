@@ -62,7 +62,7 @@ const ensureWorkspaceCodexGitignore = async (folder: WorkspaceFolder) => {
 
 export async function activate(context: ExtensionContext) {
 	// Create output channel for debugging
-	outputChannel = window.createOutputChannel("Kiro for Codex - Debug");
+	outputChannel = window.createOutputChannel("OpenSpec for Copilot - Debug");
 
 	// Initialize PromptLoader
 	try {
@@ -106,21 +106,21 @@ export async function activate(context: ExtensionContext) {
 
 	context.subscriptions.push(
 		window.registerTreeDataProvider(
-			"kiro-codex-ide.views.overview",
+			"openspec-for-copilot.views.overview",
 			overviewProvider
 		),
 		window.registerTreeDataProvider(
-			"kiro-codex-ide.views.specExplorer",
+			"openspec-for-copilot.views.specExplorer",
 			specExplorer
 		),
 		window.registerTreeDataProvider(
-			"kiro-codex-ide.views.steeringExplorer",
+			"openspec-for-copilot.views.steeringExplorer",
 			steeringExplorer
 		)
 	);
 	context.subscriptions.push(
 		window.registerTreeDataProvider(
-			"kiro-codex-ide.views.promptsExplorer",
+			"openspec-for-copilot.views.promptsExplorer",
 			promptsExplorer
 		)
 	);
@@ -210,7 +210,7 @@ function registerCommands(
 	promptsExplorer: PromptsExplorerProvider
 ) {
 	const createSpecCommand = commands.registerCommand(
-		"kiro-codex-ide.spec.create",
+		"openspec-for-copilot.spec.create",
 		async () => {
 			outputChannel.appendLine(
 				`[Spec] create command triggered at ${new Date().toISOString()}`
@@ -227,33 +227,33 @@ function registerCommands(
 	);
 
 	context.subscriptions.push(
-		commands.registerCommand("kiro-codex-ide.noop", () => {
+		commands.registerCommand("openspec-for-copilot.noop", () => {
 			// noop
 		}),
 		createSpecCommand,
 		commands.registerCommand(
-			"kiro-codex-ide.spec.navigate.requirements",
+			"openspec-for-copilot.spec.navigate.requirements",
 			async (specName: string) => {
 				await specManager.navigateToDocument(specName, "requirements");
 			}
 		),
 
 		commands.registerCommand(
-			"kiro-codex-ide.spec.navigate.design",
+			"openspec-for-copilot.spec.navigate.design",
 			async (specName: string) => {
 				await specManager.navigateToDocument(specName, "design");
 			}
 		),
 
 		commands.registerCommand(
-			"kiro-codex-ide.spec.navigate.tasks",
+			"openspec-for-copilot.spec.navigate.tasks",
 			async (specName: string) => {
 				await specManager.navigateToDocument(specName, "tasks");
 			}
 		),
 
 		commands.registerCommand(
-			"kiro-codex-ide.spec.implTask",
+			"openspec-for-copilot.spec.implTask",
 			async (documentUri: Uri) => {
 				outputChannel.appendLine(
 					`[Task Execute] Generating OpenSpec apply prompt for: ${documentUri.fsPath}`
@@ -263,13 +263,13 @@ function registerCommands(
 		),
 
 		commands.registerCommand(
-			"kiro-codex-ide.spec.open",
+			"openspec-for-copilot.spec.open",
 			async (relativePath: string, type: string) => {
 				await specManager.openDocument(relativePath, type);
 			}
 		),
 		// biome-ignore lint/suspicious/useAwait: ignore
-		commands.registerCommand("kiro-codex-ide.spec.refresh", async () => {
+		commands.registerCommand("openspec-for-copilot.spec.refresh", async () => {
 			outputChannel.appendLine("[Manual Refresh] Refreshing spec explorer...");
 			specExplorer.refresh();
 		})
@@ -280,7 +280,7 @@ function registerCommands(
 	// Steering commands
 	context.subscriptions.push(
 		commands.registerCommand(
-			"kiro-codex-ide.steering.refine",
+			"openspec-for-copilot.steering.refine",
 			async (item: any) => {
 				// Item is always from tree view
 				const uri = Uri.file(item.resourcePath);
@@ -289,7 +289,7 @@ function registerCommands(
 		),
 
 		commands.registerCommand(
-			"kiro-codex-ide.steering.delete",
+			"openspec-for-copilot.steering.delete",
 			async (item: any) => {
 				outputChannel.appendLine(`[Steering] Deleting: ${item.label}`);
 
@@ -307,21 +307,20 @@ function registerCommands(
 
 		// Configuration commands
 		commands.registerCommand(
-			"kiro-codex-ide.steering.createUserRule",
+			"openspec-for-copilot.steering.createUserRule",
 			async () => {
 				await steeringManager.createUserConfiguration();
 			}
 		),
 
 		commands.registerCommand(
-			"kiro-codex-ide.steering.createProjectRule",
+			"openspec-for-copilot.steering.createProjectRule",
 			async () => {
 				await steeringManager.createProjectDocumentation();
 			}
 		),
 
-		// biome-ignore lint/suspicious/useAwait: ignore
-		commands.registerCommand("kiro-codex-ide.steering.refresh", async () => {
+		commands.registerCommand("openspec-for-copilot.steering.refresh", () => {
 			outputChannel.appendLine(
 				"[Manual Refresh] Refreshing steering explorer..."
 			);
@@ -357,13 +356,13 @@ function registerCommands(
 	// Spec delete command
 	context.subscriptions.push(
 		commands.registerCommand(
-			"kiro-codex-ide.spec.delete",
+			"openspec-for-copilot.spec.delete",
 			async (item: any) => {
 				await specManager.delete(item.label);
 			}
 		),
 		commands.registerCommand(
-			"kiro-codex-ide.spec.archiveChange",
+			"openspec-for-copilot.spec.archiveChange",
 			async (item: any) => {
 				// item is SpecItem, item.specName is the ID
 				const changeId = item.specName;
@@ -406,27 +405,26 @@ function registerCommands(
 
 	// Prompts commands
 	context.subscriptions.push(
-		// biome-ignore lint/suspicious/useAwait: ignore
-		commands.registerCommand("kiro-codex-ide.prompts.refresh", async () => {
+		commands.registerCommand("openspec-for-copilot.prompts.refresh", () => {
 			outputChannel.appendLine(
 				"[Manual Refresh] Refreshing prompts explorer..."
 			);
 			promptsExplorer.refresh();
 		}),
 		commands.registerCommand(
-			"kiro-codex-ide.prompts.createInstructions",
+			"openspec-for-copilot.prompts.createInstructions",
 			async () => {
 				await commands.executeCommand("workbench.command.new.instructions");
 			}
 		),
 		commands.registerCommand(
-			"kiro-codex-ide.prompts.createCopilotPrompt",
+			"openspec-for-copilot.prompts.createCopilotPrompt",
 			async () => {
 				await commands.executeCommand("workbench.command.new.prompt");
 			}
 		),
 		commands.registerCommand(
-			"kiro-codex-ide.prompts.create",
+			"openspec-for-copilot.prompts.create",
 			async (item?: any) => {
 				const ws = workspace.workspaceFolders?.[0];
 				if (!ws) {
@@ -481,7 +479,7 @@ function registerCommands(
 			}
 		),
 		commands.registerCommand(
-			"kiro-codex-ide.prompts.run",
+			"openspec-for-copilot.prompts.run",
 			// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: ignore
 			async (filePathOrItem?: any) => {
 				try {
@@ -519,7 +517,7 @@ function registerCommands(
 			}
 		),
 		commands.registerCommand(
-			"kiro-codex-ide.prompts.delete",
+			"openspec-for-copilot.prompts.delete",
 			async (item: any) => {
 				if (!item?.resourceUri) {
 					return;
@@ -548,15 +546,15 @@ function registerCommands(
 	// Group the following commands in a single subscriptions push
 	context.subscriptions.push(
 		// Overview and settings commands
-		commands.registerCommand("kiro-codex-ide.settings.open", async () => {
-			outputChannel.appendLine("Opening Kiro settings...");
+		commands.registerCommand("openspec-for-copilot.settings.open", async () => {
+			outputChannel.appendLine("Opening OpenSpec settings...");
 			await commands.executeCommand(
 				"workbench.action.openSettings",
 				VSC_CONFIG_NAMESPACE
 			);
 		}),
 		commands.registerCommand(
-			"kiro-codex-ide.settings.openGlobalConfig",
+			"openspec-for-copilot.settings.openGlobalConfig",
 			async () => {
 				outputChannel.appendLine("Opening MCP config...");
 
@@ -584,21 +582,21 @@ function registerCommands(
 		),
 
 		// biome-ignore lint/suspicious/useAwait: ignore
-		commands.registerCommand("kiro-codex-ide.help.open", async () => {
+		commands.registerCommand("openspec-for-copilot.help.open", async () => {
 			outputChannel.appendLine("Opening OpenSpec help...");
 			const helpUrl = "https://github.com/atman-33/openspec-for-copilot#readme";
 			env.openExternal(Uri.parse(helpUrl));
 		}),
 
 		// biome-ignore lint/suspicious/useAwait: ignore
-		commands.registerCommand("kiro-codex-ide.help.install", async () => {
+		commands.registerCommand("openspec-for-copilot.help.install", async () => {
 			outputChannel.appendLine("Opening OpenSpec installation guide...");
 			const installUrl = "https://github.com/Fission-AI/OpenSpec#readme";
 			env.openExternal(Uri.parse(installUrl));
 		}),
 
-		commands.registerCommand("kiro-codex-ide.menu.open", async () => {
-			outputChannel.appendLine("Opening Kiro menu...");
+		commands.registerCommand("openspec-for-copilot.menu.open", async () => {
+			outputChannel.appendLine("Opening OpenSpec menu...");
 			await toggleViews();
 		})
 	);

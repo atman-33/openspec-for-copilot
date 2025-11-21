@@ -14,7 +14,7 @@ This applies to `tasks.md` files located within the `openspec` directory or conf
 Given a `tasks.md` file with at least one incomplete task (e.g., `- [ ] Task 1`)
 When the CodeLens is rendered
 Then it displays "$(play) Start All Tasks"
-And clicking it triggers the `kiro-codex-ide.spec.implTask` command.
+And clicking it triggers the `openspec-for-copilot.spec.implTask` command.
 
 #### Scenario: All tasks completed
 Given a `tasks.md` file where all tasks are marked as complete (e.g., `- [x] Task 1`)

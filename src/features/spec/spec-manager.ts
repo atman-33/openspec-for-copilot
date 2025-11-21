@@ -66,7 +66,7 @@ export class SpecManager {
 		} catch (error) {
 			// File doesn't exist, look for already open virtual documents
 			// Create unique identifier for this spec document
-			const uniqueMarker = `<!-- kiro-spec: ${relativePath} -->`;
+			const uniqueMarker = `<!-- openspec-spec: ${relativePath} -->`;
 
 			for (const doc of workspace.textDocuments) {
 				// Check if this is an untitled document with our unique marker

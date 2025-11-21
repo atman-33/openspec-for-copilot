@@ -1,5 +1,5 @@
 {
-  "name": "kiro-for-codex-ide",
+  "name": "openspec-for-copilot",
   "displayName": "OpenSpec for Copilot",
   "description": "Spec-driven development with Codex CLI - inspired by Kiro",
   "version": "0.1.6",
@@ -8,7 +8,7 @@
   "icon": "icon.png",
   "repository": {
     "type": "git",
-    "url": "https://github.com/atman-33/kiro-for-codex-ide"
+    "url": "https://github.com/atman-33/openspec-for-copilot"
   },
   "engines": {
     "vscode": "^1.84.0"
@@ -48,37 +48,37 @@
     "configuration": {
       "title": "OpenSpec for Copilot",
       "properties": {
-        "kiro-codex-ide.views.specs.visible": {
+        "openspec-for-copilot.views.specs.visible": {
           "type": "boolean",
           "default": true,
           "description": "Controls visibility of the Specs view in the activity bar."
         },
-        "kiro-codex-ide.views.steering.visible": {
+        "openspec-for-copilot.views.steering.visible": {
           "type": "boolean",
           "default": true,
           "description": "Controls visibility of the Steering view in the activity bar."
         },
-        "kiro-codex-ide.views.prompts.visible": {
+        "openspec-for-copilot.views.prompts.visible": {
           "type": "boolean",
           "default": true,
           "description": "Controls visibility of the Prompts view in the activity bar."
         },
-        "kiro-codex-ide.views.settings.visible": {
+        "openspec-for-copilot.views.settings.visible": {
           "type": "boolean",
           "default": true,
           "description": "Controls visibility of the Settings view in the activity bar."
         },
-        "kiro-codex-ide.codex.specsPath": {
+        "openspec-for-copilot.codex.specsPath": {
           "type": "string",
           "default": "openspec",
           "description": "Path where Codex specification files are stored."
         },
-        "kiro-codex-ide.codex.promptsPath": {
+        "openspec-for-copilot.codex.promptsPath": {
           "type": "string",
           "default": ".github/prompts",
           "description": "Path where Codex prompt files are stored."
         },
-        "kiro-codex-ide.codex.steeringPath": {
+        "openspec-for-copilot.codex.steeringPath": {
           "type": "string",
           "default": ".codex/steering",
           "description": "Path where Codex steering documents are stored."
@@ -88,169 +88,169 @@
     "viewsContainers": {
       "activitybar": [
         {
-          "id": "kiro-codex-ide",
+          "id": "openspec-for-copilot",
           "title": "OpenSpec for Copilot",
           "icon": "./icons/kiro.svg"
         }
       ]
     },
     "views": {
-      "kiro-codex-ide": [
+      "openspec-for-copilot": [
         {
-          "id": "kiro-codex-ide.views.specExplorer",
+          "id": "openspec-for-copilot.views.specExplorer",
           "name": "Specs",
           "icon": "symbol-structure",
-          "when": "!(workbenchState == empty || workspaceFolderCount == 0) && config.kiro-codex-ide.views.specs.visible"
+          "when": "!(workbenchState == empty || workspaceFolderCount == 0) && config.openspec-for-copilot.views.specs.visible"
         },
         {
-          "id": "kiro-codex-ide.views.steeringExplorer",
+          "id": "openspec-for-copilot.views.steeringExplorer",
           "name": "Steering",
           "icon": "symbol-parameter",
-          "when": "!(workbenchState == empty || workspaceFolderCount == 0) && config.kiro-codex-ide.views.steering.visible"
+          "when": "!(workbenchState == empty || workspaceFolderCount == 0) && config.openspec-for-copilot.views.steering.visible"
         },
         {
-          "id": "kiro-codex-ide.views.promptsExplorer",
+          "id": "openspec-for-copilot.views.promptsExplorer",
           "name": "Prompts",
           "icon": "terminal",
-          "when": "!(workbenchState == empty || workspaceFolderCount == 0) && config.kiro-codex-ide.views.prompts.visible"
+          "when": "!(workbenchState == empty || workspaceFolderCount == 0) && config.openspec-for-copilot.views.prompts.visible"
         },
         {
-          "id": "kiro-codex-ide.views.overview",
+          "id": "openspec-for-copilot.views.overview",
           "name": "Settings",
           "icon": "gear",
           "visibility": "collapsed",
-          "when": "!(workbenchState == empty || workspaceFolderCount == 0) && config.kiro-codex-ide.views.settings.visible"
+          "when": "!(workbenchState == empty || workspaceFolderCount == 0) && config.openspec-for-copilot.views.settings.visible"
         }
       ]
     },
     "viewsWelcome": [
       {
-        "view": "kiro-codex-ide.views.specExplorer",
-        "contents": "Plan features with Specs\n\n[$(plus) Create New Spec](command:kiro-codex-ide.spec.create)"
+        "view": "openspec-for-copilot.views.specExplorer",
+        "contents": "Plan features with Specs\n\n[$(plus) Create New Spec](command:openspec-for-copilot.spec.create)"
       },
       {
-        "view": "kiro-codex-ide.views.steeringExplorer",
-        "contents": "[$(globe) Create User Rule](command:kiro-codex-ide.steering.createUserRule)\n\n[$(root-folder) Create Project Rule](command:kiro-codex-ide.steering.createProjectRule)"
+        "view": "openspec-for-copilot.views.steeringExplorer",
+        "contents": "[$(globe) Create User Rule](command:openspec-for-copilot.steering.createUserRule)\n\n[$(root-folder) Create Project Rule](command:openspec-for-copilot.steering.createProjectRule)"
       },
       {
-        "view": "kiro-codex-ide.views.promptsExplorer",
-        "contents": "Create and run prompts (.md) under .codex/prompts\n\n[$(plus) Create Prompt](command:kiro-codex-ide.prompts.create)\n[$(refresh) Refresh](command:kiro-codex-ide.prompts.refresh)"
+        "view": "openspec-for-copilot.views.promptsExplorer",
+        "contents": "Create and run prompts (.md) under .codex/prompts\n\n[$(plus) Create Prompt](command:openspec-for-copilot.prompts.create)\n[$(refresh) Refresh](command:openspec-for-copilot.prompts.refresh)"
       },
       {
-        "view": "kiro-codex-ide.views.overview",
-        "contents": "Configure OpenSpec for Copilot\n\n[$(book) Install OpenSpec](command:kiro-codex-ide.help.install)\n[$(gear) Open Settings](command:kiro-codex-ide.settings.open)\n[$(file-text) Open MCP Config (mcp.json)](command:kiro-codex-ide.settings.openGlobalConfig)\n[$(question) Help](command:kiro-codex-ide.help.open)"
+        "view": "openspec-for-copilot.views.overview",
+        "contents": "Configure OpenSpec for Copilot\n\n[$(book) Install OpenSpec](command:openspec-for-copilot.help.install)\n[$(gear) Open Settings](command:openspec-for-copilot.settings.open)\n[$(file-text) Open MCP Config (mcp.json)](command:openspec-for-copilot.settings.openGlobalConfig)\n[$(question) Help](command:openspec-for-copilot.help.open)"
       }
     ],
     "commands": [
       {
-        "command": "kiro-codex-ide.spec.create",
+        "command": "openspec-for-copilot.spec.create",
         "title": "Create New Spec",
         "category": "OpenSpec for Copilot",
         "icon": "$(plus)"
       },
       {
-        "command": "kiro-codex-ide.spec.refresh",
+        "command": "openspec-for-copilot.spec.refresh",
         "title": "Refresh Specs",
         "category": "OpenSpec for Copilot",
         "icon": "$(refresh)"
       },
       {
-        "command": "kiro-codex-ide.spec.delete",
+        "command": "openspec-for-copilot.spec.delete",
         "title": "Delete Spec",
         "category": "OpenSpec for Copilot",
         "icon": "$(trash)"
       },
       {
-        "command": "kiro-codex-ide.spec.archiveChange",
+        "command": "openspec-for-copilot.spec.archiveChange",
         "title": "Archive Change",
         "category": "OpenSpec for Copilot",
         "icon": "$(archive)"
       },
       {
-        "command": "kiro-codex-ide.spec.implTask",
+        "command": "openspec-for-copilot.spec.implTask",
         "title": "Implement Task",
         "category": "OpenSpec for Copilot"
       },
       {
-        "command": "kiro-codex-ide.steering.refine",
+        "command": "openspec-for-copilot.steering.refine",
         "title": "Refine Steering",
         "category": "OpenSpec for Copilot",
         "icon": "$(sparkle)"
       },
       {
-        "command": "kiro-codex-ide.steering.delete",
+        "command": "openspec-for-copilot.steering.delete",
         "title": "Delete Steering",
         "category": "OpenSpec for Copilot",
         "icon": "$(trash)"
       },
       {
-        "command": "kiro-codex-ide.steering.refresh",
+        "command": "openspec-for-copilot.steering.refresh",
         "title": "Refresh Steering",
         "category": "OpenSpec for Copilot",
         "icon": "$(refresh)"
       },
       {
-        "command": "kiro-codex-ide.steering.createUserRule",
+        "command": "openspec-for-copilot.steering.createUserRule",
         "title": "Create User Rule",
         "category": "OpenSpec for Copilot",
         "icon": "$(globe)"
       },
       {
-        "command": "kiro-codex-ide.steering.createProjectRule",
+        "command": "openspec-for-copilot.steering.createProjectRule",
         "title": "Create Project Rule",
         "category": "OpenSpec for Copilot",
         "icon": "$(root-folder)"
       },
       {
-        "command": "kiro-codex-ide.prompts.create",
+        "command": "openspec-for-copilot.prompts.create",
         "title": "Create Prompt",
         "category": "OpenSpec for Copilot",
         "icon": "$(plus)"
       },
       {
-        "command": "kiro-codex-ide.prompts.createInstructions",
+        "command": "openspec-for-copilot.prompts.createInstructions",
         "title": "New Instructions File",
         "category": "OpenSpec for Copilot",
         "icon": "$(book)"
       },
       {
-        "command": "kiro-codex-ide.prompts.createCopilotPrompt",
+        "command": "openspec-for-copilot.prompts.createCopilotPrompt",
         "title": "New Prompt File",
         "category": "OpenSpec for Copilot",
         "icon": "$(sparkle)"
       },
       {
-        "command": "kiro-codex-ide.prompts.refresh",
+        "command": "openspec-for-copilot.prompts.refresh",
         "title": "Refresh Prompts",
         "category": "OpenSpec for Copilot",
         "icon": "$(refresh)"
       },
       {
-        "command": "kiro-codex-ide.prompts.run",
+        "command": "openspec-for-copilot.prompts.run",
         "title": "Run Prompt",
         "category": "OpenSpec for Copilot",
         "icon": "$(play)"
       },
       {
-        "command": "kiro-codex-ide.prompts.delete",
+        "command": "openspec-for-copilot.prompts.delete",
         "title": "Delete Prompt",
         "category": "OpenSpec for Copilot",
         "icon": "$(trash)"
       },
       {
-        "command": "kiro-codex-ide.settings.open",
+        "command": "openspec-for-copilot.settings.open",
         "title": "OpenSpec Settings",
         "category": "OpenSpec for Copilot",
         "icon": "$(gear)"
       },
       {
-        "command": "kiro-codex-ide.settings.openGlobalConfig",
+        "command": "openspec-for-copilot.settings.openGlobalConfig",
         "title": "Open MCP Config (mcp.json)",
         "category": "OpenSpec for Copilot",
         "icon": "$(file-text)"
       },
       {
-        "command": "kiroCodex.help.open",
+        "command": "openspec-for-copilot.help.open",
         "title": "OpenSpec Help",
         "category": "OpenSpec for Copilot",
         "icon": "$(question)"
@@ -259,86 +259,86 @@
     "menus": {
       "view/title": [
         {
-          "command": "kiro-codex-ide.spec.create",
-          "when": "view == kiro-codex-ide.views.specExplorer",
+          "command": "openspec-for-copilot.spec.create",
+          "when": "view == openspec-for-copilot.views.specExplorer",
           "group": "navigation@1"
         },
         {
-          "command": "kiro-codex-ide.spec.refresh",
-          "when": "view == kiro-codex-ide.views.specExplorer",
+          "command": "openspec-for-copilot.spec.refresh",
+          "when": "view == openspec-for-copilot.views.specExplorer",
           "group": "navigation@2"
         },
         {
-          "command": "kiro-codex-ide.steering.refresh",
-          "when": "view == kiro-codex-ide.views.steeringExplorer",
+          "command": "openspec-for-copilot.steering.refresh",
+          "when": "view == openspec-for-copilot.views.steeringExplorer",
           "group": "navigation@3"
         },
         {
-          "command": "kiro-codex-ide.prompts.createInstructions",
-          "when": "view == kiro-codex-ide.views.promptsExplorer",
+          "command": "openspec-for-copilot.prompts.createInstructions",
+          "when": "view == openspec-for-copilot.views.promptsExplorer",
           "group": "navigation@2"
         },
         {
-          "command": "kiro-codex-ide.prompts.createCopilotPrompt",
-          "when": "view == kiro-codex-ide.views.promptsExplorer",
+          "command": "openspec-for-copilot.prompts.createCopilotPrompt",
+          "when": "view == openspec-for-copilot.views.promptsExplorer",
           "group": "navigation@3"
         },
         {
-          "command": "kiro-codex-ide.prompts.refresh",
-          "when": "view == kiro-codex-ide.views.promptsExplorer",
+          "command": "openspec-for-copilot.prompts.refresh",
+          "when": "view == openspec-for-copilot.views.promptsExplorer",
           "group": "navigation@4"
         },
         {
-          "command": "kiro-codex-ide.settings.openGlobalConfig",
-          "when": "view == kiro-codex-ide.views.overview",
+          "command": "openspec-for-copilot.settings.openGlobalConfig",
+          "when": "view == openspec-for-copilot.views.overview",
           "group": "navigation@2"
         }
       ],
       "view/item/context": [
         {
-          "command": "kiro-codex-ide.spec.delete",
-          "when": "view == kiro-codex-ide.views.specExplorer && viewItem == spec",
+          "command": "openspec-for-copilot.spec.delete",
+          "when": "view == openspec-for-copilot.views.specExplorer && viewItem == spec",
           "group": "7_modification"
         },
         {
-          "command": "kiro-codex-ide.spec.archiveChange",
-          "when": "view == kiro-codex-ide.views.specExplorer && viewItem == change",
+          "command": "openspec-for-copilot.spec.archiveChange",
+          "when": "view == openspec-for-copilot.views.specExplorer && viewItem == change",
           "group": "7_modification"
         },
         {
-          "command": "kiro-codex-ide.prompts.run",
-          "when": "view == kiro-codex-ide.views.promptsExplorer && viewItem == prompt-runnable",
+          "command": "openspec-for-copilot.prompts.run",
+          "when": "view == openspec-for-copilot.views.promptsExplorer && viewItem == prompt-runnable",
           "group": "inline"
         },
         {
-          "command": "kiro-codex-ide.prompts.delete",
-          "when": "view == kiro-codex-ide.views.promptsExplorer && (viewItem == prompt || viewItem == prompt-runnable)",
+          "command": "openspec-for-copilot.prompts.delete",
+          "when": "view == openspec-for-copilot.views.promptsExplorer && (viewItem == prompt || viewItem == prompt-runnable)",
           "group": "7_modification"
         },
         {
-          "command": "kiro-codex-ide.steering.refine",
-          "when": "view == kiro-codex-ide.views.steeringExplorer && viewItem == steering-document",
+          "command": "openspec-for-copilot.steering.refine",
+          "when": "view == openspec-for-copilot.views.steeringExplorer && viewItem == steering-document",
           "group": "inline"
         },
         {
-          "command": "kiro-codex-ide.steering.delete",
-          "when": "view == kiro-codex-ide.views.steeringExplorer && viewItem == steering-document",
+          "command": "openspec-for-copilot.steering.delete",
+          "when": "view == openspec-for-copilot.views.steeringExplorer && viewItem == steering-document",
           "group": "7_modification"
         }
       ],
       "commandPalette": [
         {
-          "command": "kiro-codex-ide.spec.create"
+          "command": "openspec-for-copilot.spec.create"
         },
         {
-          "command": "kiro-codex-ide.steering.refresh"
+          "command": "openspec-for-copilot.steering.refresh"
         },
         {
-          "command": "kiro-codex-ide.prompts.create",
+          "command": "openspec-for-copilot.prompts.create",
           "when": "workspaceFolderCount > 0"
         },
         {
-          "command": "kiro-codex-ide.settings.openGlobalConfig"
+          "command": "openspec-for-copilot.settings.openGlobalConfig"
         }
       ]
     }
