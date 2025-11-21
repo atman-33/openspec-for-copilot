@@ -75,7 +75,7 @@
         },
         "kiro-codex-ide.codex.promptsPath": {
           "type": "string",
-          "default": ".codex/prompts",
+          "default": ".github/prompts",
           "description": "Path where Codex prompt files are stored."
         },
         "kiro-codex-ide.codex.steeringPath": {

@@ -4,7 +4,7 @@ export const VSC_CONFIG_NAMESPACE = "kiro-codex-ide";
 // Default configuration
 export const DEFAULT_CONFIG = {
 	paths: {
-		prompts: ".codex/prompts",
+		prompts: ".github/prompts",
 		specs: ".codex/specs",
 		steering: ".codex/steering",
 	},

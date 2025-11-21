@@ -280,7 +280,7 @@ export class PromptsExplorerProvider implements TreeDataProvider<PromptItem> {
 	private readonly getGlobalPromptsRoot = (): Uri | undefined => {
 		try {
 			const homeUri = Uri.file(homedir());
-			return joinPath(homeUri, ".codex", "prompts");
+			return joinPath(homeUri, ".github", "prompts");
 		} catch {
 			return;
 		}
@@ -289,14 +289,14 @@ export class PromptsExplorerProvider implements TreeDataProvider<PromptItem> {
 	private readonly getGlobalPromptsLabel = (): string => {
 		const home = homedir();
 		if (!home) {
-			return ".codex/prompts";
+			return ".github/prompts";
 		}
 
 		if (process.platform === "win32") {
-			return `${home}\\.codex\\prompts`;
+			return `${home}\\.github\\prompts`;
 		}
 
-		return `${home}/.codex/prompts`;
+		return `${home}/.github/prompts`;
 	};
 
 	private readonly getPromptsRoot = (): Uri | undefined => {
