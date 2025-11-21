@@ -237,7 +237,7 @@ export class PromptsExplorerProvider implements TreeDataProvider<PromptItem> {
 		rootUri: Uri,
 		source: PromptSource
 	): Promise<PromptItem[]> => {
-		const suffix = source === "global" ? ".prompt.md" : ".md";
+		const suffix = source === "global" ? "" : ".md";
 		const promptFiles = await this.readMarkdownFiles(rootUri, suffix);
 
 		if (promptFiles.length === 0) {
