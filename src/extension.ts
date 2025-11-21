@@ -1,5 +1,5 @@
 import { homedir } from "os";
-import { join } from "node:path";
+import { basename, join } from "node:path";
 import type { FileSystemWatcher } from "vscode";
 import {
 	commands,
@@ -502,6 +502,29 @@ function registerCommands(
 					await sendPromptToChat(promptContent);
 				} catch (e) {
 					window.showErrorMessage(`Failed to run prompt: ${e}`);
+				}
+			}
+		),
+		commands.registerCommand(
+			"kiro-codex-ide.prompts.delete",
+			async (item: any) => {
+				if (!item?.resourceUri) {
+					return;
+				}
+				const uri = item.resourceUri as Uri;
+				const confirm = await window.showWarningMessage(
+					`Are you sure you want to delete '${basename(uri.fsPath)}'?`,
+					{ modal: true },
+					"Delete"
+				);
+				if (confirm !== "Delete") {
+					return;
+				}
+				try {
+					await workspace.fs.delete(uri);
+					promptsExplorer.refresh();
+				} catch (e) {
+					window.showErrorMessage(`Failed to delete prompt: ${e}`);
 				}
 			}
 		)

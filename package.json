@@ -220,6 +220,12 @@
         "icon": "$(play)"
       },
       {
+        "command": "kiro-codex-ide.prompts.delete",
+        "title": "Delete Prompt",
+        "category": "Kiro for Codex IDE",
+        "icon": "$(trash)"
+      },
+      {
         "command": "kiro-codex-ide.settings.open",
         "title": "Kiro Settings",
         "category": "Kiro for Codex IDE",
@@ -291,6 +297,11 @@
           "command": "kiro-codex-ide.prompts.run",
           "when": "view == kiro-codex-ide.views.promptsExplorer && viewItem == prompt",
           "group": "inline"
+        },
+        {
+          "command": "kiro-codex-ide.prompts.delete",
+          "when": "view == kiro-codex-ide.views.promptsExplorer && viewItem == prompt",
+          "group": "7_modification"
         },
         {
           "command": "kiro-codex-ide.steering.refine",
