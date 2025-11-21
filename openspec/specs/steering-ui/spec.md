@@ -1,20 +1,29 @@
 # steering-ui Specification
 
 ## Purpose
-TBD - created by archiving change add-custom-steering-dialog. Update Purpose after archive.
+To provide a dedicated view for managing AI steering instructions (Global and Project-level) within the IDE, allowing users to easily create, open, and manage context files for GitHub Copilot and OpenSpec agents.
+
 ## Requirements
-### Requirement: Custom Steering Creation Dialog
-The extension MUST open a dedicated webview dialog with rich inputs whenever the `kiro-codex-ide.steering.create` command runs, providing parity with the Create New Spec experience and formatting the collected data for the `create-custom-steering` prompt.
+### Requirement: Steering Tree View
+The extension MUST display a "Steering" view that lists global and project-level instruction files.
 
-#### Scenario: Launch With Draft Recovery
-- **GIVEN** the user previously saved custom steering input via autosave
-- **WHEN** they invoke `kiro-codex-ide.steering.create`
-- **THEN** a `create-steering` webview panel opens in the active editor column with the saved form values loaded
-- **AND** the primary summary textarea receives focus unless the user was editing a different field before the dialog closed.
+#### Scenario: View Structure
+- **GIVEN** the user has opened the Steering view
+- **THEN** it displays "Global Instructions" pointing to `~/.github/copilot-instructions.md`
+- **AND** it displays "Project Instructions" containing:
+    - `Copilot Instructions` (`.github/copilot-instructions.md`) if it exists
+    - `Agent Instructions` (`openspec/AGENTS.md`) if it exists
+    - `Root Instructions` (`AGENTS.md`) if it exists
+- **AND** it displays "Project Spec" containing:
+    - `Project Definition` (`openspec/project.md`) if it exists
 
-#### Scenario: Submit Steering Prompt
-- **GIVEN** the user completes all required fields in the custom steering dialog
-- **WHEN** they submit the form
-- **THEN** the dialog sends an aggregated guidance description to the `create-custom-steering` prompt through `PromptLoader`
-- **AND** the extension clears the draft state, shows the existing chat notification, and closes the panel without leaving stray workspace state.
+#### Scenario: Create Global Rule
+- **GIVEN** the Global Instructions file does not exist
+- **WHEN** the user clicks "Create Global Rule" (or equivalent action)
+- **THEN** it creates `~/.github/copilot-instructions.md`
+
+#### Scenario: Create Project Rule
+- **GIVEN** no project rule exists
+- **WHEN** the user clicks "Create Project Rule"
+- **THEN** it creates `openspec/AGENTS.md`
 
