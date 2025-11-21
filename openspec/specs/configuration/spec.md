@@ -1,9 +1,10 @@
-# Spec: Chat Language Configuration
+# configuration Specification
 
-## ADDED Requirements
-
+## Purpose
+TBD - created by archiving change add-chat-language-setting. Update Purpose after archive.
+## Requirements
 ### Requirement: Configure Chat Language
-The user must be able to select their preferred language for Copilot chat interactions via VS Code settings.
+The user MUST be able to select their preferred language for Copilot chat interactions via VS Code settings.
 
 #### Scenario: Default Setting
 - Given the user has not modified the extension settings
@@ -32,3 +33,4 @@ The user must be able to select their preferred language for Copilot chat intera
 - Given the user manually edits `settings.json`
 - When they set `openspec-for-copilot.chatLanguage` to an unsupported value (e.g., "xx")
 - Then VS Code should show a validation warning (restricted by enum)
+

@@ -1,9 +1,10 @@
-# Spec: Chat Language Integration
+# chat-integration Specification
 
-## MODIFIED Requirements
-
+## Purpose
+TBD - created by archiving change add-chat-language-setting. Update Purpose after archive.
+## Requirements
 ### Requirement: Append Language Instruction
-All prompts sent to GitHub Copilot via OpenSpec commands must include an instruction to respond in the configured language.
+All prompts sent to GitHub Copilot via OpenSpec commands MUST include an instruction to respond in the configured language.
 
 #### Scenario: Send Prompt in English (Default)
 - Given the `chatLanguage` setting is `en`
@@ -25,3 +26,4 @@ All prompts sent to GitHub Copilot via OpenSpec commands must include an instruc
 - Given the developer adds a new feature that uses `sendPromptToChat`
 - When the feature is used
 - Then the language instruction should be applied automatically without extra code in the new feature.
+

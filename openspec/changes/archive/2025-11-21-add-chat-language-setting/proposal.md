@@ -1,9 +1,9 @@
 # Proposal: Add Chat Language Setting
 
-## Summary
+## What Changes
 Add a configuration setting to control the language used in GitHub Copilot chat interactions initiated by OpenSpec. This ensures that users can receive responses in their preferred language (English or Japanese), addressing the issue where responses default to English even when the user prefers Japanese.
 
-## Problem Statement
+## Why
 Currently, when OpenSpec sends prompts to GitHub Copilot, the chat responses are typically in English. Users who prefer Japanese (or other languages in the future) have to manually instruct Copilot to switch languages or translate the output, which interrupts the workflow.
 
 ## Goals
