@@ -29,7 +29,7 @@ if (
 				window.dispatchEvent(
 					new MessageEvent("message", {
 						data: {
-							type: "codex.chat/echoResult",
+							type: "openspec.chat/echoResult",
 							id: msg.id,
 							text: msg.text,
 							ts: Date.now(),

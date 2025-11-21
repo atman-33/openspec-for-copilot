@@ -129,7 +129,7 @@
       },
       {
         "view": "openspec-for-copilot.views.promptsExplorer",
-        "contents": "Create and run prompts (.md) under .codex/prompts\n\n[$(plus) Create Prompt](command:openspec-for-copilot.prompts.create)\n[$(refresh) Refresh](command:openspec-for-copilot.prompts.refresh)"
+        "contents": "Create and run prompts (.md) under .github/prompts\n\n[$(plus) Create Prompt](command:openspec-for-copilot.prompts.create)\n[$(refresh) Refresh](command:openspec-for-copilot.prompts.refresh)"
       },
       {
         "view": "openspec-for-copilot.views.overview",
