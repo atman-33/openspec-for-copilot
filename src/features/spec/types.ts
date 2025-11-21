@@ -1,7 +1,8 @@
 export interface CreateSpecFormData {
-	summary: string;
 	productContext: string;
+	keyScenarios: string;
 	technicalConstraints: string;
+	relatedFiles: string;
 	openQuestions: string;
 }
 

@@ -19,9 +19,10 @@ import {
 } from "react";
 
 const EMPTY_FORM: CreateSpecFormData = {
-	summary: "",
 	productContext: "",
+	keyScenarios: "",
 	technicalConstraints: "",
+	relatedFiles: "",
 	openQuestions: "",
 };
 
@@ -29,13 +30,14 @@ const AUTOSAVE_DEBOUNCE_MS = 600;
 const normalizeFormData = (
 	data: Partial<CreateSpecFormData> | undefined
 ): CreateSpecFormData => ({
-	summary: typeof data?.summary === "string" ? data.summary : "",
 	productContext:
 		typeof data?.productContext === "string" ? data.productContext : "",
+	keyScenarios: typeof data?.keyScenarios === "string" ? data.keyScenarios : "",
 	technicalConstraints:
 		typeof data?.technicalConstraints === "string"
 			? data.technicalConstraints
 			: "",
+	relatedFiles: typeof data?.relatedFiles === "string" ? data.relatedFiles : "",
 	openQuestions:
 		typeof data?.openQuestions === "string" ? data.openQuestions : "",
 });
@@ -44,9 +46,10 @@ const areFormsEqual = (
 	left: CreateSpecFormData,
 	right: CreateSpecFormData
 ): boolean =>
-	left.summary === right.summary &&
 	left.productContext === right.productContext &&
+	left.keyScenarios === right.keyScenarios &&
 	left.technicalConstraints === right.technicalConstraints &&
+	left.relatedFiles === right.relatedFiles &&
 	left.openQuestions === right.openQuestions;
 
 const formatTimestamp = (timestamp: number | undefined): string | undefined => {
@@ -91,9 +94,10 @@ export const CreateSpecView = () => {
 	const lastPersistedRef = useRef<CreateSpecFormData>(EMPTY_FORM);
 	const autosaveTimeoutRef = useRef<number | undefined>();
 
-	const summaryRef = useRef<HTMLTextAreaElement>(null);
 	const productContextRef = useRef<HTMLTextAreaElement>(null);
+	const keyScenariosRef = useRef<HTMLTextAreaElement>(null);
 	const technicalConstraintsRef = useRef<HTMLTextAreaElement>(null);
+	const relatedFilesRef = useRef<HTMLTextAreaElement>(null);
 	const openQuestionsRef = useRef<HTMLTextAreaElement>(null);
 
 	const isDirty = useMemo(
@@ -152,10 +156,10 @@ export const CreateSpecView = () => {
 	);
 
 	const validateForm = useCallback((current: CreateSpecFormData): boolean => {
-		const trimmedSummary = current.summary.trim();
-		if (!trimmedSummary) {
-			setFieldErrors({ summary: "Summary is required." });
-			summaryRef.current?.focus();
+		const trimmedContext = current.productContext.trim();
+		if (!trimmedContext) {
+			setFieldErrors({ productContext: "Product Context is required." });
+			productContextRef.current?.focus();
 			return false;
 		}
 
@@ -172,7 +176,7 @@ export const CreateSpecView = () => {
 
 			const normalized = normalizeFormData({
 				...formData,
-				summary: formData.summary.trim(),
+				productContext: formData.productContext.trim(),
 			});
 
 			if (!validateForm(normalized)) {
@@ -199,9 +203,9 @@ export const CreateSpecView = () => {
 		});
 	}, [clearAutosaveTimer, isDirty]);
 
-	const focusSummaryField = useCallback(() => {
+	const focusPrimaryField = useCallback(() => {
 		window.setTimeout(() => {
-			summaryRef.current?.focus();
+			productContextRef.current?.focus();
 		}, 0);
 	}, []);
 
@@ -218,10 +222,10 @@ export const CreateSpecView = () => {
 			vscode.setState(initPayload?.draft);
 
 			if (initPayload?.shouldFocusPrimaryField) {
-				focusSummaryField();
+				focusPrimaryField();
 			}
 		},
-		[focusSummaryField]
+		[focusPrimaryField]
 	);
 
 	useEffect(() => {
@@ -266,7 +270,7 @@ export const CreateSpecView = () => {
 					break;
 				}
 				case "create-spec/focus": {
-					focusSummaryField();
+					focusPrimaryField();
 					break;
 				}
 				default:
@@ -278,7 +282,7 @@ export const CreateSpecView = () => {
 		return () => {
 			window.removeEventListener("message", handleMessage);
 		};
-	}, [focusSummaryField, handleInitMessage]);
+	}, [focusPrimaryField, handleInitMessage]);
 
 	useEffect(() => {
 		const handleBeforeUnload = (event: BeforeUnloadEvent) => {
@@ -348,8 +352,8 @@ export const CreateSpecView = () => {
 					Create New Spec
 				</h1>
 				<p className="text-[color:var(--vscode-descriptionForeground,rgba(255,255,255,0.65))] text-sm">
-					Provide context for the new specification. Summary is required; other
-					sections are optional but recommended.
+					Provide context for the new specification. Product Context is
+					required; other sections are optional but recommended.
 				</p>
 			</header>
 
@@ -360,12 +364,13 @@ export const CreateSpecView = () => {
 				fieldErrors={fieldErrors}
 				formData={formData}
 				isSubmitting={isSubmitting}
+				keyScenariosRef={keyScenariosRef}
 				onCancel={handleCancel}
 				onFieldChange={handleFieldChange}
 				onSubmit={handleSubmit}
 				openQuestionsRef={openQuestionsRef}
 				productContextRef={productContextRef}
-				summaryRef={summaryRef}
+				relatedFilesRef={relatedFilesRef}
 				technicalConstraintsRef={technicalConstraintsRef}
 			/>
 		</div>

@@ -39,20 +39,26 @@ const isMessageItem = (value: unknown): value is MessageItem => {
 };
 
 const normalizeFormData = (data: CreateSpecFormData): CreateSpecFormData => ({
-	summary: data.summary ?? "",
 	productContext: data.productContext ?? "",
+	keyScenarios: data.keyScenarios ?? "",
 	technicalConstraints: data.technicalConstraints ?? "",
+	relatedFiles: data.relatedFiles ?? "",
 	openQuestions: data.openQuestions ?? "",
 });
 
 const formatDescription = (data: CreateSpecFormData): string => {
 	const sections = [
-		`Summary:\n${data.summary.trim()}`,
 		data.productContext.trim()
-			? `Product Context:\n${data.productContext.trim()}`
+			? `Product Context / Goal:\n${data.productContext.trim()}`
+			: undefined,
+		data.keyScenarios.trim()
+			? `Key Scenarios / Acceptance Criteria:\n${data.keyScenarios.trim()}`
 			: undefined,
 		data.technicalConstraints.trim()
 			? `Technical Constraints:\n${data.technicalConstraints.trim()}`
+			: undefined,
+		data.relatedFiles.trim()
+			? `Related Files / Impact:\n${data.relatedFiles.trim()}`
 			: undefined,
 		data.openQuestions.trim()
 			? `Open Questions:\n${data.openQuestions.trim()}`
@@ -224,18 +230,18 @@ export class CreateSpecInputController {
 			return;
 		}
 
-		const sanitizedSummary = data.summary?.trim();
-		if (!sanitizedSummary) {
+		const sanitizedContext = data.productContext?.trim();
+		if (!sanitizedContext) {
 			await this.panel.webview.postMessage({
 				type: "create-spec/submit:error",
-				payload: { message: "Summary is required." },
+				payload: { message: "Product Context is required." },
 			});
 			return;
 		}
 
 		const normalized = normalizeFormData({
 			...data,
-			summary: sanitizedSummary,
+			productContext: sanitizedContext,
 		});
 
 		const payload = formatDescription(normalized);

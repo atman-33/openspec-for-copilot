@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import type { ChangeEvent, FormEvent, MutableRefObject } from "react";
 import type { CreateSpecFieldErrors, CreateSpecFormData } from "../types";
 
-const SUMMARY_HELPER_ID = "create-spec-summary-helper";
+const PRODUCT_CONTEXT_HELPER_ID = "create-spec-product-context-helper";
 
 interface CreateSpecFormProps {
 	formData: CreateSpecFormData;
@@ -15,9 +15,10 @@ interface CreateSpecFormProps {
 	onFieldChange: (
 		field: keyof CreateSpecFormData
 	) => (event: ChangeEvent<HTMLTextAreaElement>) => void;
-	summaryRef: MutableRefObject<HTMLTextAreaElement | null>;
 	productContextRef: MutableRefObject<HTMLTextAreaElement | null>;
+	keyScenariosRef: MutableRefObject<HTMLTextAreaElement | null>;
 	technicalConstraintsRef: MutableRefObject<HTMLTextAreaElement | null>;
+	relatedFilesRef: MutableRefObject<HTMLTextAreaElement | null>;
 	openQuestionsRef: MutableRefObject<HTMLTextAreaElement | null>;
 }
 
@@ -29,9 +30,10 @@ export const CreateSpecForm = ({
 	onSubmit,
 	onCancel,
 	onFieldChange,
-	summaryRef,
 	productContextRef,
+	keyScenariosRef,
 	technicalConstraintsRef,
+	relatedFilesRef,
 	openQuestionsRef,
 }: CreateSpecFormProps) => (
 	<form
@@ -44,37 +46,37 @@ export const CreateSpecForm = ({
 			<div className="flex flex-col gap-2">
 				<label
 					className="font-medium text-[color:var(--vscode-foreground)] text-sm"
-					htmlFor="create-spec-summary"
+					htmlFor="create-spec-product-context"
 				>
-					Summary{" "}
+					Product Context{" "}
 					<span className="text-[color:var(--vscode-errorForeground)]">*</span>
 				</label>
 				<TextareaPanel
 					containerClassName="shadow-[0_16px_32px_rgba(0,0,0,0.25)]"
 					disabled={isSubmitting}
-					onChange={onFieldChange("summary")}
-					placeholder="Capture the key outcome you want to achieve…"
+					onChange={onFieldChange("productContext")}
+					placeholder="Describe the goal, background, and what you want to achieve…"
 					rows={4}
 					textareaClassName="min-h-[6rem] max-h-[60vh] overflow-y-auto text-sm leading-6"
 					textareaProps={{
-						id: "create-spec-summary",
-						name: "summary",
+						id: "create-spec-product-context",
+						name: "productContext",
 						"aria-required": true,
-						"aria-invalid": fieldErrors.summary ? true : undefined,
-						"aria-describedby": fieldErrors.summary
-							? SUMMARY_HELPER_ID
+						"aria-invalid": fieldErrors.productContext ? true : undefined,
+						"aria-describedby": fieldErrors.productContext
+							? PRODUCT_CONTEXT_HELPER_ID
 							: undefined,
 					}}
-					textareaRef={summaryRef}
-					value={formData.summary}
+					textareaRef={productContextRef}
+					value={formData.productContext}
 				>
-					{fieldErrors.summary ? (
+					{fieldErrors.productContext ? (
 						<div
 							className="flex items-center justify-end px-3 py-2 text-[color:var(--vscode-descriptionForeground,rgba(255,255,255,0.6))] text-xs"
-							id={SUMMARY_HELPER_ID}
+							id={PRODUCT_CONTEXT_HELPER_ID}
 						>
 							<span className="text-[color:var(--vscode-errorForeground)]">
-								{fieldErrors.summary}
+								{fieldErrors.productContext}
 							</span>
 						</div>
 					) : null}
@@ -84,22 +86,22 @@ export const CreateSpecForm = ({
 			<div className="flex flex-col gap-2">
 				<label
 					className="font-medium text-[color:var(--vscode-foreground)] text-sm"
-					htmlFor="create-spec-product-context"
+					htmlFor="create-spec-key-scenarios"
 				>
-					Product Context
+					Key Scenarios
 				</label>
 				<TextareaPanel
 					disabled={isSubmitting}
-					onChange={onFieldChange("productContext")}
-					placeholder="Describe current product state, users, or constraints…"
-					rows={3}
-					textareaClassName="min-h-[5rem] max-h-[60vh] overflow-y-auto text-sm leading-6"
+					onChange={onFieldChange("keyScenarios")}
+					placeholder="e.g. When user clicks save, then a notification appears..."
+					rows={4}
+					textareaClassName="min-h-[6rem] max-h-[60vh] overflow-y-auto text-sm leading-6"
 					textareaProps={{
-						id: "create-spec-product-context",
-						name: "productContext",
+						id: "create-spec-key-scenarios",
+						name: "keyScenarios",
 					}}
-					textareaRef={productContextRef}
-					value={formData.productContext}
+					textareaRef={keyScenariosRef}
+					value={formData.keyScenarios}
 				/>
 			</div>
 
@@ -113,7 +115,7 @@ export const CreateSpecForm = ({
 				<TextareaPanel
 					disabled={isSubmitting}
 					onChange={onFieldChange("technicalConstraints")}
-					placeholder="List architecture decisions, deadlines, or compliance needs…"
+					placeholder="Libraries, patterns, or existing systems to consider…"
 					rows={3}
 					textareaClassName="min-h-[5rem] max-h-[60vh] overflow-y-auto text-sm leading-6"
 					textareaProps={{
@@ -128,6 +130,28 @@ export const CreateSpecForm = ({
 			<div className="flex flex-col gap-2">
 				<label
 					className="font-medium text-[color:var(--vscode-foreground)] text-sm"
+					htmlFor="create-spec-related-files"
+				>
+					Related Files
+				</label>
+				<TextareaPanel
+					disabled={isSubmitting}
+					onChange={onFieldChange("relatedFiles")}
+					placeholder="src/utils/auth.ts, src/components/Login.tsx..."
+					rows={2}
+					textareaClassName="min-h-[4rem] max-h-[60vh] overflow-y-auto text-sm leading-6"
+					textareaProps={{
+						id: "create-spec-related-files",
+						name: "relatedFiles",
+					}}
+					textareaRef={relatedFilesRef}
+					value={formData.relatedFiles}
+				/>
+			</div>
+
+			<div className="flex flex-col gap-2">
+				<label
+					className="font-medium text-[color:var(--vscode-foreground)] text-sm"
 					htmlFor="create-spec-open-questions"
 				>
 					Open Questions
@@ -135,9 +159,9 @@ export const CreateSpecForm = ({
 				<TextareaPanel
 					disabled={isSubmitting}
 					onChange={onFieldChange("openQuestions")}
-					placeholder="Capture unknowns, dependencies, or risks to explore…"
-					rows={3}
-					textareaClassName="min-h-[5rem] max-h-[60vh] overflow-y-auto text-sm leading-6"
+					placeholder="Any uncertainties or risks?"
+					rows={2}
+					textareaClassName="min-h-[4rem] max-h-[60vh] overflow-y-auto text-sm leading-6"
 					textareaProps={{
 						id: "create-spec-open-questions",
 						name: "openQuestions",

@@ -1,7 +1,8 @@
 export interface CreateSpecFormData {
-	summary: string;
 	productContext: string;
+	keyScenarios: string;
 	technicalConstraints: string;
+	relatedFiles: string;
 	openQuestions: string;
 }
 
@@ -23,5 +24,5 @@ export type CreateSpecExtensionMessage =
 	| { type: "create-spec/focus" };
 
 export interface CreateSpecFieldErrors {
-	summary?: string;
+	productContext?: string;
 }
