@@ -1,5 +1,5 @@
 import { existsSync } from "fs";
-import { join, relative, basename } from "path";
+import { join, relative } from "path";
 import {
 	type Command,
 	type Event,
@@ -113,21 +113,6 @@ export class SteeringExplorerProvider
 		if (!element) {
 			const items: SteeringItem[] = [];
 
-			// Global Instructions Group
-			const globalLabel = await this.getGlobalPromptsLabel();
-			items.push(
-				new SteeringItem(
-					"Global Instructions",
-					TreeItemCollapsibleState.Collapsed,
-					"global-instructions-group",
-					"",
-					this.context,
-					undefined,
-					undefined,
-					globalLabel
-				)
-			);
-
 			if (workspace.workspaceFolders) {
 				const workspaceRoot = workspace.workspaceFolders[0].uri.fsPath;
 
@@ -148,7 +133,7 @@ export class SteeringExplorerProvider
 				if (hasProjectInstructions) {
 					items.push(
 						new SteeringItem(
-							"Project Instructions",
+							"AGENTS",
 							TreeItemCollapsibleState.Expanded,
 							"project-instructions-group",
 							"",
@@ -204,57 +189,6 @@ export class SteeringExplorerProvider
 			}
 
 			return items;
-		}
-
-		if (element.contextValue === "global-instructions-group") {
-			const rootUri = await this.getGlobalPromptsRoot();
-			if (!rootUri) {
-				return [
-					new SteeringItem(
-						"Global prompts directory not found",
-						TreeItemCollapsibleState.None,
-						"steering-empty",
-						"",
-						this.context
-					),
-				];
-			}
-
-			const files = await this.readMarkdownFiles(rootUri, ".instructions.md");
-			if (files.length === 0) {
-				return [
-					new SteeringItem(
-						"No instructions found",
-						TreeItemCollapsibleState.None,
-						"steering-empty",
-						"",
-						this.context,
-						undefined,
-						undefined,
-						"Add *.instructions.md files"
-					),
-				];
-			}
-
-			return files
-				.sort((a, b) => a.localeCompare(b))
-				.map((pathString) => {
-					const uri = Uri.file(pathString);
-					const command: Command = {
-						command: "vscode.open",
-						title: "Open Instruction",
-						arguments: [uri],
-					};
-					return new SteeringItem(
-						basename(pathString),
-						TreeItemCollapsibleState.None,
-						"global-instruction-file",
-						pathString,
-						this.context,
-						command,
-						basename(pathString)
-					);
-				});
 		}
 
 		if (element.contextValue === "project-instructions-group") {
@@ -414,24 +348,9 @@ class SteeringItem extends TreeItem {
 		this.filename = filename;
 
 		// Set appropriate icons based on type
-		if (contextValue === "global-instructions") {
-			this.iconPath = new ThemeIcon("globe");
-			this.tooltip = `Global Instructions: ${resourcePath}`;
-			this.description = "~/.github/copilot-instructions.md";
-		} else if (contextValue === "create-global-instructions") {
-			this.iconPath = new ThemeIcon("globe");
-			this.tooltip = "Click to create Global Instructions";
-		} else if (contextValue === "global-instructions-group") {
+		if (contextValue === "project-instructions-group") {
 			this.iconPath = new ThemeIcon("folder");
-			this.tooltip = description;
-			this.description = description;
-		} else if (contextValue === "global-instruction-file") {
-			this.iconPath = new ThemeIcon("file-text");
-			this.tooltip = `Global Instruction: ${resourcePath}`;
-			this.description = filename;
-		} else if (contextValue === "project-instructions-group") {
-			this.iconPath = new ThemeIcon("folder");
-			this.tooltip = "Project Instructions";
+			this.tooltip = "AGENTS";
 		} else if (contextValue === "create-project-instructions") {
 			this.iconPath = new ThemeIcon("folder-active");
 			this.tooltip = "Click to create Project Instructions";
