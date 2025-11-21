@@ -331,7 +331,7 @@ function registerCommands(
 
 				try {
 					const promptContent = await workspace.fs.readFile(promptPath);
-					const promptString = promptContent.toString();
+					const promptString = new TextDecoder().decode(promptContent);
 					const fullPrompt = `${promptString}\n\nid: ${changeId}`;
 
 					outputChannel.appendLine(
