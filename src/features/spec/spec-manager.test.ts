@@ -9,7 +9,6 @@ import { SpecManager } from "./spec-manager";
 vi.mock("../../services/prompt-loader", () => {
 	const mockRenderPrompt = vi.fn();
 	return {
-		// biome-ignore lint/style/useNamingConvention: ignore
 		PromptLoader: {
 			getInstance: () => ({
 				renderPrompt: mockRenderPrompt,
@@ -29,7 +28,6 @@ const { openMock, createSpecInputControllerMock } = vi.hoisted(() => {
 	};
 });
 vi.mock("./create-spec-input-controller", () => ({
-	// biome-ignore lint/style/useNamingConvention: ignore
 	CreateSpecInputController: createSpecInputControllerMock,
 }));
 
