@@ -2,8 +2,8 @@
 
 ## MODIFIED Requirements
 
-### CodeLens for Tasks
-The `tasks.md` file shall display a CodeLens action at the top of the file to initiate task execution.
+### Requirement: CodeLens for Tasks
+The `tasks.md` file SHALL display a CodeLens action at the top of the file to initiate task execution.
 
 #### Scenario: Incomplete tasks exist
 Given a `tasks.md` file with at least one incomplete task (e.g., `- [ ] Task 1`)

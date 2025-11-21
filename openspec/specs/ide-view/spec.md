@@ -1,4 +1,10 @@
-## ADDED Requirements
+# ide-view Specification
+
+## Purpose
+TBD - created by archiving change support-openspec-structure. Update Purpose after archive.
+## Requirements
+### Requirement: OpenSpec Structure Support
+The IDE SHALL support the new OpenSpec directory structure.
 
 #### Scenario: View OpenSpec Structure
 Given the user has an `openspec` folder in their workspace
@@ -20,3 +26,4 @@ Given the user sees a spec "auth" in the "Current Specs" section
 When the user expands "auth"
 Then they should see "Spec"
 And clicking "Spec" should open `openspec/specs/auth/spec.md`
+

@@ -1,8 +1,9 @@
 # Spec Explorer Specs
 
-## MODIFIED Requirements
+## ADDED Requirements
 
-### Context Menu
+### Requirement: Context Menu
+The context menu for changes SHALL include an option to archive the change.
 
 #### Scenario: Archive Change
 Given I am in the Specs view

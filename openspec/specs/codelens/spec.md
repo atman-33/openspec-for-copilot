@@ -1,9 +1,10 @@
-# CodeLens Requirements
+# codelens Specification
 
-## MODIFIED Requirements
-
-### CodeLens for Tasks
-The `tasks.md` file shall display a CodeLens action at the top of the file to initiate task execution.
+## Purpose
+TBD - created by archiving change fix-tasks-codelens. Update Purpose after archive.
+## Requirements
+### Requirement: CodeLens for Tasks
+The `tasks.md` file SHALL display a CodeLens action at the top of the file to initiate task execution.
 
 #### Scenario: Incomplete tasks exist
 Given a `tasks.md` file with at least one incomplete task (e.g., `- [ ] Task 1`)
@@ -16,3 +17,4 @@ Given a `tasks.md` file where all tasks are marked as complete (e.g., `- [x] Tas
 When the CodeLens is rendered
 Then it displays "$(check) All Tasks Completed"
 And clicking it performs no action (or triggers a status notification).
+
