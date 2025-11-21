@@ -96,8 +96,10 @@ All settings live under the `openspec-for-copilot` namespace.
 
 | Setting | Type | Default | Purpose |
 | --- | --- | --- | --- |
+| `chatLanguage` | string | `English` | The language GitHub Copilot should use for responses. |
 | `copilot.specsPath` | string | `openspec` | Workspace-relative path for generated specs. |
-| `copilot.promptsPath` | string | `.github/prompts` | Workspace-relative path for Markdown prompts. || `views.specs.visible` | boolean | `true` | Show or hide the Specs explorer. |
+| `copilot.promptsPath` | string | `.github/prompts` | Workspace-relative path for Markdown prompts. |
+| `views.specs.visible` | boolean | `true` | Show or hide the Specs explorer. |
 | `views.prompts.visible` | boolean | `true` | Toggle the Prompts explorer. |
 | `views.steering.visible` | boolean | `true` | Toggle the Steering explorer. |
 | `views.settings.visible` | boolean | `true` | Toggle the Settings overview. |
