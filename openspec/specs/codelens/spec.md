@@ -1,10 +1,14 @@
 # codelens Specification
 
 ## Purpose
-TBD - created by archiving change fix-tasks-codelens. Update Purpose after archive.
+Defines the CodeLens functionality for task execution within the OpenSpec environment.
+
 ## Requirements
 ### Requirement: CodeLens for Tasks
-The `tasks.md` file SHALL display a CodeLens action at the top of the file to initiate task execution.
+The extension MUST provide a CodeLens action at the top of `tasks.md` files to initiate task execution.
+
+#### Scope
+This applies to `tasks.md` files located within the `openspec` directory or configured specs path.
 
 #### Scenario: Incomplete tasks exist
 Given a `tasks.md` file with at least one incomplete task (e.g., `- [ ] Task 1`)
