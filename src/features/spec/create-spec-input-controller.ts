@@ -12,7 +12,6 @@ import type { PromptLoader } from "../../services/prompt-loader";
 import type { ConfigManager } from "../../utils/config-manager";
 import { sendPromptToChat } from "../../utils/chat-prompt-runner";
 import { getWebviewContent } from "../../utils/get-webview-content";
-import { NotificationUtils } from "../../utils/notification-utils";
 import type {
 	CreateSpecDraftState,
 	CreateSpecFormData,
@@ -266,9 +265,6 @@ export class CreateSpecInputController {
 			const prompt = `${promptTemplate}\n\nThe following sections describe the specification and context for this change request.\n\n${payload}\n\nIMPORTANT:\nAfter generating the proposal documents, you MUST STOP and ask the user for confirmation.\nDo NOT proceed with any implementation steps until the user has explicitly approved the proposal.`;
 
 			await sendPromptToChat(prompt);
-			NotificationUtils.showAutoDismissNotification(
-				"Sent the spec creation prompt to ChatGPT. Continue the flow there."
-			);
 
 			await this.clearDraftState();
 

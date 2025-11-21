@@ -4,16 +4,9 @@ import { Uri, ViewColumn, window, workspace } from "vscode";
 import { CreateSpecInputController } from "./create-spec-input-controller";
 import type { CreateSpecDraftState } from "./types";
 import { sendPromptToChat } from "../../utils/chat-prompt-runner";
-import { NotificationUtils } from "../../utils/notification-utils";
 
 vi.mock("../../utils/chat-prompt-runner", () => ({
 	sendPromptToChat: vi.fn(),
-}));
-
-vi.mock("../../utils/notification-utils", () => ({
-	NotificationUtils: {
-		showAutoDismissNotification: vi.fn(),
-	},
 }));
 
 describe("CreateSpecInputController", () => {
@@ -181,9 +174,10 @@ describe("CreateSpecInputController", () => {
 	it("restores saved draft state when available", async () => {
 		const draft: CreateSpecDraftState = {
 			formData: {
-				summary: "Saved summary",
 				productContext: "Saved product context",
+				keyScenarios: "Saved key scenarios",
 				technicalConstraints: "",
+				relatedFiles: "",
 				openQuestions: "",
 			},
 			lastUpdated: 123,
@@ -215,9 +209,10 @@ describe("CreateSpecInputController", () => {
 		await emitMessage({
 			type: "create-spec/submit",
 			payload: {
-				summary: " Feature idea ",
 				productContext: "Context",
+				keyScenarios: " Feature idea ",
 				technicalConstraints: "",
+				relatedFiles: "",
 				openQuestions: "",
 			},
 		});
@@ -226,9 +221,10 @@ describe("CreateSpecInputController", () => {
 			expect.stringContaining("Prompt Template")
 		);
 		expect(sendPromptToChat).toHaveBeenCalledWith(
-			expect.stringContaining("Summary:\nFeature idea")
+			expect.stringContaining(
+				"Key Scenarios / Acceptance Criteria:\nFeature idea"
+			)
 		);
-		expect(NotificationUtils.showAutoDismissNotification).toHaveBeenCalled();
 		expect(workspaceStateUpdateMock).toHaveBeenCalledWith(
 			"createSpecDraftState",
 			undefined
@@ -245,9 +241,10 @@ describe("CreateSpecInputController", () => {
 		await emitMessage({
 			type: "create-spec/autosave",
 			payload: {
-				summary: "Draft summary",
 				productContext: "",
+				keyScenarios: "Draft summary",
 				technicalConstraints: "Constraints",
+				relatedFiles: "",
 				openQuestions: "",
 			},
 		});
@@ -256,9 +253,10 @@ describe("CreateSpecInputController", () => {
 			"createSpecDraftState",
 			{
 				formData: {
-					summary: "Draft summary",
 					productContext: "",
+					keyScenarios: "Draft summary",
 					technicalConstraints: "Constraints",
+					relatedFiles: "",
 					openQuestions: "",
 				},
 				lastUpdated: 1_700_000_000_000,
