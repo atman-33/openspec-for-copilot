@@ -38,9 +38,11 @@ webpack.config.js
 src/**/*.js
 docs/**
 GEMINI.md
+AGENTS.md
 .tmp/**
 .husky/**
 .codex/**
 .serena/**
 .repomix/**
 repomix-output*
+openspec/**

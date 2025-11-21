@@ -1,7 +1,7 @@
 {
   "name": "openspec-for-copilot",
   "displayName": "OpenSpec for Copilot",
-  "description": "Spec-driven development with Codex CLI - inspired by Kiro",
+  "description": "Spec-driven development with OpenSpec",
   "version": "0.1.6",
   "author": "atman-33",
   "publisher": "atman-dev",
