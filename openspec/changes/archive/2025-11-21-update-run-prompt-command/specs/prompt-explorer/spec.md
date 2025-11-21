@@ -1,6 +1,6 @@
 # prompt-explorer Specification
 
-## MODIFIED Requirements
+## ADDED Requirements
 
 ### Requirement: Run Prompt Command
 The "Run Prompt" command MUST read the content of the selected prompt file and send it as a message to the GitHub Copilot Chat interface.

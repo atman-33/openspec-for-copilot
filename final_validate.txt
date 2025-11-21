@@ -1,0 +1,10 @@
+- Validating...
+✓ spec/code-lens
+✓ spec/codelens
+✓ spec/ide-view
+✓ spec/prompt-explorer
+✓ spec/prompt-generation
+✓ spec/settings
+✓ spec/spec-explorer
+✓ spec/steering-ui
+Totals: 8 passed, 0 failed (8 items)

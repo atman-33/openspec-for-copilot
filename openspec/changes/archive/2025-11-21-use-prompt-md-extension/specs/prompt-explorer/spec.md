@@ -1,6 +1,6 @@
 # prompt-explorer Specification
 
-## MODIFIED Requirements
+## ADDED Requirements
 
 ### Requirement: Prompt File Extension
 When creating a new prompt, the file extension MUST be `.prompt.md`.

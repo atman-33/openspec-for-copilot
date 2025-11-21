@@ -19,3 +19,77 @@ The extension MUST locate the platform-specific global prompt directory when pop
 - **WHEN** the Prompts view loads prompt data
 - **THEN** the extension reads prompts from the appropriate global path for the current platform and lists them under the `Global` group
 
+### Requirement: Delete Prompt Command
+The extension MUST provide a "Delete" command in the context menu for prompt files in the PROMPTS view.
+
+#### Scenario: Delete Menu Item
+Given the PROMPTS view is open
+When the user right-clicks on a prompt file
+Then the "Delete" option should be visible in the context menu
+
+### Requirement: Delete Confirmation
+The "Delete" command MUST ask for confirmation before deleting the file.
+
+#### Scenario: Confirm Deletion
+Given the user selects "Delete" for a prompt file
+Then a confirmation dialog should appear asking "Are you sure you want to delete 'filename'?"
+And the dialog should have "Delete" and "Cancel" options
+
+### Requirement: File Deletion
+The "Delete" command MUST delete the file from the file system if the user confirms.
+
+#### Scenario: User Confirms Deletion
+Given the confirmation dialog is open
+When the user clicks "Delete"
+Then the prompt file should be deleted from the file system
+And the PROMPTS view should be refreshed
+
+#### Scenario: User Cancels Deletion
+Given the confirmation dialog is open
+When the user clicks "Cancel"
+Then the prompt file should NOT be deleted
+And the PROMPTS view should remain unchanged
+
+### Requirement: Create Prompt Command Location
+The "Create Prompt" command SHALL be available in the context menu of the "Project" and "Global" group items in the PROMPTS view, and SHALL NOT be available in the view title.
+
+#### Scenario: Context Menu for Project
+Given the PROMPTS view is open
+When the user right-clicks on the "Project" item
+Then the "Create Prompt" option should be visible
+
+#### Scenario: Context Menu for Global
+Given the PROMPTS view is open
+When the user right-clicks on the "Global" item
+Then the "Create Prompt" option should be visible
+
+### Requirement: Create Prompt Scope
+The "Create Prompt" command MUST create the prompt file in the directory corresponding to the selected scope (Project or Global).
+
+#### Scenario: Create Project Prompt
+Given the user selects "Create Prompt" from the "Project" item context menu
+When the user enters a valid file name
+Then the prompt file should be created in the configured project prompts directory
+
+#### Scenario: Create Global Prompt
+Given the user selects "Create Prompt" from the "Global" item context menu
+When the user enters a valid file name
+Then the prompt file should be created in the global prompts directory (`~/.github/prompts`)
+
+### Requirement: Run Prompt Command
+The "Run Prompt" command MUST read the content of the selected prompt file and send it as a message to the GitHub Copilot Chat interface.
+
+#### Scenario: User clicks Run Prompt
+Given a prompt file "my-prompt.md" with content "Explain this code"
+When the user clicks the "Run Prompt" button on the file in the PROMPTS view
+Then the GitHub Copilot Chat window should open
+And the message "Explain this code" should be sent to the chat
+
+### Requirement: Prompt File Extension
+When creating a new prompt, the file extension MUST be `.prompt.md`.
+
+#### Scenario: Create New Prompt
+Given the user triggers the "Create Prompt" command
+When the user enters the name "my-test"
+Then a file named "my-test.prompt.md" should be created
+

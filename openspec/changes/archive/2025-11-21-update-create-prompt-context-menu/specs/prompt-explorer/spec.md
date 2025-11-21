@@ -1,6 +1,6 @@
 # prompt-explorer Specification
 
-## MODIFIED Requirements
+## ADDED Requirements
 
 ### Requirement: Create Prompt Command Location
 The "Create Prompt" command SHALL be available in the context menu of the "Project" and "Global" group items in the PROMPTS view, and SHALL NOT be available in the view title.
