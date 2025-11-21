@@ -6,7 +6,6 @@ export const DEFAULT_CONFIG = {
 	paths: {
 		prompts: ".github/prompts",
 		specs: "openspec",
-		steering: ".codex/steering",
 	},
 	views: {
 		specs: true,

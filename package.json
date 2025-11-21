@@ -77,11 +77,6 @@
           "type": "string",
           "default": ".github/prompts",
           "description": "Path where Codex prompt files are stored."
-        },
-        "openspec-for-copilot.codex.steeringPath": {
-          "type": "string",
-          "default": ".codex/steering",
-          "description": "Path where Codex steering documents are stored."
         }
       }
     },
@@ -170,18 +165,6 @@
         "command": "openspec-for-copilot.spec.implTask",
         "title": "Implement Task",
         "category": "OpenSpec for Copilot"
-      },
-      {
-        "command": "openspec-for-copilot.steering.refine",
-        "title": "Refine Steering",
-        "category": "OpenSpec for Copilot",
-        "icon": "$(sparkle)"
-      },
-      {
-        "command": "openspec-for-copilot.steering.delete",
-        "title": "Delete Steering",
-        "category": "OpenSpec for Copilot",
-        "icon": "$(trash)"
       },
       {
         "command": "openspec-for-copilot.steering.refresh",
@@ -313,16 +296,6 @@
         {
           "command": "openspec-for-copilot.prompts.delete",
           "when": "view == openspec-for-copilot.views.promptsExplorer && (viewItem == prompt || viewItem == prompt-runnable)",
-          "group": "7_modification"
-        },
-        {
-          "command": "openspec-for-copilot.steering.refine",
-          "when": "view == openspec-for-copilot.views.steeringExplorer && viewItem == steering-document",
-          "group": "inline"
-        },
-        {
-          "command": "openspec-for-copilot.steering.delete",
-          "when": "view == openspec-for-copilot.views.steeringExplorer && viewItem == steering-document",
           "group": "7_modification"
         }
       ],

@@ -8,7 +8,6 @@ import {
 export interface OpenSpecSettings {
 	paths: {
 		specs: string;
-		steering: string;
 		prompts: string;
 	};
 	views: {
@@ -74,7 +73,6 @@ export class ConfigManager {
 		const config = workspace.getConfiguration(VSC_CONFIG_NAMESPACE);
 		const promptsPath = config.get<string>("codex.promptsPath")?.trim();
 		const specsPath = config.get<string>("codex.specsPath")?.trim();
-		const steeringPath = config.get<string>("codex.steeringPath")?.trim();
 
 		const configuredPaths: Partial<Record<keyof typeof DEFAULT_PATHS, string>> =
 			{};
@@ -85,10 +83,6 @@ export class ConfigManager {
 
 		if (specsPath) {
 			configuredPaths.specs = specsPath;
-		}
-
-		if (steeringPath) {
-			configuredPaths.steering = steeringPath;
 		}
 
 		return configuredPaths;

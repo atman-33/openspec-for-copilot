@@ -1,5 +1,5 @@
 import { existsSync } from "fs";
-import { join, relative } from "path";
+import { join } from "path";
 import {
 	type Command,
 	type Event,
@@ -109,7 +109,7 @@ export class SteeringExplorerProvider
 	}
 
 	// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: ignore
-	async getChildren(element?: SteeringItem): Promise<SteeringItem[]> {
+	getChildren(element?: SteeringItem): SteeringItem[] {
 		if (!element) {
 			const items: SteeringItem[] = [];
 
@@ -164,23 +164,6 @@ export class SteeringExplorerProvider
 							"Project Spec",
 							TreeItemCollapsibleState.Expanded,
 							"project-spec-group",
-							"",
-							this.context
-						)
-					);
-				}
-			}
-
-			// Traditional steering documents - add them directly at root level if they exist
-			if (workspace.workspaceFolders && this.steeringManager) {
-				const steeringDocs = await this.steeringManager.getSteeringDocuments();
-				if (steeringDocs.length > 0) {
-					// Add a collapsible header item for steering documents
-					items.push(
-						new SteeringItem(
-							"Steering Docs",
-							TreeItemCollapsibleState.Expanded, // Make it expandable
-							"steering-header",
 							"",
 							this.context
 						)
@@ -279,38 +262,6 @@ export class SteeringExplorerProvider
 					);
 				}
 			}
-			return items;
-		}
-
-		if (element.contextValue === "steering-header") {
-			// Return steering documents as children of the header
-			const items: SteeringItem[] = [];
-
-			if (workspace.workspaceFolders && this.steeringManager) {
-				const steeringDocs = await this.steeringManager.getSteeringDocuments();
-				const workspacePath = workspace.workspaceFolders[0].uri.fsPath;
-
-				for (const doc of steeringDocs) {
-					// Calculate relative path from workspace root
-					const relativePath = relative(workspacePath, doc.path);
-					items.push(
-						new SteeringItem(
-							doc.name,
-							TreeItemCollapsibleState.None,
-							"steering-document",
-							doc.path,
-							this.context,
-							{
-								command: "vscode.open",
-								title: "Open Steering Document",
-								arguments: [Uri.file(doc.path)],
-							},
-							relativePath // Pass relative path without prefix
-						)
-					);
-				}
-			}
-
 			return items;
 		}
 

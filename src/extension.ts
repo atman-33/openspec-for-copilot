@@ -279,32 +279,6 @@ function registerCommands(
 
 	// Steering commands
 	context.subscriptions.push(
-		commands.registerCommand(
-			"openspec-for-copilot.steering.refine",
-			async (item: any) => {
-				// Item is always from tree view
-				const uri = Uri.file(item.resourcePath);
-				await steeringManager.refine(uri);
-			}
-		),
-
-		commands.registerCommand(
-			"openspec-for-copilot.steering.delete",
-			async (item: any) => {
-				outputChannel.appendLine(`[Steering] Deleting: ${item.label}`);
-
-				// Use SteeringManager to delete the document
-				const result = await steeringManager.delete(
-					item.label,
-					item.resourcePath
-				);
-
-				if (!result.success && result.error) {
-					window.showErrorMessage(result.error);
-				}
-			}
-		),
-
 		// Configuration commands
 		commands.registerCommand(
 			"openspec-for-copilot.steering.createUserRule",
@@ -654,7 +628,6 @@ function setupFileWatchers(
 		const configuredPaths = [
 			configManager.getPath("prompts"),
 			configManager.getPath("specs"),
-			configManager.getPath("steering"),
 		];
 
 		const extraPatterns = new Set<string>();

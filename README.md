@@ -5,37 +5,32 @@
 [![GitHub stars](https://img.shields.io/github/stars/atman-33/openspec-for-copilot.svg?style=flat-square)](https://github.com/atman-33/openspec-for-copilot/stargazers)
 [![GitHub issues](https://img.shields.io/github/issues/atman-33/openspec-for-copilot.svg?style=flat-square)](https://github.com/atman-33/openspec-for-copilot/issues)
 
-A VS Code extension that brings spec-driven development to Codex CLI, leveraging the powerful AI capabilities of the [VS Code Codex extension](https://marketplace.visualstudio.com/items?itemName=openai.chatgpt). Manage your specs, steering documents, and custom prompts visually.
+OpenSpec for Copilot is a VS Code extension that brings Spec-Driven Development (SDD) to your workflow, leveraging [OpenSpec](https://github.com/Fission-AI/OpenSpec) prompts and **GitHub Copilot**.
+
+It allows you to visually manage Specs, Steering documents (AGENTS.md), and custom prompts, seamlessly integrating with GitHub Copilot Chat to generate high-quality documentation and code.
 
 ![Create new Spec](./screenshots/image.png)
 
-## Feature Overview
+## Features
 
 ### 📝 Spec Management
 
-- Run `OpenSpec for Copilot: Create New Spec` (`openspec-for-copilot.spec.create`) to open the Create Spec dialog. Provide the required summary alongside optional product context, technical constraints, and open questions; drafts auto-save so you can resume later. Submitting sends the compiled request to the VS Code Codex extension's chat to finish generating the spec.
-- Browse generated specs in the **Specs** view; each spec exposes Requirements, Design, and Tasks nodes with quick-open commands.
-- Execute individual checklist items from `tasks.md` via the "Start Task" CodeLens, which marks the checklist and passes the task context to the VS Code Codex extension's chat. You can then interact with the chat to execute the task.
+- **Create Specs**: Run `OpenSpec for Copilot: Create New Spec` (`openspec-for-copilot.spec.create`) to open the creation dialog. Define your summary, product context, and constraints.
+- **Generate with Copilot**: The extension compiles your input into an optimized OpenSpec prompt and sends it to **GitHub Copilot Chat** to generate the full specification (Requirements, Design, Tasks).
+- **Manage Specs**: Browse generated specs in the **Specs** view.
+- **Execute Tasks**: Open `tasks.md` and use the "Start Task" CodeLens to send task context to GitHub Copilot Chat for implementation.
 
-### 🎯 Steering Management
-
-- The **Steering** view surfaces global (`~/.codex/AGENTS.md`) and project-level (`AGENTS.md`) rules and lets you open them instantly.
-- Use the built-in commands to create global or project rules, initialize steering documents, refine existing files, or delete outdated guidance. These actions will pass the relevant context to the VS Code Codex extension's chat, allowing you to interact and manage your steering documents.
-
-### 🧩 Prompts
-- Maintain Markdown prompts under `.codex/prompts` (default paths configurable). 
-- Create prompts from the tree view; the extension scaffolds the file and opens it for editing.
-- Run prompts from the inline action or the command palette, which passes the document as context to the Codex Chat provided by the VS Code Codex extension.
+### 🧩 Prompt Management
+- **Custom Prompts**: Manage Markdown prompts under `.github/prompts` (configurable).
+- **Run Prompts**: Execute prompts directly from the tree view, passing the context to GitHub Copilot Chat.
 
 ## Installation
 
 ### Prerequisites
-- Codex CLI 0.28.0 or later available on `PATH`.
 - Visual Studio Code 1.84.0 or newer.
-- Node.js 16+ for local builds.
-- **[VS Code Codex extension](https://marketplace.visualstudio.com/items?itemName=openai.chatgpt) must be installed.** This extension utilizes the Codex Chat functionality provided by the ChatGPT extension to pass prompt contexts.
+- **[GitHub Copilot Chat](https://marketplace.visualstudio.com/items?itemName=GitHub.copilot-chat)** extension must be installed.
 
-### Marketplace (when published)
+### Marketplace
 Search for "OpenSpec for Copilot" in the VS Code Marketplace and install the extension.
 
 ### From Local VSIX
@@ -44,27 +39,21 @@ Search for "OpenSpec for Copilot" in the VS Code Marketplace and install the ext
 
 ## Usage
 
-### Create a Spec
-1. Open the OpenSpec for Copilot activity bar container.
-2. Choose **Specs** → **Create New Spec**.
-3. Fill out the Create Spec dialog: the summary is required, while product context, technical constraints, and open questions are optional. Drafts auto-save while you type, and closing the dialog prompts you to discard or resume later.
-4. Press **Create Spec** to send the compiled prompt to the VS Code Codex extension's chat, then continue the guided flow there.
-5. Review each generated document before moving to the next step.
+### 1. Create a Spec
+1. Open the **Specs** view in the Activity Bar.
+2. Click **Create New Spec**.
+3. Fill in the details (Summary is required).
+4. Click **Create Spec**. This will open GitHub Copilot Chat with a generated prompt.
+5. Follow the chat instructions to generate the spec files.
 
-### Execute Tasks from `tasks.md`
-1. Open the generated `tasks.md` file.
-2. Click the "Start Task" CodeLens next to a checklist item.
-3. The extension checks off the task locally and passes the task context to the VS Code Codex extension's chat. You can then interact with the chat to execute the task.
+### 2. Implement Tasks
+1. Open a generated `tasks.md` file.
+2. Click **Start Task** above a checklist item.
+3. GitHub Copilot Chat will open with the task context. Interact with it to implement the code.
 
-### Manage Steering Documents
-1. Open the **Steering** view to inspect global and project AGENTS.md files.
-2. Use **Init Steering** to generate product, tech, and structure documents, or **Create Custom Steering** for ad-hoc guidance. These actions will pass the relevant context to the VS Code Codex extension's chat, allowing you to interact and manage your steering documents.
-3. Refine or delete documents from the context menu; the extension keeps AGENTS.md synchronized.
-
-### Work with Prompts
-1. Open the **Prompts** view and press **Create Prompt** to scaffold a Markdown prompt.
-2. Edit the file; Markdown frontmatter is optional.
-3. Use **Run Prompt** to push the file into the Codex Chat (provided by the VS Code Codex extension). You can then interact with the chat to utilize the prompt.
+### 3. Manage Steering
+1. Open the **Steering** view.
+2. Edit `AGENTS.md` to define high-level rules for your project.
 
 ## Configuration
 All settings live under the `openspec-for-copilot` namespace.
@@ -75,23 +64,22 @@ All settings live under the `openspec-for-copilot` namespace.
 | `views.steering.visible` | boolean | `true` | Toggle the Steering explorer. |
 | `views.prompts.visible` | boolean | `true` | Toggle the Prompts explorer. |
 | `views.settings.visible` | boolean | `true` | Toggle the Settings overview. |
-| `codex.specsPath` | string | `.codex/specs` | Workspace-relative path for generated specs. |
-| `codex.steeringPath` | string | `.codex/steering` | Workspace-relative path for steering documents. |
-| `codex.promptsPath` | string | `.codex/prompts` | Workspace-relative path for Markdown prompts. |
+| `codex.specsPath` | string | `openspec` | Workspace-relative path for generated specs. |
+| `codex.promptsPath` | string | `.github/prompts` | Workspace-relative path for Markdown prompts. |
 
 Paths accept custom locations inside the workspace; the extension mirrors watchers to match custom directories.
 
 ## Workspace Layout
 ```
-.codex/
-├── prompts/                # Markdown prompts consumed by Codex CLI
-├── specs/
-│   └── <spec>/
-│       ├── requirements.md
-│       ├── design.md
-│       └── tasks.md
-├── steering/
-│   └── *.md                # Product / tech / structure guidance
+.github/
+├── prompts/                # Markdown prompts
+openspec/
+├── AGENTS.md               # Project-specific steering rules
+├── project.md              # Project specification
+├── <spec>/
+│   ├── requirements.md
+│   ├── design.md
+│   └── tasks.md
 LICENSE
 src/
 ├── extension.ts            # Activation, command registration, tree providers
@@ -130,4 +118,5 @@ scripts/
 MIT License. See [`LICENSE`](LICENSE).
 
 ## Credits
-Inspired by the original Kiro project for Claude Code by @notdp, adapted here for Codex CLI workflows.
+Based on [OpenSpec](https://github.com/Fission-AI/OpenSpec) by Fission AI.
+Originally forked from [kiro-for-codex-ide](https://github.com/notdp/kiro-for-codex-ide).

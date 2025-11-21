@@ -1,7 +1,6 @@
 import { homedir } from "os";
 import { join } from "path";
 import {
-	FileType,
 	type ExtensionContext,
 	type OutputChannel,
 	Uri,
@@ -11,9 +10,7 @@ import {
 } from "vscode";
 import type { CodexProvider } from "../../providers/codex-provider";
 import { PromptLoader } from "../../services/prompt-loader";
-import { sendPromptToChat } from "../../utils/chat-prompt-runner";
 import { ConfigManager } from "../../utils/config-manager";
-import { NotificationUtils } from "../../utils/notification-utils";
 
 export class SteeringManager {
 	private readonly configManager: ConfigManager;
@@ -31,94 +28,6 @@ export class SteeringManager {
 		this.promptLoader = PromptLoader.getInstance();
 		this.codexProvider = codexProvider;
 		this.outputChannel = outputChannel;
-	}
-
-	getSteeringBasePath(): string {
-		return this.configManager.getPath("steering");
-	}
-
-	/**
-	 * Delete a steering document and update AGENTS.md
-	 */
-	async delete(
-		documentName: string,
-		documentPath: string
-	): Promise<{ success: boolean; error?: string }> {
-		try {
-			// First delete the file
-			await workspace.fs.delete(Uri.file(documentPath));
-
-			// Load and render the delete prompt
-			const prompt = this.promptLoader.renderPrompt("delete-steering", {
-				documentName,
-				steeringPath: this.getSteeringBasePath(),
-			});
-
-			// Show progress notification
-			await NotificationUtils.showAutoDismissNotification(
-				`Deleting "${documentName}" and updating AGENTS.md...`
-			);
-
-			// Execute Codex command to update AGENTS.md
-			const result = await this.codexProvider.invokeCodexHeadless(prompt);
-
-			if (result.exitCode === 0) {
-				await NotificationUtils.showAutoDismissNotification(
-					`Steering document "${documentName}" deleted and AGENTS.md updated successfully.`
-				);
-				return { success: true };
-			}
-			if (result.exitCode !== undefined) {
-				const error = `Failed to update AGENTS.md. Exit code: ${result.exitCode}`;
-				this.outputChannel.appendLine(`[Steering] ${error}`);
-				return { success: false, error };
-			}
-			return { success: true }; // Assume success if no exit code
-		} catch (error) {
-			const errorMsg = `Failed to delete steering document: ${error}`;
-			this.outputChannel.appendLine(`[Steering] ${errorMsg}`);
-			return { success: false, error: errorMsg };
-		}
-	}
-
-	async refine(uri: Uri) {
-		// Load and render the refine prompt
-		const prompt = this.promptLoader.renderPrompt("refine-steering", {
-			filePath: uri.fsPath,
-		});
-
-		await sendPromptToChat(prompt);
-
-		await NotificationUtils.showAutoDismissNotification(
-			"Sent the steering refinement prompt to ChatGPT. Continue collaborating there."
-		);
-	}
-
-	async getSteeringDocuments(): Promise<Array<{ name: string; path: string }>> {
-		const workspaceFolder = workspace.workspaceFolders?.[0];
-		if (!workspaceFolder) {
-			return [];
-		}
-
-		const steeringPath = join(
-			workspaceFolder.uri.fsPath,
-			this.getSteeringBasePath()
-		);
-
-		try {
-			const entries = await workspace.fs.readDirectory(Uri.file(steeringPath));
-			return entries
-				.filter(
-					([name, type]) => type === FileType.File && name.endsWith(".md")
-				)
-				.map(([name]) => ({
-					name: name.replace(".md", ""),
-					path: join(steeringPath, name),
-				}));
-		} catch (error) {
-			// Directory doesn't exist yet
-			return [];
-		}
 	}
 
 	/**
