@@ -1,4 +1,4 @@
-import { dirname, join } from "path";
+import { join } from "path";
 import {
 	FileType,
 	type ExtensionContext,
@@ -52,18 +52,13 @@ export class SpecManager {
 		}
 	}
 
-	async navigateToDocument(specName: string, type: SpecDocumentType) {
+	async openDocument(relativePath: string, type: string) {
 		const workspaceFolder = workspace.workspaceFolders?.[0];
 		if (!workspaceFolder) {
 			return;
 		}
 
-		const docPath = join(
-			workspaceFolder.uri.fsPath,
-			this.getSpecBasePath(),
-			specName,
-			`${type}.md`
-		);
+		const docPath = join(workspaceFolder.uri.fsPath, relativePath);
 
 		try {
 			const doc = await workspace.openTextDocument(docPath);
@@ -71,7 +66,7 @@ export class SpecManager {
 		} catch (error) {
 			// File doesn't exist, look for already open virtual documents
 			// Create unique identifier for this spec document
-			const uniqueMarker = `<!-- kiro-spec: ${specName}/${type} -->`;
+			const uniqueMarker = `<!-- kiro-spec: ${relativePath} -->`;
 
 			for (const doc of workspace.textDocuments) {
 				// Check if this is an untitled document with our unique marker
@@ -115,6 +110,13 @@ This document has not been created yet.`;
 		}
 	}
 
+	async navigateToDocument(specName: string, type: SpecDocumentType) {
+		// Legacy support or redirect to openDocument
+		// Assuming specName is a current spec in openspec/specs
+		const path = join(this.getSpecBasePath(), "specs", specName, `${type}.md`);
+		await this.openDocument(path, type);
+	}
+
 	async delete(specName: string): Promise<void> {
 		const workspaceFolder = workspace.workspaceFolders?.[0];
 		if (!workspaceFolder) {
@@ -143,39 +145,42 @@ This document has not been created yet.`;
 		}
 	}
 
-	async getSpecList(): Promise<string[]> {
+	private async getDirectories(subPath: string): Promise<string[]> {
 		const workspaceFolder = workspace.workspaceFolders?.[0];
 		if (!workspaceFolder) {
 			return [];
 		}
 
-		const specsPath = join(workspaceFolder.uri.fsPath, this.getSpecBasePath());
-
-		// Check if directory exists first before creating
-		try {
-			await workspace.fs.stat(Uri.file(specsPath));
-		} catch {
-			// Directory doesn't exist, create it
-			try {
-				this.outputChannel.appendLine(
-					"[SpecManager] Creating .codex/specs directory"
-				);
-				await workspace.fs.createDirectory(Uri.file(dirname(specsPath)));
-				await workspace.fs.createDirectory(Uri.file(specsPath));
-			} catch {
-				// Ignore errors
-			}
-		}
+		const fullPath = join(
+			workspaceFolder.uri.fsPath,
+			this.getSpecBasePath(),
+			subPath
+		);
 
 		try {
-			const entries = await workspace.fs.readDirectory(Uri.file(specsPath));
+			const entries = await workspace.fs.readDirectory(Uri.file(fullPath));
 			return entries
 				.filter(([, type]) => type === FileType.Directory)
 				.map(([name]) => name);
 		} catch (error) {
-			// Directory doesn't exist yet
+			this.outputChannel.appendLine(
+				`[SpecManager] Failed to read directory ${fullPath}: ${error}`
+			);
 			return [];
 		}
+	}
+
+	async getSpecs(): Promise<string[]> {
+		return await this.getDirectories("specs");
+	}
+
+	async getChanges(): Promise<string[]> {
+		return await this.getDirectories("changes");
+	}
+
+	async getSpecList(): Promise<string[]> {
+		// For backward compatibility, return specs
+		return await this.getSpecs();
 	}
 
 	async implTask(taskFilePath: string, taskDescription: string) {
@@ -197,5 +202,9 @@ This document has not been created yet.`;
 		NotificationUtils.showAutoDismissNotification(
 			"Sent the implementation task prompt to ChatGPT. Follow up there."
 		);
+	}
+
+	async getChangeSpecs(changeName: string): Promise<string[]> {
+		return await this.getDirectories(`changes/${changeName}/specs`);
 	}
 }

@@ -70,7 +70,7 @@
         },
         "kiro-codex-ide.codex.specsPath": {
           "type": "string",
-          "default": ".codex/specs",
+          "default": "openspec",
           "description": "Path where Codex specification files are stored."
         },
         "kiro-codex-ide.codex.promptsPath": {

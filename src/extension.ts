@@ -270,6 +270,13 @@ function registerCommands(
 				await specManager.implTask(documentUri.fsPath, taskDescription);
 			}
 		),
+
+		commands.registerCommand(
+			"kiro-codex-ide.spec.open",
+			async (relativePath: string, type: string) => {
+				await specManager.openDocument(relativePath, type);
+			}
+		),
 		// biome-ignore lint/suspicious/useAwait: ignore
 		commands.registerCommand("kiro-codex-ide.spec.refresh", async () => {
 			outputChannel.appendLine("[Manual Refresh] Refreshing spec explorer...");

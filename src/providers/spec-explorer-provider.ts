@@ -18,6 +18,8 @@ export class SpecExplorerProvider implements TreeDataProvider<SpecItem> {
 	static readonly navigateDesignCommandId =
 		"kiro-codex-ide.spec.navigate.design";
 	static readonly navigateTasksCommandId = "kiro-codex-ide.spec.navigate.tasks";
+	static readonly openSpecCommandId = "kiro-codex-ide.spec.open";
+
 	private readonly _onDidChangeTreeData: EventEmitter<
 		SpecItem | undefined | null | void
 	> = new EventEmitter<SpecItem | undefined | null | void>();
@@ -49,68 +51,162 @@ export class SpecExplorerProvider implements TreeDataProvider<SpecItem> {
 		}
 
 		if (!element) {
-			// Root level - show all specs
-			const specs = await this.specManager.getSpecList();
-			const specItems = specs.map(
-				(specName) =>
+			return [
+				new SpecItem(
+					"Current Specs",
+					TreeItemCollapsibleState.Expanded,
+					"group-specs",
+					this.context
+				),
+				new SpecItem(
+					"Changes",
+					TreeItemCollapsibleState.Expanded,
+					"group-changes",
+					this.context
+				),
+			];
+		}
+
+		if (element.contextValue === "group-specs") {
+			const specs = await this.specManager.getSpecs();
+			return specs.map(
+				(name) =>
 					new SpecItem(
-						specName,
-						TreeItemCollapsibleState.Expanded,
+						name,
+						TreeItemCollapsibleState.Collapsed,
 						"spec",
 						this.context,
-						specName
+						name
 					)
 			);
-
-			return specItems;
 		}
+
+		if (element.contextValue === "group-changes") {
+			const changes = await this.specManager.getChanges();
+			return changes.map(
+				(name) =>
+					new SpecItem(
+						name,
+						TreeItemCollapsibleState.Collapsed,
+						"change",
+						this.context,
+						name
+					)
+			);
+		}
+
 		if (element.contextValue === "spec") {
-			// Show spec documents
-			const specsPath = await this.specManager.getSpecBasePath();
-			const specPath = `${specsPath}/${element.specName}`;
+			const specPath = `openspec/specs/${element.specName}/spec.md`;
+			return [
+				new SpecItem(
+					"Spec",
+					TreeItemCollapsibleState.None,
+					"spec-document",
+					this.context,
+					element.specName,
+					"spec",
+					{
+						command: SpecExplorerProvider.openSpecCommandId,
+						title: "Open Spec",
+						arguments: [specPath, "spec"],
+					},
+					specPath
+				),
+			];
+		}
+
+		if (element.contextValue === "change") {
+			const basePath = `openspec/changes/${element.specName}`;
+			return [
+				new SpecItem(
+					"Proposal",
+					TreeItemCollapsibleState.None,
+					"spec-document",
+					this.context,
+					element.specName,
+					"proposal",
+					{
+						command: SpecExplorerProvider.openSpecCommandId,
+						title: "Open Proposal",
+						arguments: [`${basePath}/proposal.md`, "proposal"],
+					},
+					`${basePath}/proposal.md`
+				),
+				new SpecItem(
+					"Tasks",
+					TreeItemCollapsibleState.None,
+					"spec-document",
+					this.context,
+					element.specName,
+					"tasks",
+					{
+						command: SpecExplorerProvider.openSpecCommandId,
+						title: "Open Tasks",
+						arguments: [`${basePath}/tasks.md`, "tasks"],
+					},
+					`${basePath}/tasks.md`
+				),
+				new SpecItem(
+					"Design",
+					TreeItemCollapsibleState.None,
+					"spec-document",
+					this.context,
+					element.specName,
+					"design",
+					{
+						command: SpecExplorerProvider.openSpecCommandId,
+						title: "Open Design",
+						arguments: [`${basePath}/design.md`, "design"],
+					},
+					`${basePath}/design.md`
+				),
+				new SpecItem(
+					"Specs",
+					TreeItemCollapsibleState.Collapsed,
+					"change-specs-group",
+					this.context,
+					element.specName
+				),
+			];
+		}
+
+		if (element.contextValue === "change-specs-group") {
+			const specs = await this.specManager.getChangeSpecs(element.specName!);
+			return specs.map(
+				(name) =>
+					new SpecItem(
+						name,
+						TreeItemCollapsibleState.Collapsed,
+						"change-spec",
+						this.context,
+						name,
+						undefined,
+						undefined,
+						undefined,
+						element.specName
+					)
+			);
+		}
+
+		if (element.contextValue === "change-spec") {
+			const changeName = element.parentName!;
+			const specName = element.specName!;
+			const specPath = `openspec/changes/${changeName}/specs/${specName}/spec.md`;
 
 			return [
 				new SpecItem(
-					"requirements",
+					"Spec",
 					TreeItemCollapsibleState.None,
 					"spec-document",
 					this.context,
-					element.specName!,
-					"requirements",
+					specName,
+					"spec",
 					{
-						command: SpecExplorerProvider.navigateRequirementsCommandId,
-						title: "Open Requirements",
-						arguments: [element.specName],
+						command: SpecExplorerProvider.openSpecCommandId,
+						title: "Open Spec",
+						arguments: [specPath, "spec"],
 					},
-					`${specPath}/requirements.md`
-				),
-				new SpecItem(
-					"design",
-					TreeItemCollapsibleState.None,
-					"spec-document",
-					this.context,
-					element.specName!,
-					"design",
-					{
-						command: SpecExplorerProvider.navigateDesignCommandId,
-						title: "Open Design",
-						arguments: [element.specName],
-					},
-					`${specPath}/design.md`
-				),
-				new SpecItem(
-					"tasks",
-					TreeItemCollapsibleState.None,
-					"spec-document",
-					this.context,
-					element.specName!,
-					"tasks",
-					{
-						command: SpecExplorerProvider.navigateTasksCommandId,
-						title: "Open Tasks",
-						arguments: [element.specName],
-					},
-					`${specPath}/tasks.md`
+					specPath
 				),
 			];
 		}
@@ -128,6 +224,7 @@ class SpecItem extends TreeItem {
 	readonly documentType?: string;
 	readonly command?: Command;
 	private readonly filePath?: string;
+	readonly parentName?: string;
 
 	// biome-ignore lint/nursery/useMaxParams: ignore
 	constructor(
@@ -138,7 +235,8 @@ class SpecItem extends TreeItem {
 		specName?: string,
 		documentType?: string,
 		command?: Command,
-		filePath?: string
+		filePath?: string,
+		parentName?: string
 	) {
 		super(label, collapsibleState);
 		this.label = label;
@@ -149,39 +247,54 @@ class SpecItem extends TreeItem {
 		this.documentType = documentType;
 		this.command = command;
 		this.filePath = filePath;
+		this.parentName = parentName;
 
-		if (contextValue === "spec") {
+		this.updateIconAndTooltip();
+	}
+
+	private updateIconAndTooltip() {
+		if (
+			this.contextValue === "spec" ||
+			this.contextValue === "change" ||
+			this.contextValue === "change-spec"
+		) {
 			this.iconPath = new ThemeIcon("package");
-			this.tooltip = `Spec: ${label}`;
-		} else if (contextValue === "spec-document") {
-			// Different icons for different document types
-			if (documentType === "requirements") {
-				this.iconPath = new ThemeIcon("chip");
-				this.tooltip = `Requirements: ${specName}/${label}`;
-			} else if (documentType === "design") {
-				this.iconPath = new ThemeIcon("layers");
-				this.tooltip = `Design: ${specName}/${label}`;
-			} else if (documentType === "tasks") {
-				this.iconPath = new ThemeIcon("tasklist");
-				this.tooltip = `Tasks: ${specName}/${label}`;
-			} else {
-				this.iconPath = new ThemeIcon("file");
-				this.tooltip = `${documentType}: ${specName}/${label}`;
-			}
+			this.tooltip = `${this.contextValue}: ${this.label}`;
+			return;
+		}
 
-			// Set description to file path
-			if (filePath) {
-				this.description = filePath;
-			}
+		if (this.contextValue === "spec-document") {
+			this.updateDocumentIcon();
+			return;
+		}
 
-			// Add context menu items
-			if (
-				documentType === "requirements" ||
-				documentType === "design" ||
-				documentType === "tasks"
-			) {
-				this.contextValue = `spec-document-${documentType}`;
-			}
+		if (
+			this.contextValue.startsWith("group-") ||
+			this.contextValue === "change-specs-group"
+		) {
+			this.iconPath = new ThemeIcon("folder");
+		}
+	}
+
+	private updateDocumentIcon() {
+		// Different icons for different document types
+		if (this.documentType === "requirements" || this.documentType === "spec") {
+			this.iconPath = new ThemeIcon("chip");
+		} else if (this.documentType === "design") {
+			this.iconPath = new ThemeIcon("layers");
+		} else if (this.documentType === "tasks") {
+			this.iconPath = new ThemeIcon("tasklist");
+		} else if (this.documentType === "proposal") {
+			this.iconPath = new ThemeIcon("lightbulb");
+		} else {
+			this.iconPath = new ThemeIcon("file");
+		}
+
+		this.tooltip = `${this.documentType}: ${this.label}`;
+
+		// Set description to file path
+		if (this.filePath) {
+			this.description = this.filePath;
 		}
 	}
 }
