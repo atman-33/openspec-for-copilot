@@ -25,6 +25,7 @@ import { SpecExplorerProvider } from "./providers/spec-explorer-provider";
 import { SpecTaskCodeLensProvider } from "./providers/spec-task-code-lens-provider";
 import { SteeringExplorerProvider } from "./providers/steering-explorer-provider";
 import { PromptLoader } from "./services/prompt-loader";
+import { sendPromptToChat } from "./utils/chat-prompt-runner";
 import { addDocumentToCodexChat } from "./utils/codex-chat-utils";
 import { ConfigManager } from "./utils/config-manager";
 
@@ -370,6 +371,43 @@ function registerCommands(
 			"kiro-codex-ide.spec.delete",
 			async (item: any) => {
 				await specManager.delete(item.label);
+			}
+		),
+		commands.registerCommand(
+			"kiro-codex-ide.spec.archiveChange",
+			async (item: any) => {
+				// item is SpecItem, item.specName is the ID
+				const changeId = item.specName;
+				if (!changeId) {
+					window.showErrorMessage("Could not determine change ID.");
+					return;
+				}
+
+				const ws = workspace.workspaceFolders?.[0];
+				if (!ws) {
+					window.showErrorMessage("No workspace folder found");
+					return;
+				}
+
+				const promptPath = Uri.joinPath(
+					ws.uri,
+					".github/prompts/openspec-archive.prompt.md"
+				);
+
+				try {
+					const promptContent = await workspace.fs.readFile(promptPath);
+					const promptString = promptContent.toString();
+					const fullPrompt = `${promptString}\n\nid: ${changeId}`;
+
+					outputChannel.appendLine(
+						`[Archive Change] Archiving change: ${changeId}`
+					);
+					await sendPromptToChat(fullPrompt);
+				} catch (error) {
+					window.showErrorMessage(
+						`Failed to read archive prompt: ${error instanceof Error ? error.message : String(error)}`
+					);
+				}
 			}
 		)
 	);

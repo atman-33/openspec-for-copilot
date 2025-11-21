@@ -161,6 +161,12 @@
         "icon": "$(trash)"
       },
       {
+        "command": "kiro-codex-ide.spec.archiveChange",
+        "title": "Archive Change",
+        "category": "Kiro for Codex IDE",
+        "icon": "$(archive)"
+      },
+      {
         "command": "kiro-codex-ide.spec.implTask",
         "title": "Implement Task",
         "category": "Kiro for Codex IDE"
@@ -291,6 +297,11 @@
         {
           "command": "kiro-codex-ide.spec.delete",
           "when": "view == kiro-codex-ide.views.specExplorer && viewItem == spec",
+          "group": "7_modification"
+        },
+        {
+          "command": "kiro-codex-ide.spec.archiveChange",
+          "when": "view == kiro-codex-ide.views.specExplorer && viewItem == change",
           "group": "7_modification"
         },
         {
