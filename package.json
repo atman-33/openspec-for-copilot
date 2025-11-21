@@ -53,15 +53,15 @@
           "default": true,
           "description": "Controls visibility of the Specs view in the activity bar."
         },
-        "openspec-for-copilot.views.steering.visible": {
-          "type": "boolean",
-          "default": true,
-          "description": "Controls visibility of the Steering view in the activity bar."
-        },
         "openspec-for-copilot.views.prompts.visible": {
           "type": "boolean",
           "default": true,
           "description": "Controls visibility of the Prompts view in the activity bar."
+        },
+        "openspec-for-copilot.views.steering.visible": {
+          "type": "boolean",
+          "default": true,
+          "description": "Controls visibility of the Steering view in the activity bar."
         },
         "openspec-for-copilot.views.settings.visible": {
           "type": "boolean",
@@ -98,16 +98,16 @@
           "when": "!(workbenchState == empty || workspaceFolderCount == 0) && config.openspec-for-copilot.views.specs.visible"
         },
         {
-          "id": "openspec-for-copilot.views.steeringExplorer",
-          "name": "Steering",
-          "icon": "symbol-parameter",
-          "when": "!(workbenchState == empty || workspaceFolderCount == 0) && config.openspec-for-copilot.views.steering.visible"
-        },
-        {
           "id": "openspec-for-copilot.views.promptsExplorer",
           "name": "Prompts",
           "icon": "terminal",
           "when": "!(workbenchState == empty || workspaceFolderCount == 0) && config.openspec-for-copilot.views.prompts.visible"
+        },
+        {
+          "id": "openspec-for-copilot.views.steeringExplorer",
+          "name": "Steering",
+          "icon": "symbol-parameter",
+          "when": "!(workbenchState == empty || workspaceFolderCount == 0) && config.openspec-for-copilot.views.steering.visible"
         },
         {
           "id": "openspec-for-copilot.views.overview",
@@ -124,12 +124,12 @@
         "contents": "Plan features with Specs\n\n[$(plus) Create New Spec](command:openspec-for-copilot.spec.create)"
       },
       {
-        "view": "openspec-for-copilot.views.steeringExplorer",
-        "contents": "[$(globe) Create User Rule](command:openspec-for-copilot.steering.createUserRule)\n\n[$(root-folder) Create Project Rule](command:openspec-for-copilot.steering.createProjectRule)"
-      },
-      {
         "view": "openspec-for-copilot.views.promptsExplorer",
         "contents": "Create and run prompts (.md) under .github/prompts\n\n[$(plus) Create Prompt](command:openspec-for-copilot.prompts.create)\n[$(refresh) Refresh](command:openspec-for-copilot.prompts.refresh)"
+      },
+      {
+        "view": "openspec-for-copilot.views.steeringExplorer",
+        "contents": "[$(globe) Create User Rule](command:openspec-for-copilot.steering.createUserRule)\n\n[$(root-folder) Create Project Rule](command:openspec-for-copilot.steering.createProjectRule)"
       },
       {
         "view": "openspec-for-copilot.views.overview",
