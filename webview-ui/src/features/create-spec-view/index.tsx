@@ -1,4 +1,5 @@
 import { vscode } from "@/bridge/vscode";
+import { Button } from "@/components/ui/button";
 import { CreateSpecForm } from "./components/create-spec-form";
 import { StatusBanner } from "./components/status-banner";
 import type {
@@ -92,7 +93,7 @@ export const CreateSpecView = () => {
 	const [closeWarningVisible, setCloseWarningVisible] = useState(false);
 
 	const lastPersistedRef = useRef<CreateSpecFormData>(EMPTY_FORM);
-	const autosaveTimeoutRef = useRef<number | undefined>();
+	// const autosaveTimeoutRef = useRef<number | undefined>();
 
 	const productContextRef = useRef<HTMLTextAreaElement>(null);
 	const keyScenariosRef = useRef<HTMLTextAreaElement>(null);
@@ -105,12 +106,12 @@ export const CreateSpecView = () => {
 		[formData]
 	);
 
-	const clearAutosaveTimer = useCallback(() => {
-		if (autosaveTimeoutRef.current) {
-			window.clearTimeout(autosaveTimeoutRef.current);
-			autosaveTimeoutRef.current = undefined;
-		}
-	}, []);
+	// const clearAutosaveTimer = useCallback(() => {
+	// 	if (autosaveTimeoutRef.current) {
+	// 		window.clearTimeout(autosaveTimeoutRef.current);
+	// 		autosaveTimeoutRef.current = undefined;
+	// 	}
+	// }, []);
 
 	const persistDraft = useCallback((data: CreateSpecFormData) => {
 		const normalized = normalizeFormData(data);
@@ -129,15 +130,15 @@ export const CreateSpecView = () => {
 		vscode.postMessage({ type: "create-spec/autosave", payload: normalized });
 	}, []);
 
-	const scheduleAutosave = useCallback(
-		(data: CreateSpecFormData) => {
-			clearAutosaveTimer();
-			autosaveTimeoutRef.current = window.setTimeout(() => {
-				persistDraft(data);
-			}, AUTOSAVE_DEBOUNCE_MS);
-		},
-		[clearAutosaveTimer, persistDraft]
-	);
+	// const scheduleAutosave = useCallback(
+	// 	(data: CreateSpecFormData) => {
+	// 		clearAutosaveTimer();
+	// 		autosaveTimeoutRef.current = window.setTimeout(() => {
+	// 			persistDraft(data);
+	// 		}, AUTOSAVE_DEBOUNCE_MS);
+	// 	},
+	// 	[clearAutosaveTimer, persistDraft]
+	// );
 
 	const handleFieldChange = useCallback(
 		(field: keyof CreateSpecFormData) =>
@@ -148,11 +149,12 @@ export const CreateSpecView = () => {
 						...previous,
 						[field]: value,
 					};
-					scheduleAutosave(next);
+					// scheduleAutosave(next);
 					return next;
 				});
 			},
-		[scheduleAutosave]
+		// [scheduleAutosave]
+		[]
 	);
 
 	const validateForm = useCallback((current: CreateSpecFormData): boolean => {
@@ -183,7 +185,7 @@ export const CreateSpecView = () => {
 				return;
 			}
 
-			clearAutosaveTimer();
+			// clearAutosaveTimer();
 			setIsSubmitting(true);
 			setSubmissionError(undefined);
 
@@ -192,16 +194,16 @@ export const CreateSpecView = () => {
 				payload: normalized,
 			});
 		},
-		[clearAutosaveTimer, formData, isSubmitting, validateForm]
+		[formData, isSubmitting, validateForm]
 	);
 
 	const handleCancel = useCallback(() => {
-		clearAutosaveTimer();
+		// clearAutosaveTimer();
 		vscode.postMessage({
 			type: "create-spec/close-attempt",
 			payload: { hasDirtyChanges: isDirty },
 		});
-	}, [clearAutosaveTimer, isDirty]);
+	}, [isDirty]);
 
 	const focusPrimaryField = useCallback(() => {
 		window.setTimeout(() => {
@@ -239,9 +241,9 @@ export const CreateSpecView = () => {
 		vscode.postMessage({ type: "create-spec/ready" });
 
 		return () => {
-			clearAutosaveTimer();
+			// clearAutosaveTimer();
 		};
-	}, [clearAutosaveTimer]);
+	}, []);
 
 	useEffect(() => {
 		const handleMessage = (event: MessageEvent<CreateSpecExtensionMessage>) => {
@@ -346,15 +348,35 @@ export const CreateSpecView = () => {
 	}, [isDirty, lastSavedLabel]);
 
 	return (
-		<div className="mx-auto flex h-full w-full max-w-4xl flex-col gap-6 px-4 py-6">
-			<header className="flex flex-col gap-2">
-				<h1 className="font-semibold text-2xl text-[color:var(--vscode-foreground)]">
-					Create New Spec
-				</h1>
-				<p className="text-[color:var(--vscode-descriptionForeground,rgba(255,255,255,0.65))] text-sm">
-					Provide context for the new specification. Product Context is
-					required; other sections are optional but recommended.
-				</p>
+		<div className="mx-auto flex h-full w-full max-w-4xl flex-col gap-6 px-4 pb-6">
+			<header className="sticky top-0 z-10 flex items-start justify-between gap-4 bg-[var(--vscode-editor-background)] pt-6 pb-4">
+				<div className="flex flex-col gap-2">
+					<h1 className="font-semibold text-2xl text-[color:var(--vscode-foreground)]">
+						Create New Spec
+					</h1>
+					<p className="text-[color:var(--vscode-descriptionForeground,rgba(255,255,255,0.65))] text-sm">
+						Provide context for the new specification. Product Context is
+						required; other sections are optional but recommended.
+					</p>
+				</div>
+				<div className="flex shrink-0 gap-2">
+					<Button
+						disabled={isSubmitting}
+						onClick={handleCancel}
+						type="button"
+						variant="ghost"
+					>
+						Cancel
+					</Button>
+					<Button
+						disabled={isSubmitting}
+						form="create-spec-form"
+						type="submit"
+						variant="default"
+					>
+						{isSubmitting ? "Creating…" : "Create Spec"}
+					</Button>
+				</div>
 			</header>
 
 			{statusBanner}
@@ -363,9 +385,9 @@ export const CreateSpecView = () => {
 				autosaveStatus={autosaveStatus}
 				fieldErrors={fieldErrors}
 				formData={formData}
+				formId="create-spec-form"
 				isSubmitting={isSubmitting}
 				keyScenariosRef={keyScenariosRef}
-				onCancel={handleCancel}
 				onFieldChange={handleFieldChange}
 				onSubmit={handleSubmit}
 				openQuestionsRef={openQuestionsRef}

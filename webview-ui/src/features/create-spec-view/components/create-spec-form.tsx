@@ -1,5 +1,4 @@
 import { TextareaPanel } from "@/components/textarea-panel";
-import { Button } from "@/components/ui/button";
 import type { ChangeEvent, FormEvent, MutableRefObject } from "react";
 import type { CreateSpecFieldErrors, CreateSpecFormData } from "../types";
 
@@ -11,7 +10,6 @@ interface CreateSpecFormProps {
 	isSubmitting: boolean;
 	autosaveStatus: string;
 	onSubmit: (event: FormEvent<HTMLFormElement>) => void;
-	onCancel: () => void;
 	onFieldChange: (
 		field: keyof CreateSpecFormData
 	) => (event: ChangeEvent<HTMLTextAreaElement>) => void;
@@ -20,6 +18,7 @@ interface CreateSpecFormProps {
 	technicalConstraintsRef: MutableRefObject<HTMLTextAreaElement | null>;
 	relatedFilesRef: MutableRefObject<HTMLTextAreaElement | null>;
 	openQuestionsRef: MutableRefObject<HTMLTextAreaElement | null>;
+	formId: string;
 }
 
 export const CreateSpecForm = ({
@@ -28,17 +27,18 @@ export const CreateSpecForm = ({
 	isSubmitting,
 	autosaveStatus,
 	onSubmit,
-	onCancel,
 	onFieldChange,
 	productContextRef,
 	keyScenariosRef,
 	technicalConstraintsRef,
 	relatedFilesRef,
 	openQuestionsRef,
+	formId,
 }: CreateSpecFormProps) => (
 	<form
 		aria-busy={isSubmitting}
 		className="flex flex-1 flex-col gap-6"
+		id={formId}
 		noValidate
 		onSubmit={onSubmit}
 	>
@@ -175,19 +175,6 @@ export const CreateSpecForm = ({
 		<footer className="flex flex-col gap-3 border-[color:color-mix(in_srgb,var(--vscode-foreground)_12%,transparent)] border-t pt-4">
 			<div className="flex flex-wrap items-center justify-between gap-3 text-[color:var(--vscode-descriptionForeground,rgba(255,255,255,0.6))] text-xs">
 				<span>{autosaveStatus}</span>
-			</div>
-			<div className="flex flex-wrap justify-end gap-3">
-				<Button
-					disabled={isSubmitting}
-					onClick={onCancel}
-					type="button"
-					variant="secondary"
-				>
-					Cancel
-				</Button>
-				<Button disabled={isSubmitting} type="submit" variant="default">
-					{isSubmitting ? "Creating…" : "Create Spec"}
-				</Button>
 			</div>
 		</footer>
 	</form>
