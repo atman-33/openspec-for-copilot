@@ -200,84 +200,16 @@ export class SteeringManager {
 	}
 
 	/**
-	 * Create project-level AGENTS.md file using Codex CLI
-	 */
-
-	// biome-ignore lint/suspicious/useAwait: ignore
-	async createProjectCodexMd() {
-		const terminal = window.createTerminal({
-			name: "Codex - Init",
-			cwd: workspace.workspaceFolders?.[0]?.uri.fsPath,
-			location: {
-				viewColumn: ViewColumn.Two,
-			},
-		});
-		terminal.show();
-
-		// Wait for Python extension to finish venv activation
-		const delay = this.configManager.getTerminalDelay();
-		setTimeout(() => {
-			terminal.sendText('codex --permission-mode bypassPermissions "/init"');
-		}, delay);
-	}
-
-	/**
-	 * Create global AGENTS.md file in user's home directory
-	 */
-	async createUserCodexMd() {
-		const homeDir =
-			homedir() || process.env.USERPROFILE || process.env.HOME || "";
-		const codexDir = join(homeDir, ".codex");
-		const filePath = join(codexDir, "AGENTS.md");
-
-		// Ensure directory exists
-		try {
-			await workspace.fs.createDirectory(Uri.file(codexDir));
-		} catch (error) {
-			// Directory might already exist
-		}
-
-		// Check if file already exists
-		try {
-			await workspace.fs.stat(Uri.file(filePath));
-			const overwrite = await window.showWarningMessage(
-				"Global AGENTS.md already exists. Overwrite?",
-				"Overwrite",
-				"Cancel"
-			);
-			if (overwrite !== "Overwrite") {
-				return;
-			}
-		} catch {
-			// File doesn't exist, continue
-		}
-
-		// Create empty file
-		const initialContent = "";
-		await workspace.fs.writeFile(
-			Uri.file(filePath),
-			Buffer.from(initialContent)
-		);
-
-		// Open the file
-		const document = await workspace.openTextDocument(filePath);
-		await window.showTextDocument(document);
-
-		await NotificationUtils.showAutoDismissNotification(
-			"Created global AGENTS.md file"
-		);
-	}
-	/**
-	 * Create global Codex configuration file (~/.codex/AGENTS.md)
+	 * Create global Copilot configuration file (~/.github/copilot-instructions.md)
 	 */
 	async createUserConfiguration() {
 		const homeDir = homedir() || process.env.USERPROFILE || "";
-		const codexDir = join(homeDir, ".codex");
-		const filePath = join(codexDir, "AGENTS.md");
+		const githubDir = join(homeDir, ".github");
+		const filePath = join(githubDir, "copilot-instructions.md");
 
 		// Ensure directory exists
 		try {
-			await workspace.fs.createDirectory(Uri.file(codexDir));
+			await workspace.fs.createDirectory(Uri.file(githubDir));
 		} catch (error) {
 			// Directory might already exist
 		}
@@ -286,7 +218,7 @@ export class SteeringManager {
 		try {
 			await workspace.fs.stat(Uri.file(filePath));
 			const overwrite = await window.showWarningMessage(
-				"Global configuration file (~/.codex/AGENTS.md) already exists. Overwrite?",
+				"Global configuration file (~/.github/copilot-instructions.md) already exists. Overwrite?",
 				"Overwrite",
 				"Cancel"
 			);
@@ -297,8 +229,10 @@ export class SteeringManager {
 			// File doesn't exist, continue
 		}
 
-		// Create initial MD content for Codex CLI
-		const initialContent = `This file controls default behavior for Codex CLI across all projects.
+		// Create initial MD content
+		const initialContent = `# Global Copilot Instructions
+
+This file controls default behavior for GitHub Copilot across all projects.
 `;
 
 		await workspace.fs.writeFile(
@@ -314,21 +248,53 @@ export class SteeringManager {
 	}
 
 	/**
-	 * Create project-level AGENTS.md file using Codex CLI
+	 * Create project-level AGENTS.md file (openspec/AGENTS.md)
 	 */
 	async createProjectDocumentation() {
-		try {
-			const prompt = this.promptLoader.renderPrompt("create-agents-md", {
-				steeringPath: this.getSteeringBasePath(),
-			});
-
-			await sendPromptToChat(prompt);
-
-			await NotificationUtils.showAutoDismissNotification(
-				"Sent the AGENTS.md creation prompt to ChatGPT. Follow the conversation to finalize it."
-			);
-		} catch (error) {
-			window.showErrorMessage(`Failed to create AGENTS.md: ${error}`);
+		if (!workspace.workspaceFolders) {
+			window.showErrorMessage("No workspace folder open.");
+			return;
 		}
+		const workspaceRoot = workspace.workspaceFolders[0].uri.fsPath;
+		const openspecDir = join(workspaceRoot, "openspec");
+		const filePath = join(openspecDir, "AGENTS.md");
+
+		// Ensure directory exists
+		try {
+			await workspace.fs.createDirectory(Uri.file(openspecDir));
+		} catch (error) {
+			// Directory might already exist
+		}
+
+		// Check if file already exists
+		try {
+			await workspace.fs.stat(Uri.file(filePath));
+			const overwrite = await window.showWarningMessage(
+				"Project AGENTS.md (openspec/AGENTS.md) already exists. Overwrite?",
+				"Overwrite",
+				"Cancel"
+			);
+			if (overwrite !== "Overwrite") {
+				return;
+			}
+		} catch {
+			// File doesn't exist
+		}
+
+		// Create initial content
+		const initialContent = `# Project Instructions
+
+This file contains instructions for AI agents working on this project.
+`;
+		await workspace.fs.writeFile(
+			Uri.file(filePath),
+			Buffer.from(initialContent)
+		);
+
+		const document = await workspace.openTextDocument(filePath);
+		await window.showTextDocument(document, {
+			preview: false,
+			viewColumn: ViewColumn.Active,
+		});
 	}
 }

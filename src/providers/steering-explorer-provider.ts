@@ -52,58 +52,105 @@ export class SteeringExplorerProvider
 	// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: ignore
 	async getChildren(element?: SteeringItem): Promise<SteeringItem[]> {
 		if (!element) {
-			// Root level - show AGENTS.md files directly
 			const items: SteeringItem[] = [];
-
-			// Check existence of files
 			const homeDir =
 				homedir() || process.env.USERPROFILE || process.env.HOME || "";
-			const globalCodexMd = join(homeDir, ".codex", "AGENTS.md");
-			const globalExists = existsSync(globalCodexMd);
 
-			let projectCodexMd = "";
-			let projectExists = false;
-			if (workspace.workspaceFolders) {
-				projectCodexMd = join(
-					workspace.workspaceFolders[0].uri.fsPath,
-					"AGENTS.md"
-				);
-				projectExists = existsSync(projectCodexMd);
-			}
+			// Global Instructions
+			const globalCopilotMd = join(
+				homeDir,
+				".github",
+				"copilot-instructions.md"
+			);
+			const globalExists = existsSync(globalCopilotMd);
 
-			// Always show Global Rule and Project Rule (if they exist)
 			if (globalExists) {
 				items.push(
 					new SteeringItem(
-						"Global Rule",
+						"Global Instructions",
 						TreeItemCollapsibleState.None,
-						"codex-md-global",
-						globalCodexMd,
+						"global-instructions",
+						globalCopilotMd,
 						this.context,
 						{
 							command: "vscode.open",
-							title: "Open Global AGENTS.md",
-							arguments: [Uri.file(globalCodexMd)],
+							title: "Open Global Instructions",
+							arguments: [Uri.file(globalCopilotMd)],
+						}
+					)
+				);
+			} else {
+				items.push(
+					new SteeringItem(
+						"Create Global Instructions",
+						TreeItemCollapsibleState.None,
+						"create-global-instructions",
+						"",
+						this.context,
+						{
+							command: SteeringExplorerProvider.createUserRuleCommandId,
+							title: "Create Global Instructions",
 						}
 					)
 				);
 			}
 
-			if (projectExists) {
-				items.push(
-					new SteeringItem(
-						"Project Rule",
-						TreeItemCollapsibleState.None,
-						"codex-md-project",
-						projectCodexMd,
-						this.context,
-						{
-							command: "vscode.open",
-							title: "Open Project AGENTS.md",
-							arguments: [Uri.file(projectCodexMd)],
-						}
-					)
+			if (workspace.workspaceFolders) {
+				const workspaceRoot = workspace.workspaceFolders[0].uri.fsPath;
+
+				// Check if any project instruction files exist
+				const projectCopilotMd = join(
+					workspaceRoot,
+					".github",
+					"copilot-instructions.md"
 				);
+				const agentsMd = join(workspaceRoot, "openspec", "AGENTS.md");
+				const rootAgentsMd = join(workspaceRoot, "AGENTS.md");
+
+				const hasProjectInstructions =
+					existsSync(projectCopilotMd) ||
+					existsSync(agentsMd) ||
+					existsSync(rootAgentsMd);
+
+				if (hasProjectInstructions) {
+					items.push(
+						new SteeringItem(
+							"Project Instructions",
+							TreeItemCollapsibleState.Expanded,
+							"project-instructions-group",
+							"",
+							this.context
+						)
+					);
+				} else {
+					items.push(
+						new SteeringItem(
+							"Create Project Instructions",
+							TreeItemCollapsibleState.None,
+							"create-project-instructions",
+							"",
+							this.context,
+							{
+								command: SteeringExplorerProvider.createProjectRuleCommandId,
+								title: "Create Project Instructions",
+							}
+						)
+					);
+				}
+
+				// Project Spec Group
+				const projectSpecMd = join(workspaceRoot, "openspec", "project.md");
+				if (existsSync(projectSpecMd)) {
+					items.push(
+						new SteeringItem(
+							"Project Spec",
+							TreeItemCollapsibleState.Expanded,
+							"project-spec-group",
+							"",
+							this.context
+						)
+					);
+				}
 			}
 
 			// Traditional steering documents - add them directly at root level if they exist
@@ -123,41 +170,100 @@ export class SteeringExplorerProvider
 				}
 			}
 
-			// Add create buttons at the bottom for missing files
-			if (!globalExists) {
-				items.push(
-					new SteeringItem(
-						"Create Global Rule",
-						TreeItemCollapsibleState.None,
-						"create-global-codex",
-						"",
-						this.context,
-						{
-							command: SteeringExplorerProvider.createUserRuleCommandId,
-							title: "Create Global AGENTS.md",
-						}
-					)
-				);
-			}
-
-			if (workspace.workspaceFolders && !projectExists) {
-				items.push(
-					new SteeringItem(
-						"Create Project Rule",
-						TreeItemCollapsibleState.None,
-						"create-project-codex",
-						"",
-						this.context,
-						{
-							command: SteeringExplorerProvider.createProjectRuleCommandId,
-							title: "Create Project AGENTS.md",
-						}
-					)
-				);
-			}
-
 			return items;
 		}
+
+		if (element.contextValue === "project-instructions-group") {
+			const items: SteeringItem[] = [];
+			if (workspace.workspaceFolders) {
+				const workspaceRoot = workspace.workspaceFolders[0].uri.fsPath;
+
+				const projectCopilotMd = join(
+					workspaceRoot,
+					".github",
+					"copilot-instructions.md"
+				);
+				if (existsSync(projectCopilotMd)) {
+					items.push(
+						new SteeringItem(
+							"Copilot Instructions",
+							TreeItemCollapsibleState.None,
+							"project-copilot-instructions",
+							projectCopilotMd,
+							this.context,
+							{
+								command: "vscode.open",
+								title: "Open Copilot Instructions",
+								arguments: [Uri.file(projectCopilotMd)],
+							}
+						)
+					);
+				}
+
+				const agentsMd = join(workspaceRoot, "openspec", "AGENTS.md");
+				if (existsSync(agentsMd)) {
+					items.push(
+						new SteeringItem(
+							"Agent Instructions",
+							TreeItemCollapsibleState.None,
+							"project-agents-md",
+							agentsMd,
+							this.context,
+							{
+								command: "vscode.open",
+								title: "Open Agent Instructions",
+								arguments: [Uri.file(agentsMd)],
+							}
+						)
+					);
+				}
+
+				const rootAgentsMd = join(workspaceRoot, "AGENTS.md");
+				if (existsSync(rootAgentsMd)) {
+					items.push(
+						new SteeringItem(
+							"Root Instructions",
+							TreeItemCollapsibleState.None,
+							"root-agents-md",
+							rootAgentsMd,
+							this.context,
+							{
+								command: "vscode.open",
+								title: "Open Root Instructions",
+								arguments: [Uri.file(rootAgentsMd)],
+							}
+						)
+					);
+				}
+			}
+			return items;
+		}
+
+		if (element.contextValue === "project-spec-group") {
+			const items: SteeringItem[] = [];
+			if (workspace.workspaceFolders) {
+				const workspaceRoot = workspace.workspaceFolders[0].uri.fsPath;
+				const projectSpecMd = join(workspaceRoot, "openspec", "project.md");
+				if (existsSync(projectSpecMd)) {
+					items.push(
+						new SteeringItem(
+							"Project Definition",
+							TreeItemCollapsibleState.None,
+							"project-spec-md",
+							projectSpecMd,
+							this.context,
+							{
+								command: "vscode.open",
+								title: "Open Project Definition",
+								arguments: [Uri.file(projectSpecMd)],
+							}
+						)
+					);
+				}
+			}
+			return items;
+		}
+
 		if (element.contextValue === "steering-header") {
 			// Return steering documents as children of the header
 			const items: SteeringItem[] = [];
@@ -202,6 +308,7 @@ class SteeringItem extends TreeItem {
 	private readonly context: ExtensionContext;
 	readonly command?: Command;
 	private readonly filename?: string;
+	// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: ignore
 	// biome-ignore lint/nursery/useMaxParams: ignore
 	constructor(
 		label: string,
@@ -222,20 +329,38 @@ class SteeringItem extends TreeItem {
 		this.filename = filename;
 
 		// Set appropriate icons based on type
-		if (contextValue === "codex-md-global") {
+		if (contextValue === "global-instructions") {
 			this.iconPath = new ThemeIcon("globe");
-			this.tooltip = `Global AGENTS.md: ${resourcePath}`;
-			this.description = "~/.codex/AGENTS.md";
-		} else if (contextValue === "codex-md-project") {
-			this.iconPath = new ThemeIcon("root-folder");
-			this.tooltip = `Project AGENTS.md: ${resourcePath}`;
+			this.tooltip = `Global Instructions: ${resourcePath}`;
+			this.description = "~/.github/copilot-instructions.md";
+		} else if (contextValue === "create-global-instructions") {
+			this.iconPath = new ThemeIcon("globe");
+			this.tooltip = "Click to create Global Instructions";
+		} else if (contextValue === "project-instructions-group") {
+			this.iconPath = new ThemeIcon("folder");
+			this.tooltip = "Project Instructions";
+		} else if (contextValue === "create-project-instructions") {
+			this.iconPath = new ThemeIcon("folder-active");
+			this.tooltip = "Click to create Project Instructions";
+		} else if (contextValue === "project-copilot-instructions") {
+			this.iconPath = new ThemeIcon("github");
+			this.tooltip = `Copilot Instructions: ${resourcePath}`;
+			this.description = ".github/copilot-instructions.md";
+		} else if (contextValue === "project-agents-md") {
+			this.iconPath = new ThemeIcon("robot");
+			this.tooltip = `Agent Instructions: ${resourcePath}`;
+			this.description = "openspec/AGENTS.md";
+		} else if (contextValue === "root-agents-md") {
+			this.iconPath = new ThemeIcon("file-text");
+			this.tooltip = `Root Instructions: ${resourcePath}`;
 			this.description = "AGENTS.md";
-		} else if (contextValue === "create-global-codex") {
-			this.iconPath = new ThemeIcon("globe");
-			this.tooltip = "Click to create Global AGENTS.md";
-		} else if (contextValue === "create-project-codex") {
-			this.iconPath = new ThemeIcon("root-folder");
-			this.tooltip = "Click to create Project AGENTS.md";
+		} else if (contextValue === "project-spec-group") {
+			this.iconPath = new ThemeIcon("book");
+			this.tooltip = "Project Specification";
+		} else if (contextValue === "project-spec-md") {
+			this.iconPath = new ThemeIcon("file-code");
+			this.tooltip = `Project Definition: ${resourcePath}`;
+			this.description = "openspec/project.md";
 		} else if (contextValue === "separator") {
 			this.iconPath = undefined;
 			this.description = undefined;
