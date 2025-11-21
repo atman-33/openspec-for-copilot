@@ -241,11 +241,23 @@ export class CreateSpecInputController {
 		const payload = formatDescription(normalized);
 
 		try {
-			const prompt = this.promptLoader.renderPrompt("create-spec", {
-				description: payload,
-				workspacePath: workspaceFolder.uri.fsPath,
-				specBasePath: this.configManager.getPath("specs"),
-			});
+			const promptUri = Uri.joinPath(
+				workspaceFolder.uri,
+				".github",
+				"prompts",
+				"openspec-proposal.prompt.md"
+			);
+			let promptTemplate = "";
+			try {
+				const fileData = await workspace.fs.readFile(promptUri);
+				promptTemplate = new TextDecoder().decode(fileData);
+			} catch (error) {
+				throw new Error(
+					"Required prompt file not found: .github/prompts/openspec-proposal.prompt.md"
+				);
+			}
+
+			const prompt = `${promptTemplate}\n\nThe following sections describe the specification and context for this change request.\n\n${payload}`;
 
 			await sendPromptToChat(prompt);
 			NotificationUtils.showAutoDismissNotification(
