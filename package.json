@@ -68,15 +68,15 @@
           "default": true,
           "description": "Controls visibility of the Settings view in the activity bar."
         },
-        "openspec-for-copilot.codex.specsPath": {
+        "openspec-for-copilot.copilot.specsPath": {
           "type": "string",
           "default": "openspec",
-          "description": "Path where Codex specification files are stored."
+          "description": "Path where Copilot specification files are stored."
         },
-        "openspec-for-copilot.codex.promptsPath": {
+        "openspec-for-copilot.copilot.promptsPath": {
           "type": "string",
           "default": ".github/prompts",
-          "description": "Path where Codex prompt files are stored."
+          "description": "Path where Copilot prompt files are stored."
         }
       }
     },

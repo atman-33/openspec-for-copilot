@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { commands, Position, Selection, Uri, window, workspace } from "vscode";
-import { addDocumentToCodexChat } from "./codex-chat-utils";
+import { addDocumentToCopilotChat } from "./copilot-chat-utils";
 
-describe("codex-chat-utils", () => {
+describe("copilot-chat-utils", () => {
 	const mockUri = Uri.parse("file:///fake/document.txt");
 	const mockDocument = {
 		uri: mockUri,
@@ -25,11 +25,11 @@ describe("codex-chat-utils", () => {
 		);
 	});
 
-	// 1. Happy Path: Test that addDocumentToCodexChat calls the correct command.
+	// 1. Happy Path: Test that addDocumentToCopilotChat calls the correct command.
 	it("should select the document and execute the add to chat command", async () => {
 		// @ts-expect-error
 		window.activeTextEditor = mockEditor;
-		await addDocumentToCodexChat(mockUri);
+		await addDocumentToCopilotChat(mockUri);
 		expect(commands.executeCommand).toHaveBeenCalledWith("chatgpt.addToThread");
 	});
 
@@ -42,7 +42,7 @@ describe("codex-chat-utils", () => {
 		window.activeTextEditor = otherEditor as any;
 		window.visibleTextEditors = [mockEditor] as any;
 
-		await addDocumentToCodexChat(mockUri);
+		await addDocumentToCopilotChat(mockUri);
 
 		expect(window.showTextDocument).toHaveBeenCalledWith(
 			mockDocument,
@@ -53,7 +53,7 @@ describe("codex-chat-utils", () => {
 
 	// 3. Fail Safe / Mocks: Test selectEntireDocument when the document is not open.
 	it("should open the document if it is not already visible", async () => {
-		await addDocumentToCodexChat(mockUri);
+		await addDocumentToCopilotChat(mockUri);
 
 		expect(workspace.openTextDocument).toHaveBeenCalledWith(mockUri);
 		expect(window.showTextDocument).toHaveBeenCalledWith(

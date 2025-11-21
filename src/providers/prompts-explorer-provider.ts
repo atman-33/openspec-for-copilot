@@ -15,7 +15,7 @@ import {
 	window,
 	workspace,
 } from "vscode";
-import { addDocumentToCodexChat } from "../utils/codex-chat-utils";
+import { addDocumentToCopilotChat } from "../utils/copilot-chat-utils";
 import { ConfigManager } from "../utils/config-manager";
 import { getVSCodeUserDataPath, isWindowsOrWsl } from "../utils/platform-utils";
 
@@ -133,7 +133,7 @@ export class PromptsExplorerProvider implements TreeDataProvider<PromptItem> {
 		}
 
 		try {
-			await addDocumentToCodexChat(item.resourceUri);
+			await addDocumentToCopilotChat(item.resourceUri);
 		} catch (error) {
 			const message =
 				error instanceof Error

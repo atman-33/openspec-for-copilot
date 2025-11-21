@@ -10,7 +10,7 @@ import {
 	type Uri,
 } from "vscode";
 
-const CODEX_ADD_TO_CHAT_COMMAND_ID = "chatgpt.addToThread";
+const COPILOT_ADD_TO_CHAT_COMMAND_ID = "chatgpt.addToThread";
 
 const selectEntireDocument = async (
 	documentUri: Uri,
@@ -41,10 +41,10 @@ const selectEntireDocument = async (
 	editor.revealRange(fullRange, TextEditorRevealType.Default);
 };
 
-export const addDocumentToCodexChat = async (
+export const addDocumentToCopilotChat = async (
 	documentUri: Uri,
 	showOptions?: TextDocumentShowOptions
 ): Promise<void> => {
 	await selectEntireDocument(documentUri, showOptions);
-	await commands.executeCommand(CODEX_ADD_TO_CHAT_COMMAND_ID);
+	await commands.executeCommand(COPILOT_ADD_TO_CHAT_COMMAND_ID);
 };

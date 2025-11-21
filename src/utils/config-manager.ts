@@ -71,8 +71,8 @@ export class ConfigManager {
 		Record<keyof typeof DEFAULT_PATHS, string>
 	> {
 		const config = workspace.getConfiguration(VSC_CONFIG_NAMESPACE);
-		const promptsPath = config.get<string>("codex.promptsPath")?.trim();
-		const specsPath = config.get<string>("codex.specsPath")?.trim();
+		const promptsPath = config.get<string>("copilot.promptsPath")?.trim();
+		const specsPath = config.get<string>("copilot.specsPath")?.trim();
 
 		const configuredPaths: Partial<Record<keyof typeof DEFAULT_PATHS, string>> =
 			{};

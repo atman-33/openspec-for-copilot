@@ -18,7 +18,7 @@ import {
 import { VSC_CONFIG_NAMESPACE } from "./constants";
 import { SpecManager } from "./features/spec/spec-manager";
 import { SteeringManager } from "./features/steering/steering-manager";
-import { CodexProvider } from "./providers/codex-provider";
+import { CopilotProvider } from "./providers/copilot-provider";
 import { OverviewProvider } from "./providers/overview-provider";
 import { PromptsExplorerProvider } from "./providers/prompts-explorer-provider";
 import { SpecExplorerProvider } from "./providers/spec-explorer-provider";
@@ -29,14 +29,14 @@ import { sendPromptToChat } from "./utils/chat-prompt-runner";
 import { ConfigManager } from "./utils/config-manager";
 import { getVSCodeUserDataPath } from "./utils/platform-utils";
 
-let codexProvider: CodexProvider;
+let copilotProvider: CopilotProvider;
 let specManager: SpecManager;
 let steeringManager: SteeringManager;
 export let outputChannel: OutputChannel;
 
-const ensureWorkspaceCodexGitignore = async (folder: WorkspaceFolder) => {
-	const codexDir = Uri.joinPath(folder.uri, ".codex");
-	const gitignoreUri = Uri.joinPath(codexDir, ".gitignore");
+const ensureWorkspaceCopilotGitignore = async (folder: WorkspaceFolder) => {
+	const copilotDir = Uri.joinPath(folder.uri, ".copilot");
+	const gitignoreUri = Uri.joinPath(copilotDir, ".gitignore");
 
 	try {
 		await workspace.fs.stat(gitignoreUri);
@@ -46,7 +46,7 @@ const ensureWorkspaceCodexGitignore = async (folder: WorkspaceFolder) => {
 	}
 
 	try {
-		await workspace.fs.createDirectory(codexDir);
+		await workspace.fs.createDirectory(copilotDir);
 	} catch {
 		// Directory already exists or cannot be created; ignore and attempt to write the file.
 	}
@@ -81,18 +81,22 @@ export async function activate(context: ExtensionContext) {
 	}
 
 	if (workspaceFolders && workspaceFolders.length > 0) {
-		await Promise.all(workspaceFolders.map(ensureWorkspaceCodexGitignore));
+		await Promise.all(workspaceFolders.map(ensureWorkspaceCopilotGitignore));
 	}
 
-	// Initialize Codex provider
-	codexProvider = new CodexProvider(context, outputChannel);
+	// Initialize Copilot provider
+	copilotProvider = new CopilotProvider(context, outputChannel);
 
 	const configManager = ConfigManager.getInstance();
 	await configManager.loadSettings();
 
 	// Initialize feature managers with output channel
 	specManager = new SpecManager(context, outputChannel);
-	steeringManager = new SteeringManager(context, codexProvider, outputChannel);
+	steeringManager = new SteeringManager(
+		context,
+		copilotProvider,
+		outputChannel
+	);
 
 	// Register tree data providers
 	const overviewProvider = new OverviewProvider(context);
@@ -308,8 +312,8 @@ function registerCommands(
 			const document = event.document;
 			const filePath = document.fileName;
 
-			// Check if this is an agent file in .codex directories
-			if (filePath.includes(".codex/agents/") && filePath.endsWith(".md")) {
+			// Check if this is an agent file in .copilot directories
+			if (filePath.includes(".copilot/agents/") && filePath.endsWith(".md")) {
 				// Show confirmation dialog
 				const result = await window.showWarningMessage(
 					"Are you sure you want to save changes to this agent file?",
@@ -374,8 +378,8 @@ function registerCommands(
 		)
 	);
 
-	// Codex integration commands
-	// Codex CLI integration commands
+	// Copilot integration commands
+	// Copilot CLI integration commands
 
 	// Prompts commands
 	context.subscriptions.push(
@@ -419,7 +423,7 @@ function registerCommands(
 				} else {
 					// Default to project scope
 					promptsPathLabel = configManager.getPath("prompts");
-					targetDir = Uri.joinPath(ws.uri, ".codex", "prompts");
+					targetDir = Uri.joinPath(ws.uri, ".copilot", "prompts");
 					try {
 						targetDir = Uri.file(configManager.getAbsolutePath("prompts"));
 					} catch {
@@ -441,7 +445,7 @@ function registerCommands(
 				try {
 					await workspace.fs.createDirectory(targetDir);
 					const content = Buffer.from(
-						`# ${name}\n\nDescribe your prompt here. This file will be sent to Codex when executed.\n`
+						`# ${name}\n\nDescribe your prompt here. This file will be sent to Copilot when executed.\n`
 					);
 					await workspace.fs.writeFile(file, content);
 					const doc = await workspace.openTextDocument(file);
@@ -587,8 +591,8 @@ function setupFileWatchers(
 	steeringExplorer: SteeringExplorerProvider,
 	promptsExplorer: PromptsExplorerProvider
 ) {
-	// Watch for changes in .codex directories with debouncing
-	const codexWatcher = workspace.createFileSystemWatcher("**/.codex/**/*");
+	// Watch for changes in .copilot directories with debouncing
+	const copilotWatcher = workspace.createFileSystemWatcher("**/.copilot/**/*");
 
 	let refreshTimeout: NodeJS.Timeout | undefined;
 	const debouncedRefresh = (event: string, uri: Uri) => {
@@ -610,9 +614,9 @@ function setupFileWatchers(
 		watcher.onDidChange((uri) => debouncedRefresh("Change", uri));
 	};
 
-	attachWatcherHandlers(codexWatcher);
+	attachWatcherHandlers(copilotWatcher);
 
-	const watchers: FileSystemWatcher[] = [codexWatcher];
+	const watchers: FileSystemWatcher[] = [copilotWatcher];
 
 	const wsFolder = workspace.workspaceFolders?.[0];
 	if (wsFolder) {
@@ -636,7 +640,7 @@ function setupFileWatchers(
 			if (!normalized || normalized.startsWith("..")) {
 				continue;
 			}
-			if (normalized === ".codex" || normalized.startsWith(".codex/")) {
+			if (normalized === ".copilot" || normalized.startsWith(".copilot/")) {
 				continue;
 			}
 			extraPatterns.add(`${normalized}/**/*`);
@@ -653,20 +657,21 @@ function setupFileWatchers(
 
 	context.subscriptions.push(...watchers);
 
-	// Watch for changes in CODEX.md files
+	// Watch for changes in copilot-instructions.md files
 	const globalHome = homedir() || process.env.USERPROFILE || "";
-	const globalCodexMdWatcher = workspace.createFileSystemWatcher(
-		new RelativePattern(globalHome, ".codex/CODEX.md")
+	const globalCopilotMdWatcher = workspace.createFileSystemWatcher(
+		new RelativePattern(globalHome, ".github/copilot-instructions.md")
 	);
-	const projectCodexMdWatcher =
-		workspace.createFileSystemWatcher("**/CODEX.md");
+	const projectCopilotMdWatcher = workspace.createFileSystemWatcher(
+		"**/copilot-instructions.md"
+	);
 
-	globalCodexMdWatcher.onDidCreate(() => steeringExplorer.refresh());
-	globalCodexMdWatcher.onDidDelete(() => steeringExplorer.refresh());
-	projectCodexMdWatcher.onDidCreate(() => steeringExplorer.refresh());
-	projectCodexMdWatcher.onDidDelete(() => steeringExplorer.refresh());
+	globalCopilotMdWatcher.onDidCreate(() => steeringExplorer.refresh());
+	globalCopilotMdWatcher.onDidDelete(() => steeringExplorer.refresh());
+	projectCopilotMdWatcher.onDidCreate(() => steeringExplorer.refresh());
+	projectCopilotMdWatcher.onDidDelete(() => steeringExplorer.refresh());
 
-	context.subscriptions.push(globalCodexMdWatcher, projectCodexMdWatcher);
+	context.subscriptions.push(globalCopilotMdWatcher, projectCopilotMdWatcher);
 }
 
 // biome-ignore lint/suspicious/noEmptyBlockStatements: ignore

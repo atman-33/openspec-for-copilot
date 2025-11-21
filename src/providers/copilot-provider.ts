@@ -12,7 +12,7 @@ import {
 import { VSC_CONFIG_NAMESPACE } from "../constants";
 import { ConfigManager } from "../utils/config-manager";
 
-export interface CodexAvailabilityResult {
+export interface CopilotAvailabilityResult {
 	isAvailable: boolean;
 	isInstalled: boolean;
 	version: string | null;
@@ -21,7 +21,7 @@ export interface CodexAvailabilityResult {
 	setupGuidance: string | null;
 }
 
-export class CodexProvider {
+export class CopilotProvider {
 	private readonly context: ExtensionContext;
 	private readonly outputChannel: OutputChannel;
 	private readonly configManager: ConfigManager;
@@ -80,10 +80,10 @@ export class CodexProvider {
 	}
 
 	/**
-	 * Invokes Codex in a new terminal on the right side (split view) with the given prompt
+	 * Invokes Copilot in a new terminal on the right side (split view) with the given prompt
 	 * Returns the terminal instance for potential renaming
 	 */
-	async invokeCodexSplitView(
+	async invokeCopilotSplitView(
 		prompt: string,
 		title = "OpenSpec for Copilot Code"
 	): Promise<Terminal> {
@@ -91,8 +91,8 @@ export class CodexProvider {
 			// Create temp file with the prompt
 			const promptFilePath = await this.createTempFile(prompt, "prompt");
 
-			// Build the command - simple now, just codex with input redirection
-			const command = `codex --permission-mode bypassPermissions < "${promptFilePath}"`;
+			// Build the command - simple now, just copilot with input redirection
+			const command = `copilot --permission-mode bypassPermissions < "${promptFilePath}"`;
 
 			// Create a new terminal in the editor area (right side)
 			const terminal = window.createTerminal({
@@ -123,13 +123,15 @@ export class CodexProvider {
 					// Ignore cleanup errors
 					this.outputChannel.appendLine(`Failed to cleanup temp file: ${e}`);
 				}
-			}, 30_000); // 30 seconds delay to give Codex time to read the file
+			}, 30_000); // 30 seconds delay to give Copilot time to read the file
 
 			// Return the terminal for potential renaming
 			return terminal;
 		} catch (error) {
-			this.outputChannel.appendLine(`ERROR: Failed to send to Codex: ${error}`);
-			window.showErrorMessage(`Failed to run Codex: ${error}`);
+			this.outputChannel.appendLine(
+				`ERROR: Failed to send to Copilot: ${error}`
+			);
+			window.showErrorMessage(`Failed to run Copilot: ${error}`);
 			throw error;
 		}
 	}
@@ -144,7 +146,7 @@ export class CodexProvider {
 		// Small delay to ensure terminal is focused
 		await new Promise((resolve) => setTimeout(resolve, 100));
 		this.outputChannel.appendLine(
-			`[CodexProvider] ${terminal.name} Terminal renamed to: ${newName}`
+			`[CopilotProvider] ${terminal.name} Terminal renamed to: ${newName}`
 		);
 
 		// Execute the rename command
@@ -154,14 +156,14 @@ export class CodexProvider {
 	}
 
 	/**
-	 * Execute Codex command with specific tools in background
+	 * Execute Copilot command with specific tools in background
 	 * Returns a promise that resolves when the command completes
 	 */
-	async invokeCodexHeadless(
+	async invokeCopilotHeadless(
 		prompt: string
 	): Promise<{ exitCode: number | undefined; output?: string }> {
 		this.outputChannel.appendLine(
-			"[CodexProvider] Invoking Codex in headless mode"
+			"[CopilotProvider] Invoking Copilot in headless mode"
 		);
 		this.outputChannel.appendLine("========================================");
 		this.outputChannel.appendLine(prompt);
@@ -178,11 +180,11 @@ export class CodexProvider {
 		);
 
 		// Build command using file redirection
-		const commandLine = `codex --permission-mode bypassPermissions < "${promptFilePath}"`;
+		const commandLine = `copilot --permission-mode bypassPermissions < "${promptFilePath}"`;
 
 		// Create hidden terminal for background execution
 		const terminal = window.createTerminal({
-			name: "Codex Background",
+			name: "Copilot Background",
 			cwd,
 			hideFromUser: true,
 		});
@@ -208,10 +210,10 @@ export class CodexProvider {
 							// Only log errors
 							if (event.exitCode !== 0) {
 								this.outputChannel.appendLine(
-									`[Codex] Command failed with exit code: ${event.exitCode}`
+									`[Copilot] Command failed with exit code: ${event.exitCode}`
 								);
 								this.outputChannel.appendLine(
-									`[Codex] Command was: ${commandLine}`
+									`[Copilot] Command was: ${commandLine}`
 								);
 							}
 
@@ -226,12 +228,12 @@ export class CodexProvider {
 								try {
 									await promises.unlink(promptFilePath);
 									this.outputChannel.appendLine(
-										`[Codex] Cleaned up temp file: ${promptFilePath}`
+										`[Copilot] Cleaned up temp file: ${promptFilePath}`
 									);
 								} catch (e) {
 									// Ignore cleanup errors
 									this.outputChannel.appendLine(
-										`[Codex] Failed to cleanup temp file: ${e}`
+										`[Copilot] Failed to cleanup temp file: ${e}`
 									);
 								}
 							}, 1000);
@@ -242,7 +244,7 @@ export class CodexProvider {
 					// Fallback: execute without shell integration
 					clearInterval(checkShellIntegration);
 					this.outputChannel.appendLine(
-						"[Codex] Shell integration not available, using fallback mode"
+						"[Copilot] Shell integration not available, using fallback mode"
 					);
 					terminal.sendText(commandLine);
 

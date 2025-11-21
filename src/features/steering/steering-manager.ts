@@ -8,25 +8,25 @@ import {
 	window,
 	workspace,
 } from "vscode";
-import type { CodexProvider } from "../../providers/codex-provider";
+import type { CopilotProvider } from "../../providers/copilot-provider";
 import { PromptLoader } from "../../services/prompt-loader";
 import { ConfigManager } from "../../utils/config-manager";
 
 export class SteeringManager {
 	private readonly configManager: ConfigManager;
 	private readonly promptLoader: PromptLoader;
-	private readonly codexProvider: CodexProvider;
+	private readonly copilotProvider: CopilotProvider;
 	private readonly outputChannel: OutputChannel;
 
 	constructor(
 		context: ExtensionContext,
-		codexProvider: CodexProvider,
+		copilotProvider: CopilotProvider,
 		outputChannel: OutputChannel
 	) {
 		this.configManager = ConfigManager.getInstance();
 		this.configManager.loadSettings();
 		this.promptLoader = PromptLoader.getInstance();
-		this.codexProvider = codexProvider;
+		this.copilotProvider = copilotProvider;
 		this.outputChannel = outputChannel;
 	}
 

@@ -64,8 +64,8 @@ All settings live under the `openspec-for-copilot` namespace.
 | `views.steering.visible` | boolean | `true` | Toggle the Steering explorer. |
 | `views.prompts.visible` | boolean | `true` | Toggle the Prompts explorer. |
 | `views.settings.visible` | boolean | `true` | Toggle the Settings overview. |
-| `codex.specsPath` | string | `openspec` | Workspace-relative path for generated specs. |
-| `codex.promptsPath` | string | `.github/prompts` | Workspace-relative path for Markdown prompts. |
+| `copilot.specsPath` | string | `openspec` | Workspace-relative path for generated specs. |
+| `copilot.promptsPath` | string | `.github/prompts` | Workspace-relative path for Markdown prompts. |
 
 Paths accept custom locations inside the workspace; the extension mirrors watchers to match custom directories.
 
@@ -86,7 +86,7 @@ src/
 ├── features/               # Spec and steering managers
 ├── providers/              # TreeDataProviders, CodeLens, webviews
 ├── services/               # Prompt loader (Handlebars templates)
-├── utils/                  # Config manager, Codex chat helpers
+├── utils/                  # Config manager, Copilot chat helpers
 └── prompts/                # Prompt source markdown and generated TypeScript
 webview-ui/                 # React + Vite webview bundle
 scripts/

@@ -1,7 +1,7 @@
 /** biome-ignore-all lint/style/noMagicNumbers: ignore */
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { window, workspace } from "vscode";
-import { CodexProvider } from "./codex-provider";
+import { CopilotProvider } from "./copilot-provider";
 
 // Mock dependencies for fs/promises
 vi.mock("fs", () => ({
@@ -11,8 +11,8 @@ vi.mock("fs", () => ({
 	},
 }));
 
-describe("CodexProvider", () => {
-	let codexProvider: CodexProvider;
+describe("CopilotProvider", () => {
+	let copilotProvider: CopilotProvider;
 	const mockContext = {
 		globalStorageUri: { fsPath: "/fake/storage" },
 	} as any;
@@ -27,7 +27,7 @@ describe("CodexProvider", () => {
 			undefined as any
 		);
 
-		codexProvider = new CodexProvider(mockContext, mockOutputChannel);
+		copilotProvider = new CopilotProvider(mockContext, mockOutputChannel);
 	});
 
 	afterEach(() => {
@@ -65,7 +65,7 @@ describe("CodexProvider", () => {
 			}
 		);
 
-		const resultPromise = codexProvider.invokeCodexHeadless("test prompt");
+		const resultPromise = copilotProvider.invokeCopilotHeadless("test prompt");
 
 		// Kick the 100ms polling interval to detect shellIntegration
 		await vi.advanceTimersByTimeAsync(100);
@@ -90,7 +90,7 @@ describe("CodexProvider", () => {
 
 		vi.spyOn(window, "createTerminal").mockReturnValue(mockTerminal);
 
-		const promise = codexProvider.invokeCodexHeadless("test prompt");
+		const promise = copilotProvider.invokeCopilotHeadless("test prompt");
 
 		// After 20 checks x 100ms => it falls back (>2000ms)
 		await vi.advanceTimersByTimeAsync(2100);
@@ -113,7 +113,7 @@ describe("CodexProvider", () => {
 
 		const windowsPath = "C:\\Users\\Test\\file.txt";
 		const expectedWslPath = "/mnt/c/Users/Test/file.txt";
-		const wslPath = (codexProvider as any).convertPathIfWsl({
+		const wslPath = (copilotProvider as any).convertPathIfWsl({
 			filePath: windowsPath,
 		});
 
