@@ -1,5 +1,7 @@
 import { basename } from "path";
-import { homedir } from "os";
+import { homedir, release } from "os";
+import { exec } from "child_process";
+import { promisify } from "util";
 import {
 	type Command,
 	commands,
@@ -19,6 +21,8 @@ import { addDocumentToCodexChat } from "../utils/codex-chat-utils";
 import { ConfigManager } from "../utils/config-manager";
 
 const { joinPath } = Uri;
+
+const WSL_REGEX = /microsoft|wsl/i;
 
 type PromptSource = "project" | "global";
 
@@ -138,7 +142,7 @@ export class PromptsExplorerProvider implements TreeDataProvider<PromptItem> {
 
 	getChildren = (element?: PromptItem): Promise<PromptItem[]> => {
 		if (!element) {
-			return Promise.resolve(this.getRootItems());
+			return this.getRootItems();
 		}
 
 		if (element.contextValue === "prompt-group-project") {
@@ -152,9 +156,9 @@ export class PromptsExplorerProvider implements TreeDataProvider<PromptItem> {
 		return Promise.resolve([]);
 	};
 
-	private readonly getRootItems = (): PromptItem[] => {
+	private readonly getRootItems = async (): Promise<PromptItem[]> => {
 		const projectDescription = this.configManager.getPath("prompts");
-		const globalDescription = this.getGlobalPromptsLabel();
+		const globalDescription = await this.getGlobalPromptsLabel();
 
 		return [
 			new PromptItem(
@@ -209,16 +213,16 @@ export class PromptsExplorerProvider implements TreeDataProvider<PromptItem> {
 		return this.createPromptItems(rootUri, "project");
 	};
 
-	private readonly getGlobalPromptItems = (): Promise<PromptItem[]> => {
-		const rootUri = this.getGlobalPromptsRoot();
+	private readonly getGlobalPromptItems = async (): Promise<PromptItem[]> => {
+		const rootUri = await this.getGlobalPromptsRoot();
 		if (!rootUri) {
-			return Promise.resolve([
+			return [
 				new PromptItem(
 					"Global prompts directory not found",
 					TreeItemCollapsibleState.None,
 					"prompts-empty"
 				),
-			]);
+			];
 		}
 
 		return this.createPromptItems(rootUri, "global");
@@ -228,13 +232,14 @@ export class PromptsExplorerProvider implements TreeDataProvider<PromptItem> {
 		rootUri: Uri,
 		source: PromptSource
 	): Promise<PromptItem[]> => {
-		const promptFiles = await this.readMarkdownFiles(rootUri);
+		const suffix = source === "global" ? ".prompt.md" : ".md";
+		const promptFiles = await this.readMarkdownFiles(rootUri, suffix);
 
 		if (promptFiles.length === 0) {
 			const label =
 				source === "project"
 					? this.configManager.getPath("prompts")
-					: this.getGlobalPromptsLabel();
+					: await this.getGlobalPromptsLabel();
 			return [
 				new PromptItem(
 					"No prompts found",
@@ -276,8 +281,32 @@ export class PromptsExplorerProvider implements TreeDataProvider<PromptItem> {
 			"prompts-loading"
 		);
 
-	private readonly getGlobalPromptsRoot = (): Uri | undefined => {
+	private readonly getGlobalPromptsRoot = async (): Promise<
+		Uri | undefined
+	> => {
 		try {
+			const isWsl = process.platform === "linux" && WSL_REGEX.test(release());
+
+			if (isWsl) {
+				const execAsync = promisify(exec);
+				const { stdout: winAppData } = await execAsync(
+					'cmd.exe /C "echo %APPDATA%"'
+				);
+				const trimmedWinAppData = winAppData.trim();
+				const { stdout: wslPath } = await execAsync(
+					`wslpath -u "${trimmedWinAppData}"`
+				);
+				const appDataPath = wslPath.trim();
+				return joinPath(Uri.file(appDataPath), "Code", "User", "prompts");
+			}
+
+			if (process.platform === "win32") {
+				const appData = process.env.APPDATA;
+				if (appData) {
+					return joinPath(Uri.file(appData), "Code", "User", "prompts");
+				}
+			}
+
 			const homeUri = Uri.file(homedir());
 			return joinPath(homeUri, ".github", "prompts");
 		} catch {
@@ -285,13 +314,32 @@ export class PromptsExplorerProvider implements TreeDataProvider<PromptItem> {
 		}
 	};
 
-	private readonly getGlobalPromptsLabel = (): string => {
+	private readonly getGlobalPromptsLabel = async (): Promise<string> => {
 		const home = homedir();
+		const isWsl = process.platform === "linux" && WSL_REGEX.test(release());
+
+		if (isWsl) {
+			try {
+				const execAsync = promisify(exec);
+				const { stdout: winAppData } = await execAsync(
+					'cmd.exe /C "echo %APPDATA%"'
+				);
+				const trimmedWinAppData = winAppData.trim();
+				return `${trimmedWinAppData}\\Code\\User\\prompts`;
+			} catch {
+				// Fallback to Linux path
+			}
+		}
+
 		if (!home) {
 			return ".github/prompts";
 		}
 
 		if (process.platform === "win32") {
+			const appData = process.env.APPDATA;
+			if (appData) {
+				return `${appData}\\Code\\User\\prompts`;
+			}
 			return `${home}\\.github\\prompts`;
 		}
 
@@ -309,19 +357,22 @@ export class PromptsExplorerProvider implements TreeDataProvider<PromptItem> {
 		}
 	};
 
-	private readonly readMarkdownFiles = async (dir: Uri): Promise<string[]> => {
+	private readonly readMarkdownFiles = async (
+		dir: Uri,
+		suffix: string
+	): Promise<string[]> => {
 		const results: string[] = [];
 		try {
 			const entries = await workspace.fs.readDirectory(dir);
 			for (const [name, type] of entries) {
 				const entryUri = joinPath(dir, name);
-				if (type === FileType.File && name.endsWith(".md")) {
+				if (type === FileType.File && name.endsWith(suffix)) {
 					results.push(entryUri.fsPath);
 					continue;
 				}
 
 				if (type === FileType.Directory) {
-					const nested = await this.readMarkdownFiles(entryUri);
+					const nested = await this.readMarkdownFiles(entryUri, suffix);
 					results.push(...nested);
 				}
 			}
