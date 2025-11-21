@@ -50,7 +50,6 @@ export class PromptsExplorerProvider implements TreeDataProvider<PromptItem> {
 		setTimeout(() => {
 			this.isLoading = false;
 			this.changeEmitter.fire();
-			// biome-ignore lint/style/noMagicNumbers: ignore
 		}, 120);
 	};
 

@@ -26,7 +26,6 @@ import { SpecTaskCodeLensProvider } from "./providers/spec-task-code-lens-provid
 import { SteeringExplorerProvider } from "./providers/steering-explorer-provider";
 import { PromptLoader } from "./services/prompt-loader";
 import { sendPromptToChat } from "./utils/chat-prompt-runner";
-import { addDocumentToCodexChat } from "./utils/codex-chat-utils";
 import { ConfigManager } from "./utils/config-manager";
 
 let codexProvider: CodexProvider;
@@ -480,7 +479,9 @@ function registerCommands(
 						return;
 					}
 
-					await addDocumentToCodexChat(targetUri);
+					const fileData = await workspace.fs.readFile(targetUri);
+					const promptContent = new TextDecoder().decode(fileData);
+					await sendPromptToChat(promptContent);
 				} catch (e) {
 					window.showErrorMessage(`Failed to run prompt: ${e}`);
 				}
