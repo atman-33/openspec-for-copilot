@@ -54,8 +54,15 @@ export class PromptsExplorerProvider implements TreeDataProvider<PromptItem> {
 		}, 120);
 	};
 
-	createPrompt = async (): Promise<void> => {
-		const rootUri = this.getPromptsRoot();
+	createPrompt = async (item?: PromptItem): Promise<void> => {
+		let rootUri: Uri | undefined;
+
+		if (item?.source === "global") {
+			rootUri = await this.getGlobalPromptsRoot();
+		} else {
+			rootUri = this.getPromptsRoot();
+		}
+
 		if (!rootUri) {
 			await window.showWarningMessage("Open a workspace to create prompts.");
 			return;
@@ -82,9 +89,10 @@ export class PromptsExplorerProvider implements TreeDataProvider<PromptItem> {
 			return;
 		}
 
-		const normalizedName = trimmedName.endsWith(".md")
-			? trimmedName
-			: `${trimmedName}.md`;
+		const normalizedName = this.normalizePromptFileName(
+			trimmedName,
+			item?.source === "global"
+		);
 
 		// biome-ignore lint/performance/useTopLevelRegex: ignore
 		const parts = normalizedName.split(/[\\/]+/).filter(Boolean);
@@ -351,6 +359,23 @@ export class PromptsExplorerProvider implements TreeDataProvider<PromptItem> {
 		} catch {
 			return false;
 		}
+	};
+
+	private readonly normalizePromptFileName = (
+		name: string,
+		isGlobal: boolean
+	): string => {
+		if (isGlobal) {
+			if (name.endsWith(".prompt.md")) {
+				return name;
+			}
+			if (name.endsWith(".md")) {
+				// biome-ignore lint/performance/useTopLevelRegex: ignore
+				return name.replace(/\.md$/, ".prompt.md");
+			}
+			return `${name}.prompt.md`;
+		}
+		return name.endsWith(".md") ? name : `${name}.md`;
 	};
 }
 

@@ -8,12 +8,15 @@ const WSL_REGEX = /microsoft|wsl/i;
 export function isWindowsOrWsl(): boolean {
 	return (
 		process.platform === "win32" ||
-		(process.platform === "linux" && WSL_REGEX.test(release()))
+		(process.platform === "linux" &&
+			(WSL_REGEX.test(release()) || !!process.env.WSL_DISTRO_NAME))
 	);
 }
 
 export async function getVSCodeUserDataPath(): Promise<string> {
-	const isWsl = process.platform === "linux" && WSL_REGEX.test(release());
+	const isWsl =
+		process.platform === "linux" &&
+		(WSL_REGEX.test(release()) || !!process.env.WSL_DISTRO_NAME);
 
 	if (process.platform === "win32") {
 		return join(process.env.APPDATA || "", "Code", "User");
