@@ -175,7 +175,8 @@ This document has not been created yet.`;
 	}
 
 	async getChanges(): Promise<string[]> {
-		return await this.getDirectories("changes");
+		const changes = await this.getDirectories("changes");
+		return changes.filter((name) => name !== "archive");
 	}
 
 	async getSpecList(): Promise<string[]> {

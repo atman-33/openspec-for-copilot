@@ -98,4 +98,21 @@ describe("SpecManager", () => {
 		});
 		expect(openMock).toHaveBeenCalled();
 	});
+
+	// 4. Filter: Test that getChanges filters out "archive" directory.
+	it("should return a list of changes directories excluding 'archive'", async () => {
+		const mockEntries = [
+			["change1", FileType.Directory],
+			["archive", FileType.Directory],
+			["change2", FileType.Directory],
+			["file1.txt", FileType.File],
+		] as [string, any][];
+
+		vi.mocked(workspace.fs.readDirectory).mockResolvedValue(mockEntries);
+
+		const changes = await specManager.getChanges();
+
+		expect(changes).toEqual(["change1", "change2"]);
+		expect(workspace.fs.readDirectory).toHaveBeenCalled();
+	});
 });
