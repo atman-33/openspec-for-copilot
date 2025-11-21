@@ -1,6 +1,3 @@
-import { exec } from "child_process";
-import { release } from "os";
-import { promisify } from "util";
 import { homedir } from "os";
 import { basename, join } from "node:path";
 import type { FileSystemWatcher } from "vscode";
@@ -30,6 +27,7 @@ import { SteeringExplorerProvider } from "./providers/steering-explorer-provider
 import { PromptLoader } from "./services/prompt-loader";
 import { sendPromptToChat } from "./utils/chat-prompt-runner";
 import { ConfigManager } from "./utils/config-manager";
+import { getVSCodeUserDataPath } from "./utils/platform-utils";
 
 let codexProvider: CodexProvider;
 let specManager: SpecManager;
@@ -587,47 +585,9 @@ function registerCommands(
 	);
 }
 
-const WSL_REGEX = /microsoft|wsl/i;
-
 async function getMcpConfigPath(): Promise<string> {
-	const isWsl = process.platform === "linux" && WSL_REGEX.test(release());
-
-	if (process.platform === "win32") {
-		return join(process.env.APPDATA || "", "Code", "User", "mcp.json");
-	}
-
-	if (isWsl) {
-		try {
-			const execAsync = promisify(exec);
-			const { stdout: winAppData } = await execAsync(
-				'cmd.exe /C "echo %APPDATA%"'
-			);
-			const trimmedWinAppData = winAppData.trim();
-			const { stdout: wslPath } = await execAsync(
-				`wslpath -u "${trimmedWinAppData}"`
-			);
-			const appDataPath = wslPath.trim();
-			return join(appDataPath, "Code", "User", "mcp.json");
-		} catch (error) {
-			outputChannel.appendLine(
-				`Failed to resolve Windows path in WSL: ${error}`
-			);
-			// Fallback to Linux path if resolution fails
-		}
-	}
-
-	if (process.platform === "darwin") {
-		return join(
-			homedir(),
-			"Library",
-			"Application Support",
-			"Code",
-			"User",
-			"mcp.json"
-		);
-	}
-
-	return join(homedir(), ".config", "Code", "User", "mcp.json");
+	const userDataPath = await getVSCodeUserDataPath();
+	return join(userDataPath, "mcp.json");
 }
 
 function setupFileWatchers(

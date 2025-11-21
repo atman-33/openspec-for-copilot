@@ -1,7 +1,5 @@
-import { basename } from "path";
-import { homedir, release } from "os";
-import { exec } from "child_process";
-import { promisify } from "util";
+import { basename, join } from "path";
+import { homedir } from "os";
 import {
 	type Command,
 	commands,
@@ -19,10 +17,9 @@ import {
 } from "vscode";
 import { addDocumentToCodexChat } from "../utils/codex-chat-utils";
 import { ConfigManager } from "../utils/config-manager";
+import { getVSCodeUserDataPath, isWindowsOrWsl } from "../utils/platform-utils";
 
 const { joinPath } = Uri;
-
-const WSL_REGEX = /microsoft|wsl/i;
 
 type PromptSource = "project" | "global";
 
@@ -285,26 +282,9 @@ export class PromptsExplorerProvider implements TreeDataProvider<PromptItem> {
 		Uri | undefined
 	> => {
 		try {
-			const isWsl = process.platform === "linux" && WSL_REGEX.test(release());
-
-			if (isWsl) {
-				const execAsync = promisify(exec);
-				const { stdout: winAppData } = await execAsync(
-					'cmd.exe /C "echo %APPDATA%"'
-				);
-				const trimmedWinAppData = winAppData.trim();
-				const { stdout: wslPath } = await execAsync(
-					`wslpath -u "${trimmedWinAppData}"`
-				);
-				const appDataPath = wslPath.trim();
-				return joinPath(Uri.file(appDataPath), "Code", "User", "prompts");
-			}
-
-			if (process.platform === "win32") {
-				const appData = process.env.APPDATA;
-				if (appData) {
-					return joinPath(Uri.file(appData), "Code", "User", "prompts");
-				}
+			if (isWindowsOrWsl()) {
+				const userDataPath = await getVSCodeUserDataPath();
+				return joinPath(Uri.file(userDataPath), "prompts");
 			}
 
 			const homeUri = Uri.file(homedir());
@@ -315,32 +295,14 @@ export class PromptsExplorerProvider implements TreeDataProvider<PromptItem> {
 	};
 
 	private readonly getGlobalPromptsLabel = async (): Promise<string> => {
-		const home = homedir();
-		const isWsl = process.platform === "linux" && WSL_REGEX.test(release());
-
-		if (isWsl) {
-			try {
-				const execAsync = promisify(exec);
-				const { stdout: winAppData } = await execAsync(
-					'cmd.exe /C "echo %APPDATA%"'
-				);
-				const trimmedWinAppData = winAppData.trim();
-				return `${trimmedWinAppData}\\Code\\User\\prompts`;
-			} catch {
-				// Fallback to Linux path
-			}
+		if (isWindowsOrWsl()) {
+			const userDataPath = await getVSCodeUserDataPath();
+			return join(userDataPath, "prompts");
 		}
 
+		const home = homedir();
 		if (!home) {
 			return ".github/prompts";
-		}
-
-		if (process.platform === "win32") {
-			const appData = process.env.APPDATA;
-			if (appData) {
-				return `${appData}\\Code\\User\\prompts`;
-			}
-			return `${home}\\.github\\prompts`;
 		}
 
 		return `${home}/.github/prompts`;
