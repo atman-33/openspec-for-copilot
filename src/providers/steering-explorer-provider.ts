@@ -1,5 +1,5 @@
 import { existsSync } from "fs";
-import { join, relative } from "path";
+import { join, relative, basename } from "path";
 import {
 	type Command,
 	type Event,
@@ -11,10 +11,14 @@ import {
 	TreeItemCollapsibleState,
 	Uri,
 	workspace,
+	FileType,
 } from "vscode";
 import type { SteeringManager } from "../features/steering/steering-manager";
 
 import { homedir } from "os";
+import { getVSCodeUserDataPath, isWindowsOrWsl } from "../utils/platform-utils";
+
+const { joinPath } = Uri;
 
 export class SteeringExplorerProvider
 	implements TreeDataProvider<SteeringItem>
@@ -45,6 +49,61 @@ export class SteeringExplorerProvider
 		this._onDidChangeTreeData.fire();
 	}
 
+	private readonly getGlobalPromptsRoot = async (): Promise<
+		Uri | undefined
+	> => {
+		try {
+			if (isWindowsOrWsl()) {
+				const userDataPath = await getVSCodeUserDataPath();
+				return joinPath(Uri.file(userDataPath), "prompts");
+			}
+
+			const homeUri = Uri.file(homedir());
+			return joinPath(homeUri, ".github", "prompts");
+		} catch {
+			return;
+		}
+	};
+
+	private readonly getGlobalPromptsLabel = async (): Promise<string> => {
+		if (isWindowsOrWsl()) {
+			const userDataPath = await getVSCodeUserDataPath();
+			return join(userDataPath, "prompts");
+		}
+
+		const home = homedir();
+		if (!home) {
+			return ".github/prompts";
+		}
+
+		return `${home}/.github/prompts`;
+	};
+
+	private readonly readMarkdownFiles = async (
+		dir: Uri,
+		suffix: string
+	): Promise<string[]> => {
+		const results: string[] = [];
+		try {
+			const entries = await workspace.fs.readDirectory(dir);
+			for (const [name, type] of entries) {
+				const entryUri = joinPath(dir, name);
+				if (type === FileType.File && name.endsWith(suffix)) {
+					results.push(entryUri.fsPath);
+					continue;
+				}
+
+				if (type === FileType.Directory) {
+					const nested = await this.readMarkdownFiles(entryUri, suffix);
+					results.push(...nested);
+				}
+			}
+		} catch {
+			// Directory may not exist yet
+		}
+		return results;
+	};
+
 	getTreeItem(element: SteeringItem): TreeItem {
 		return element;
 	}
@@ -53,47 +112,21 @@ export class SteeringExplorerProvider
 	async getChildren(element?: SteeringItem): Promise<SteeringItem[]> {
 		if (!element) {
 			const items: SteeringItem[] = [];
-			const homeDir =
-				homedir() || process.env.USERPROFILE || process.env.HOME || "";
 
-			// Global Instructions
-			const globalCopilotMd = join(
-				homeDir,
-				".github",
-				"copilot-instructions.md"
+			// Global Instructions Group
+			const globalLabel = await this.getGlobalPromptsLabel();
+			items.push(
+				new SteeringItem(
+					"Global Instructions",
+					TreeItemCollapsibleState.Collapsed,
+					"global-instructions-group",
+					"",
+					this.context,
+					undefined,
+					undefined,
+					globalLabel
+				)
 			);
-			const globalExists = existsSync(globalCopilotMd);
-
-			if (globalExists) {
-				items.push(
-					new SteeringItem(
-						"Global Instructions",
-						TreeItemCollapsibleState.None,
-						"global-instructions",
-						globalCopilotMd,
-						this.context,
-						{
-							command: "vscode.open",
-							title: "Open Global Instructions",
-							arguments: [Uri.file(globalCopilotMd)],
-						}
-					)
-				);
-			} else {
-				items.push(
-					new SteeringItem(
-						"Create Global Instructions",
-						TreeItemCollapsibleState.None,
-						"create-global-instructions",
-						"",
-						this.context,
-						{
-							command: SteeringExplorerProvider.createUserRuleCommandId,
-							title: "Create Global Instructions",
-						}
-					)
-				);
-			}
 
 			if (workspace.workspaceFolders) {
 				const workspaceRoot = workspace.workspaceFolders[0].uri.fsPath;
@@ -171,6 +204,57 @@ export class SteeringExplorerProvider
 			}
 
 			return items;
+		}
+
+		if (element.contextValue === "global-instructions-group") {
+			const rootUri = await this.getGlobalPromptsRoot();
+			if (!rootUri) {
+				return [
+					new SteeringItem(
+						"Global prompts directory not found",
+						TreeItemCollapsibleState.None,
+						"steering-empty",
+						"",
+						this.context
+					),
+				];
+			}
+
+			const files = await this.readMarkdownFiles(rootUri, ".instructions.md");
+			if (files.length === 0) {
+				return [
+					new SteeringItem(
+						"No instructions found",
+						TreeItemCollapsibleState.None,
+						"steering-empty",
+						"",
+						this.context,
+						undefined,
+						undefined,
+						"Add *.instructions.md files"
+					),
+				];
+			}
+
+			return files
+				.sort((a, b) => a.localeCompare(b))
+				.map((pathString) => {
+					const uri = Uri.file(pathString);
+					const command: Command = {
+						command: "vscode.open",
+						title: "Open Instruction",
+						arguments: [uri],
+					};
+					return new SteeringItem(
+						basename(pathString),
+						TreeItemCollapsibleState.None,
+						"global-instruction-file",
+						pathString,
+						this.context,
+						command,
+						basename(pathString)
+					);
+				});
 		}
 
 		if (element.contextValue === "project-instructions-group") {
@@ -317,7 +401,8 @@ class SteeringItem extends TreeItem {
 		resourcePath: string,
 		context: ExtensionContext,
 		command?: Command,
-		filename?: string
+		filename?: string,
+		description?: string
 	) {
 		super(label, collapsibleState);
 		this.label = label;
@@ -336,6 +421,14 @@ class SteeringItem extends TreeItem {
 		} else if (contextValue === "create-global-instructions") {
 			this.iconPath = new ThemeIcon("globe");
 			this.tooltip = "Click to create Global Instructions";
+		} else if (contextValue === "global-instructions-group") {
+			this.iconPath = new ThemeIcon("folder");
+			this.tooltip = description;
+			this.description = description;
+		} else if (contextValue === "global-instruction-file") {
+			this.iconPath = new ThemeIcon("file-text");
+			this.tooltip = `Global Instruction: ${resourcePath}`;
+			this.description = filename;
 		} else if (contextValue === "project-instructions-group") {
 			this.iconPath = new ThemeIcon("folder");
 			this.tooltip = "Project Instructions";
