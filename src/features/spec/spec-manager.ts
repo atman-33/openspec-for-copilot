@@ -218,10 +218,6 @@ This document has not been created yet.`;
 		const finalPrompt = `${promptContent}\n\nid: ${changeId}`;
 
 		await sendPromptToChat(finalPrompt);
-
-		NotificationUtils.showAutoDismissNotification(
-			"Sent the OpenSpec apply prompt to Chat."
-		);
 	}
 
 	async implTask(taskFilePath: string, taskDescription: string) {
