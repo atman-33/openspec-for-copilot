@@ -9,7 +9,7 @@ import {
 	workspace,
 } from "vscode";
 
-import { relative } from "path";
+import { join, relative } from "path";
 import { VSC_CONFIG_NAMESPACE } from "../constants";
 import { ConfigManager } from "../utils/config-manager";
 
@@ -75,16 +75,28 @@ export class SpecTaskCodeLensProvider implements CodeLensProvider {
 			return false;
 		}
 
+		// Check if inside configured specs path
 		try {
 			const specBasePath = this.configManager.getAbsolutePath("specs");
 			const relativePath = relative(specBasePath, document.uri.fsPath);
-			if (!relativePath || relativePath.startsWith("..")) {
-				return false;
+			if (relativePath && !relativePath.startsWith("..")) {
+				return true;
 			}
-			return true;
 		} catch (error) {
-			return false;
+			// ignore
 		}
+
+		// Check if inside "openspec" folder in workspace (standard OpenSpec structure)
+		const workspaceFolder = workspace.getWorkspaceFolder(document.uri);
+		if (workspaceFolder) {
+			const openspecPath = join(workspaceFolder.uri.fsPath, "openspec");
+			const relativePath = relative(openspecPath, document.uri.fsPath);
+			if (relativePath && !relativePath.startsWith("..")) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	resolveCodeLens(codeLens: CodeLens, token: CancellationToken) {
