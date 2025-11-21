@@ -279,17 +279,6 @@ function registerCommands(
 
 	// Steering commands
 	context.subscriptions.push(
-		commands.registerCommand("kiro-codex-ide.steering.create", async () => {
-			await steeringManager.createCustom();
-		}),
-
-		commands.registerCommand(
-			"kiro-codex-ide.steering.generateInitial",
-			async () => {
-				await steeringManager.init();
-			}
-		),
-
 		commands.registerCommand(
 			"kiro-codex-ide.steering.refine",
 			async (item: any) => {

@@ -172,18 +172,6 @@
         "category": "Kiro for Codex IDE"
       },
       {
-        "command": "kiro-codex-ide.steering.create",
-        "title": "Create Custom Steering",
-        "category": "Kiro for Codex IDE",
-        "icon": "$(plus)"
-      },
-      {
-        "command": "kiro-codex-ide.steering.generateInitial",
-        "title": "Init Steering",
-        "category": "Kiro for Codex IDE",
-        "icon": "$(sparkle)"
-      },
-      {
         "command": "kiro-codex-ide.steering.refine",
         "title": "Refine Steering",
         "category": "Kiro for Codex IDE",
@@ -263,16 +251,6 @@
           "group": "navigation@2"
         },
         {
-          "command": "kiro-codex-ide.steering.create",
-          "when": "view == kiro-codex-ide.views.steeringExplorer",
-          "group": "navigation@1"
-        },
-        {
-          "command": "kiro-codex-ide.steering.generateInitial",
-          "when": "view == kiro-codex-ide.views.steeringExplorer",
-          "group": "navigation@2"
-        },
-        {
           "command": "kiro-codex-ide.steering.refresh",
           "when": "view == kiro-codex-ide.views.steeringExplorer",
           "group": "navigation@3"
@@ -323,14 +301,6 @@
       "commandPalette": [
         {
           "command": "kiro-codex-ide.spec.create"
-        },
-        {
-          "command": "kiro-codex-ide.steering.create",
-          "when": "workspaceFolderCount > 0"
-        },
-        {
-          "command": "kiro-codex-ide.steering.generateInitial",
-          "when": "workspaceFolderCount > 0"
         },
         {
           "command": "kiro-codex-ide.steering.refresh"

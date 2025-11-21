@@ -4,7 +4,6 @@ import {
 	FileType,
 	type ExtensionContext,
 	type OutputChannel,
-	ProgressLocation,
 	Uri,
 	ViewColumn,
 	window,
@@ -15,14 +14,12 @@ import { PromptLoader } from "../../services/prompt-loader";
 import { sendPromptToChat } from "../../utils/chat-prompt-runner";
 import { ConfigManager } from "../../utils/config-manager";
 import { NotificationUtils } from "../../utils/notification-utils";
-import { CreateSteeringInputController } from "./create-steering-input-controller";
 
 export class SteeringManager {
 	private readonly configManager: ConfigManager;
 	private readonly promptLoader: PromptLoader;
 	private readonly codexProvider: CodexProvider;
 	private readonly outputChannel: OutputChannel;
-	private readonly createSteeringInputController: CreateSteeringInputController;
 
 	constructor(
 		context: ExtensionContext,
@@ -34,33 +31,10 @@ export class SteeringManager {
 		this.promptLoader = PromptLoader.getInstance();
 		this.codexProvider = codexProvider;
 		this.outputChannel = outputChannel;
-		this.createSteeringInputController = new CreateSteeringInputController({
-			context,
-			configManager: this.configManager,
-			promptLoader: this.promptLoader,
-			outputChannel: this.outputChannel,
-		});
 	}
 
 	getSteeringBasePath(): string {
 		return this.configManager.getPath("steering");
-	}
-
-	async createCustom() {
-		try {
-			await this.createSteeringInputController.open();
-		} catch (error) {
-			const message =
-				error instanceof Error
-					? error.message
-					: "Unable to open Create Steering dialog";
-			this.outputChannel.appendLine(
-				`[SteeringManager] Failed to open Create Steering dialog: ${message}`
-			);
-			window.showErrorMessage(
-				`Failed to open Create Steering dialog: ${message}`
-			);
-		}
 	}
 
 	/**
@@ -105,58 +79,6 @@ export class SteeringManager {
 			this.outputChannel.appendLine(`[Steering] ${errorMsg}`);
 			return { success: false, error: errorMsg };
 		}
-	}
-
-	/**
-	 * Generate initial steering documents by analyzing the project
-	 */
-	async init() {
-		const workspaceFolder = workspace.workspaceFolders?.[0];
-		if (!workspaceFolder) {
-			window.showErrorMessage("No workspace folder open");
-			return;
-		}
-
-		// Check if steering documents already exist
-		const existingDocs = await this.getSteeringDocuments();
-		if (existingDocs.length > 0) {
-			const existingNames = existingDocs.map((doc) => doc.name).join(", ");
-			const confirm = await window.showWarningMessage(
-				`Steering documents already exist (${existingNames}). Init steering will analyze the project again but won't overwrite existing files.`,
-				"Continue",
-				"Cancel"
-			);
-			if (confirm !== "Continue") {
-				return;
-			}
-		}
-
-		// Create steering directory if it doesn't exist
-		const steeringPath = join(
-			workspaceFolder.uri.fsPath,
-			this.getSteeringBasePath()
-		);
-		await workspace.fs.createDirectory(Uri.file(steeringPath));
-
-		// Generate steering documents via chat
-		await window.withProgress(
-			{
-				location: ProgressLocation.Notification,
-				title: "Preparing steering analysis prompt for ChatGPT...",
-				cancellable: false,
-			},
-			async () => {
-				const prompt = this.promptLoader.renderPrompt("init-steering", {
-					steeringPath: this.getSteeringBasePath(),
-				});
-
-				await sendPromptToChat(prompt);
-
-				await NotificationUtils.showAutoDismissNotification(
-					"Sent the steering initialization prompt to ChatGPT. Review the chat for next steps."
-				);
-			}
-		);
 	}
 
 	async refine(uri: Uri) {
