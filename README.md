@@ -29,6 +29,35 @@ It allows you to visually manage Specs, Steering documents (AGENTS.md), and cust
 ### Prerequisites
 - Visual Studio Code 1.84.0 or newer.
 - **[GitHub Copilot Chat](https://marketplace.visualstudio.com/items?itemName=GitHub.copilot-chat)** extension must be installed.
+- **[OpenSpec](https://github.com/Fission-AI/OpenSpec)** must be globally installed and initialized.
+
+### OpenSpec Global Installation and Initialization:
+
+#### Step 1: Install the CLI globally
+
+```shell
+npm install -g @fission-ai/openspec@latest
+```
+
+Verify installation:
+
+```shell
+openspec --version
+```
+
+#### Step 2: Initialize OpenSpec in your project
+
+Navigate to your project directory:
+
+```shell
+cd my-project
+```
+
+Run the initialization:
+
+```shell
+openspec init
+```
 
 ### Marketplace
 Search for "OpenSpec for Copilot" in the VS Code Marketplace and install the extension.
@@ -42,30 +71,36 @@ Search for "OpenSpec for Copilot" in the VS Code Marketplace and install the ext
 ### 1. Create a Spec
 1. Open the **Specs** view in the Activity Bar.
 2. Click **Create New Spec**.
-3. Fill in the details (Summary is required).
+3. Fill in the details (Product Context is required).
 4. Click **Create Spec**. This will open GitHub Copilot Chat with a generated prompt.
 5. Follow the chat instructions to generate the spec files.
 
+   ![Create new Spec](./screenshots/010-create-new-spec.png)
+
 ### 2. Implement Tasks
 1. Open a generated `tasks.md` file.
-2. Click **Start Task** above a checklist item.
+2. Click **Start All Tasks** above a checklist item.
 3. GitHub Copilot Chat will open with the task context. Interact with it to implement the code.
 
-### 3. Manage Steering
-1. Open the **Steering** view.
-2. Edit `AGENTS.md` to define high-level rules for your project.
+   ![Start All Tasks](./screenshots/020-start-all-tasksk.png)
+
+### 3. Archive Change
+1. Right-click on a Change ID in the **Specs** view.
+2. Select **Archive Change** from the context menu.
+3. The change will be moved to the archive.
+
+   ![Archive Change](./screenshots/030-archive-change.png)
 
 ## Configuration
 All settings live under the `openspec-for-copilot` namespace.
 
 | Setting | Type | Default | Purpose |
 | --- | --- | --- | --- |
-| `views.specs.visible` | boolean | `true` | Show or hide the Specs explorer. |
-| `views.steering.visible` | boolean | `true` | Toggle the Steering explorer. |
-| `views.prompts.visible` | boolean | `true` | Toggle the Prompts explorer. |
-| `views.settings.visible` | boolean | `true` | Toggle the Settings overview. |
 | `copilot.specsPath` | string | `openspec` | Workspace-relative path for generated specs. |
-| `copilot.promptsPath` | string | `.github/prompts` | Workspace-relative path for Markdown prompts. |
+| `copilot.promptsPath` | string | `.github/prompts` | Workspace-relative path for Markdown prompts. || `views.specs.visible` | boolean | `true` | Show or hide the Specs explorer. |
+| `views.prompts.visible` | boolean | `true` | Toggle the Prompts explorer. |
+| `views.steering.visible` | boolean | `true` | Toggle the Steering explorer. |
+| `views.settings.visible` | boolean | `true` | Toggle the Settings overview. |
 
 Paths accept custom locations inside the workspace; the extension mirrors watchers to match custom directories.
 
