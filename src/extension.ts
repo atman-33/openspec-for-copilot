@@ -590,6 +590,13 @@ function registerCommands(
 			env.openExternal(Uri.parse(helpUrl));
 		}),
 
+		// biome-ignore lint/suspicious/useAwait: ignore
+		commands.registerCommand("kiro-codex-ide.help.install", async () => {
+			outputChannel.appendLine("Opening OpenSpec installation guide...");
+			const installUrl = "https://github.com/Fission-AI/OpenSpec#readme";
+			env.openExternal(Uri.parse(installUrl));
+		}),
+
 		commands.registerCommand("kiro-codex-ide.menu.open", async () => {
 			outputChannel.appendLine("Opening Kiro menu...");
 			await toggleViews();

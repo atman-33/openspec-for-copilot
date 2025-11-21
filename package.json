@@ -138,7 +138,7 @@
       },
       {
         "view": "kiro-codex-ide.views.overview",
-        "contents": "Configure OpenSpec for Copilot\n\n[$(gear) Open Settings](command:kiro-codex-ide.settings.open)\n[$(file-text) Open MCP Config (mcp.json)](command:kiro-codex-ide.settings.openGlobalConfig)\n[$(question) Help](command:kiro-codex-ide.help.open)"
+        "contents": "Configure OpenSpec for Copilot\n\n[$(book) Install OpenSpec](command:kiro-codex-ide.help.install)\n[$(gear) Open Settings](command:kiro-codex-ide.settings.open)\n[$(file-text) Open MCP Config (mcp.json)](command:kiro-codex-ide.settings.openGlobalConfig)\n[$(question) Help](command:kiro-codex-ide.help.open)"
       }
     ],
     "commands": [
