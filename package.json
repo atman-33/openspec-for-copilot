@@ -295,12 +295,12 @@
         },
         {
           "command": "kiro-codex-ide.prompts.run",
-          "when": "view == kiro-codex-ide.views.promptsExplorer && viewItem == prompt",
+          "when": "view == kiro-codex-ide.views.promptsExplorer && viewItem == prompt-runnable",
           "group": "inline"
         },
         {
           "command": "kiro-codex-ide.prompts.delete",
-          "when": "view == kiro-codex-ide.views.promptsExplorer && viewItem == prompt",
+          "when": "view == kiro-codex-ide.views.promptsExplorer && (viewItem == prompt || viewItem == prompt-runnable)",
           "group": "7_modification"
         },
         {

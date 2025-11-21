@@ -266,10 +266,12 @@ export class PromptsExplorerProvider implements TreeDataProvider<PromptItem> {
 					title: "Open Prompt",
 					arguments: [uri],
 				};
+				const isRunnable = pathString.endsWith(".prompt.md");
+				const contextValue = isRunnable ? "prompt-runnable" : "prompt";
 				return new PromptItem(
 					basename(pathString),
 					TreeItemCollapsibleState.None,
-					"prompt",
+					contextValue,
 					{
 						resourceUri: uri,
 						command,
@@ -457,6 +459,29 @@ class PromptItem extends TreeItem {
 				"Create prompts under the configured prompts directory";
 		},
 		prompt: (item, options) => {
+			item.iconPath = new ThemeIcon("file-code");
+			if (!options) {
+				return;
+			}
+
+			if (!options.resourceUri) {
+				if (options.tooltip) {
+					item.tooltip = options.tooltip;
+				}
+				if (options.description) {
+					item.description = options.description;
+				}
+				return;
+			}
+
+			item.resourceUri = options.resourceUri;
+			const description =
+				options.description ??
+				PromptItem.formatResourceDescription(options.resourceUri);
+			item.description = description;
+			item.tooltip = options.tooltip ?? description;
+		},
+		"prompt-runnable": (item, options) => {
 			item.iconPath = new ThemeIcon("file-code");
 			if (!options) {
 				return;
