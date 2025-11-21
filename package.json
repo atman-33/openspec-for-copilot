@@ -208,6 +208,18 @@
         "icon": "$(plus)"
       },
       {
+        "command": "kiro-codex-ide.prompts.createInstructions",
+        "title": "New Instructions File",
+        "category": "OpenSpec for Copilot",
+        "icon": "$(book)"
+      },
+      {
+        "command": "kiro-codex-ide.prompts.createCopilotPrompt",
+        "title": "New Prompt File",
+        "category": "OpenSpec for Copilot",
+        "icon": "$(sparkle)"
+      },
+      {
         "command": "kiro-codex-ide.prompts.refresh",
         "title": "Refresh Prompts",
         "category": "OpenSpec for Copilot",
@@ -262,9 +274,19 @@
           "group": "navigation@3"
         },
         {
-          "command": "kiro-codex-ide.prompts.refresh",
+          "command": "kiro-codex-ide.prompts.createInstructions",
           "when": "view == kiro-codex-ide.views.promptsExplorer",
           "group": "navigation@2"
+        },
+        {
+          "command": "kiro-codex-ide.prompts.createCopilotPrompt",
+          "when": "view == kiro-codex-ide.views.promptsExplorer",
+          "group": "navigation@3"
+        },
+        {
+          "command": "kiro-codex-ide.prompts.refresh",
+          "when": "view == kiro-codex-ide.views.promptsExplorer",
+          "group": "navigation@4"
         },
         {
           "command": "kiro-codex-ide.settings.openGlobalConfig",
@@ -282,16 +304,6 @@
           "command": "kiro-codex-ide.spec.archiveChange",
           "when": "view == kiro-codex-ide.views.specExplorer && viewItem == change",
           "group": "7_modification"
-        },
-        {
-          "command": "kiro-codex-ide.prompts.create",
-          "when": "view == kiro-codex-ide.views.promptsExplorer && viewItem == prompt-group-project",
-          "group": "inline"
-        },
-        {
-          "command": "kiro-codex-ide.prompts.create",
-          "when": "view == kiro-codex-ide.views.promptsExplorer && viewItem == prompt-group-global",
-          "group": "inline"
         },
         {
           "command": "kiro-codex-ide.prompts.run",

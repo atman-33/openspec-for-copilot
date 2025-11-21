@@ -414,6 +414,18 @@ function registerCommands(
 			promptsExplorer.refresh();
 		}),
 		commands.registerCommand(
+			"kiro-codex-ide.prompts.createInstructions",
+			async () => {
+				await commands.executeCommand("workbench.command.new.instructions");
+			}
+		),
+		commands.registerCommand(
+			"kiro-codex-ide.prompts.createCopilotPrompt",
+			async () => {
+				await commands.executeCommand("workbench.command.new.prompt");
+			}
+		),
+		commands.registerCommand(
 			"kiro-codex-ide.prompts.create",
 			async (item?: any) => {
 				const ws = workspace.workspaceFolders?.[0];
