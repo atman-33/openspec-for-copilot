@@ -39,35 +39,16 @@ export class SpecTaskCodeLensProvider implements CodeLensProvider {
 			return [];
 		}
 
-		const codeLenses: CodeLens[] = [];
-		const text = document.getText();
-		// Use regex split to handle both Windows (CRLF) and Unix (LF) line endings
-		// biome-ignore lint/performance/useTopLevelRegex: ignore
-		const lines = text.split(/\r?\n/);
+		// Create a single CodeLens at the top of the file
+		const range = new Range(0, 0, 0, 0);
+		const codeLens = new CodeLens(range, {
+			title: "$(play) Start Task",
+			tooltip: "Click to generate OpenSpec apply prompt",
+			command: "kiro-codex-ide.spec.implTask",
+			arguments: [document.uri],
+		});
 
-		for (let i = 0; i < lines.length; i++) {
-			const line = lines[i];
-			// Match task list format: - [ ] task description
-			// biome-ignore lint/performance/useTopLevelRegex: ignore
-			const taskMatch = line.match(/^(\s*)- \[ \] (.+)$/);
-
-			if (taskMatch) {
-				const range = new Range(i, 0, i, line.length);
-				const taskDescription = taskMatch[2];
-
-				// Create CodeLens
-				const codeLens = new CodeLens(range, {
-					title: "$(play) Start Task",
-					tooltip: "Click to execute this task",
-					command: "kiro-codex-ide.spec.implTask",
-					arguments: [document.uri, i, taskDescription],
-				});
-
-				codeLenses.push(codeLens);
-			}
-		}
-
-		return codeLenses;
+		return [codeLens];
 	}
 
 	private isSpecTaskDocument(document: TextDocument): boolean {

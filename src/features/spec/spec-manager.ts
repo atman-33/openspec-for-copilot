@@ -1,4 +1,4 @@
-import { join } from "path";
+import { basename, dirname, join } from "path";
 import {
 	FileType,
 	type ExtensionContext,
@@ -182,6 +182,46 @@ This document has not been created yet.`;
 	async getSpecList(): Promise<string[]> {
 		// For backward compatibility, return specs
 		return await this.getSpecs();
+	}
+
+	async runOpenSpecApply(documentUri: Uri) {
+		const workspaceFolder = workspace.workspaceFolders?.[0];
+		if (!workspaceFolder) {
+			window.showErrorMessage("No workspace folder open");
+			return;
+		}
+
+		// Extract change ID from path: .../openspec/changes/<change-id>/tasks.md
+		const changeId = basename(dirname(documentUri.fsPath));
+
+		// Read prompt template from .github/prompts/openspec-apply.prompt.md
+		const promptPath = join(
+			workspaceFolder.uri.fsPath,
+			".github",
+			"prompts",
+			"openspec-apply.prompt.md"
+		);
+
+		let promptContent = "";
+		try {
+			const promptUri = Uri.file(promptPath);
+			const promptData = await workspace.fs.readFile(promptUri);
+			promptContent = Buffer.from(promptData).toString("utf-8");
+		} catch (error) {
+			const message = `Failed to read prompt file at ${promptPath}`;
+			this.outputChannel.appendLine(`[SpecManager] ${message}: ${error}`);
+			window.showErrorMessage(message);
+			return;
+		}
+
+		// Append change ID
+		const finalPrompt = `${promptContent}\n\nid: ${changeId}`;
+
+		await sendPromptToChat(finalPrompt);
+
+		NotificationUtils.showAutoDismissNotification(
+			"Sent the OpenSpec apply prompt to Chat."
+		);
 	}
 
 	async implTask(taskFilePath: string, taskDescription: string) {

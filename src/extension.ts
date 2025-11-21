@@ -9,12 +9,10 @@ import {
 	type ExtensionContext,
 	languages,
 	type OutputChannel,
-	Range,
 	RelativePattern,
 	Uri,
 	window,
 	workspace,
-	WorkspaceEdit,
 	type WorkspaceFolder,
 } from "vscode";
 import { VSC_CONFIG_NAMESPACE } from "./constants";
@@ -252,22 +250,11 @@ function registerCommands(
 
 		commands.registerCommand(
 			"kiro-codex-ide.spec.implTask",
-			async (documentUri: Uri, lineNumber: number, taskDescription: string) => {
+			async (documentUri: Uri) => {
 				outputChannel.appendLine(
-					`[Task Execute] Line ${lineNumber + 1}: ${taskDescription}`
+					`[Task Execute] Generating OpenSpec apply prompt for: ${documentUri.fsPath}`
 				);
-
-				// Update task status to completed
-				const document = await workspace.openTextDocument(documentUri);
-				const edit = new WorkspaceEdit();
-				const line = document.lineAt(lineNumber);
-				const newLine = line.text.replace("- [ ]", "- [x]");
-				const range = new Range(lineNumber, 0, lineNumber, line.text.length);
-				edit.replace(documentUri, range, newLine);
-				await workspace.applyEdit(edit);
-
-				// Use Codex CLI to execute task
-				await specManager.implTask(documentUri.fsPath, taskDescription);
+				await specManager.runOpenSpecApply(documentUri);
 			}
 		),
 
