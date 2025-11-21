@@ -452,7 +452,7 @@ function registerCommands(
 					return;
 				}
 
-				const file = Uri.joinPath(targetDir, `${name}.md`);
+				const file = Uri.joinPath(targetDir, `${name}.prompt.md`);
 				try {
 					await workspace.fs.createDirectory(targetDir);
 					const content = Buffer.from(
