@@ -220,27 +220,6 @@ This document has not been created yet.`;
 		await sendPromptToChat(finalPrompt);
 	}
 
-	async implTask(taskFilePath: string, taskDescription: string) {
-		const workspaceFolder = workspace.workspaceFolders?.[0];
-		if (!workspaceFolder) {
-			window.showErrorMessage("No workspace folder open");
-			return;
-		}
-
-		// Show notification immediately after user input
-		const prompt = this.promptLoader.renderPrompt("impl-task", {
-			taskFilePath,
-			taskDescription,
-			workingDirectory: workspaceFolder.uri.fsPath,
-		});
-
-		await sendPromptToChat(prompt);
-
-		NotificationUtils.showAutoDismissNotification(
-			"Sent the implementation task prompt to ChatGPT. Follow up there."
-		);
-	}
-
 	async getChangeSpecs(changeName: string): Promise<string[]> {
 		return await this.getDirectories(`changes/${changeName}/specs`);
 	}
