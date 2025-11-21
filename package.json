@@ -2,7 +2,7 @@
   "name": "openspec-for-copilot",
   "displayName": "OpenSpec for Copilot",
   "description": "Spec-driven development with OpenSpec",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "author": "atman-33",
   "publisher": "atman-dev",
   "icon": "icon.png",
