@@ -1,20 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { ExtensionContext, MessageItem } from "vscode";
-import { Uri, ViewColumn, window } from "vscode";
+import { Uri, ViewColumn, window, workspace } from "vscode";
 import { CreateSpecInputController } from "./create-spec-input-controller";
 import type { CreateSpecDraftState } from "./types";
 import { sendPromptToChat } from "../../utils/chat-prompt-runner";
-import { NotificationUtils } from "../../utils/notification-utils";
 
 vi.mock("../../utils/chat-prompt-runner", () => ({
 	sendPromptToChat: vi.fn(),
-}));
-
-vi.mock("../../utils/notification-utils", () => ({
-	// biome-ignore lint/style/useNamingConvention: ignore
-	NotificationUtils: {
-		showAutoDismissNotification: vi.fn(),
-	},
 }));
 
 describe("CreateSpecInputController", () => {
@@ -72,7 +64,7 @@ describe("CreateSpecInputController", () => {
 		} as unknown as ExtensionContext;
 
 		configManager = {
-			getPath: vi.fn().mockReturnValue(".codex/specs"),
+			getPath: vi.fn().mockReturnValue("openspec"),
 		};
 
 		promptLoader = {
@@ -152,7 +144,7 @@ describe("CreateSpecInputController", () => {
 		await controller.open();
 
 		expect((window as any).createWebviewPanel).toHaveBeenCalledWith(
-			"kiro.createSpecDialog",
+			"openspec.createSpecDialog",
 			"Create New Spec",
 			{
 				viewColumn: ViewColumn.Active,
@@ -182,9 +174,10 @@ describe("CreateSpecInputController", () => {
 	it("restores saved draft state when available", async () => {
 		const draft: CreateSpecDraftState = {
 			formData: {
-				summary: "Saved summary",
 				productContext: "Saved product context",
+				keyScenarios: "Saved key scenarios",
 				technicalConstraints: "",
+				relatedFiles: "",
 				openQuestions: "",
 			},
 			lastUpdated: 123,
@@ -208,26 +201,30 @@ describe("CreateSpecInputController", () => {
 		const controller = createController();
 		await controller.open();
 
+		// Mock readFile
+		(workspace.fs as any).readFile = vi
+			.fn()
+			.mockResolvedValue(new TextEncoder().encode("Prompt Template"));
+
 		await emitMessage({
 			type: "create-spec/submit",
 			payload: {
-				summary: " Feature idea ",
 				productContext: "Context",
+				keyScenarios: " Feature idea ",
 				technicalConstraints: "",
+				relatedFiles: "",
 				openQuestions: "",
 			},
 		});
 
-		expect(promptLoader.renderPrompt).toHaveBeenCalledWith(
-			"create-spec",
-			expect.objectContaining({
-				description: expect.stringContaining("Summary:\nFeature idea"),
-				workspacePath: "/fake/workspace",
-				specBasePath: ".codex/specs",
-			})
+		expect(sendPromptToChat).toHaveBeenCalledWith(
+			expect.stringContaining("Prompt Template")
 		);
-		expect(sendPromptToChat).toHaveBeenCalledWith("prompt-content");
-		expect(NotificationUtils.showAutoDismissNotification).toHaveBeenCalled();
+		expect(sendPromptToChat).toHaveBeenCalledWith(
+			expect.stringContaining(
+				"Key Scenarios / Acceptance Criteria:\nFeature idea"
+			)
+		);
 		expect(workspaceStateUpdateMock).toHaveBeenCalledWith(
 			"createSpecDraftState",
 			undefined
@@ -239,15 +236,15 @@ describe("CreateSpecInputController", () => {
 		const controller = createController();
 		await controller.open();
 
-		// biome-ignore lint/style/noMagicNumbers: ignore
 		const nowSpy = vi.spyOn(Date, "now").mockReturnValue(1_700_000_000_000);
 
 		await emitMessage({
 			type: "create-spec/autosave",
 			payload: {
-				summary: "Draft summary",
 				productContext: "",
+				keyScenarios: "Draft summary",
 				technicalConstraints: "Constraints",
+				relatedFiles: "",
 				openQuestions: "",
 			},
 		});
@@ -256,9 +253,10 @@ describe("CreateSpecInputController", () => {
 			"createSpecDraftState",
 			{
 				formData: {
-					summary: "Draft summary",
 					productContext: "",
+					keyScenarios: "Draft summary",
 					technicalConstraints: "Constraints",
+					relatedFiles: "",
 					openQuestions: "",
 				},
 				lastUpdated: 1_700_000_000_000,

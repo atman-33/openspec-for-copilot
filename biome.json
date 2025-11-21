@@ -1,5 +1,5 @@
 {
-  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.3.6/schema.json",
   "vcs": {
     "enabled": false,
     "clientKind": "git",
@@ -37,7 +37,13 @@
       },
       "style": {
         "useNodejsImportProtocol": "off",
-        "noNonNullAssertion": "off"
+        "noNonNullAssertion": "off",
+        "useConsistentTypeDefinitions": {
+          "level": "warn",
+          "options": {
+            "style": "interface"
+          }
+        }
       },
       "complexity": {
         "noStaticOnlyClass": "off"
@@ -63,5 +69,5 @@
       }
     }
   },
-  "extends": ["ultracite"]
+  "extends": ["ultracite/core"]
 }

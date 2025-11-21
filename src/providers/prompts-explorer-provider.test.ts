@@ -6,6 +6,12 @@ import { ConfigManager } from "../utils/config-manager";
 
 vi.mock("os", () => ({
 	homedir: vi.fn(() => "/home/test"),
+	release: vi.fn(() => "release"),
+	platform: vi.fn(() => "linux"),
+}));
+vi.mock("../utils/platform-utils", () => ({
+	isWindowsOrWsl: vi.fn(() => false),
+	getVSCodeUserDataPath: vi.fn(),
 }));
 
 describe("PromptsExplorerProvider", () => {
@@ -13,8 +19,8 @@ describe("PromptsExplorerProvider", () => {
 	const context = {
 		extensionUri: Uri.file("/fake/extension"),
 	} as ExtensionContext;
-	const projectRoot = "/fake/workspace/.codex/prompts";
-	const globalRoot = "/home/test/.codex/prompts";
+	const projectRoot = "/fake/workspace/.github/prompts";
+	const globalRoot = "/home/test/.github/prompts";
 
 	beforeEach(() => {
 		vi.clearAllMocks();
@@ -40,7 +46,7 @@ describe("PromptsExplorerProvider", () => {
 
 		expect(projectGroup.label).toBe("Project");
 		expect(projectGroup.contextValue).toBe("prompt-group-project");
-		expect(projectGroup.description).toBe(".codex/prompts");
+		expect(projectGroup.description).toBe(".github/prompts");
 
 		expect(globalGroup.label).toBe("Global");
 		expect(globalGroup.contextValue).toBe("prompt-group-global");

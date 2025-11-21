@@ -9,7 +9,7 @@ import {
 	workspace,
 } from "vscode";
 
-import { relative } from "path";
+import { join, relative } from "path";
 import { VSC_CONFIG_NAMESPACE } from "../constants";
 import { ConfigManager } from "../utils/config-manager";
 
@@ -39,35 +39,34 @@ export class SpecTaskCodeLensProvider implements CodeLensProvider {
 			return [];
 		}
 
-		const codeLenses: CodeLens[] = [];
+		// Create a single CodeLens at the top of the file
+		const range = new Range(0, 0, 0, 0);
 		const text = document.getText();
-		// Use regex split to handle both Windows (CRLF) and Unix (LF) line endings
-		// biome-ignore lint/performance/useTopLevelRegex: ignore
-		const lines = text.split(/\r?\n/);
+		const hasIncompleteTasks = text.includes("- [ ]");
+		const hasCompletedTasks = text.includes("- [x]");
 
-		for (let i = 0; i < lines.length; i++) {
-			const line = lines[i];
-			// Match task list format: - [ ] task description
-			// biome-ignore lint/performance/useTopLevelRegex: ignore
-			const taskMatch = line.match(/^(\s*)- \[ \] (.+)$/);
-
-			if (taskMatch) {
-				const range = new Range(i, 0, i, line.length);
-				const taskDescription = taskMatch[2];
-
-				// Create CodeLens
-				const codeLens = new CodeLens(range, {
-					title: "$(play) Start Task",
-					tooltip: "Click to execute this task",
-					command: "kiro-codex-ide.spec.implTask",
-					arguments: [document.uri, i, taskDescription],
-				});
-
-				codeLenses.push(codeLens);
-			}
+		if (hasIncompleteTasks) {
+			return [
+				new CodeLens(range, {
+					title: "$(play) Start All Tasks",
+					tooltip: "Click to generate OpenSpec apply prompt",
+					command: "openspec-for-copilot.spec.implTask",
+					arguments: [document.uri],
+				}),
+			];
 		}
 
-		return codeLenses;
+		if (hasCompletedTasks) {
+			return [
+				new CodeLens(range, {
+					title: "$(check) All Tasks Completed",
+					tooltip: "All tasks are completed",
+					command: "openspec-for-copilot.noop",
+				}),
+			];
+		}
+
+		return [];
 	}
 
 	private isSpecTaskDocument(document: TextDocument): boolean {
@@ -75,16 +74,28 @@ export class SpecTaskCodeLensProvider implements CodeLensProvider {
 			return false;
 		}
 
+		// Check if inside configured specs path
 		try {
 			const specBasePath = this.configManager.getAbsolutePath("specs");
 			const relativePath = relative(specBasePath, document.uri.fsPath);
-			if (!relativePath || relativePath.startsWith("..")) {
-				return false;
+			if (relativePath && !relativePath.startsWith("..")) {
+				return true;
 			}
-			return true;
 		} catch (error) {
-			return false;
+			// ignore
 		}
+
+		// Check if inside "openspec" folder in workspace (standard OpenSpec structure)
+		const workspaceFolder = workspace.getWorkspaceFolder(document.uri);
+		if (workspaceFolder) {
+			const openspecPath = join(workspaceFolder.uri.fsPath, "openspec");
+			const relativePath = relative(openspecPath, document.uri.fsPath);
+			if (relativePath && !relativePath.startsWith("..")) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	resolveCodeLens(codeLens: CodeLens, token: CancellationToken) {

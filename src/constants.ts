@@ -1,12 +1,11 @@
 // VSCode configuration namespace for this extension
-export const VSC_CONFIG_NAMESPACE = "kiro-codex-ide";
+export const VSC_CONFIG_NAMESPACE = "openspec-for-copilot";
 
 // Default configuration
 export const DEFAULT_CONFIG = {
 	paths: {
-		prompts: ".codex/prompts",
-		specs: ".codex/specs",
-		steering: ".codex/steering",
+		prompts: ".github/prompts",
+		specs: "openspec",
 	},
 	views: {
 		specs: true,
@@ -14,6 +13,7 @@ export const DEFAULT_CONFIG = {
 		prompts: true,
 		settings: false,
 	},
+	chatLanguage: "English",
 } as const;
 
 // Legacy exports for backward compatibility (can be removed after updating all references)

@@ -1,4 +1,4 @@
-import { basename } from "path";
+import { basename, join } from "path";
 import { homedir } from "os";
 import {
 	type Command,
@@ -15,8 +15,9 @@ import {
 	window,
 	workspace,
 } from "vscode";
-import { addDocumentToCodexChat } from "../utils/codex-chat-utils";
+import { addDocumentToCopilotChat } from "../utils/copilot-chat-utils";
 import { ConfigManager } from "../utils/config-manager";
+import { getVSCodeUserDataPath, isWindowsOrWsl } from "../utils/platform-utils";
 
 const { joinPath } = Uri;
 
@@ -25,10 +26,10 @@ type PromptSource = "project" | "global";
 type TreeEventPayload = PromptItem | undefined | null | void;
 
 export class PromptsExplorerProvider implements TreeDataProvider<PromptItem> {
-	static readonly viewId = "kiro-codex-ide.views.promptsExplorer";
-	static readonly createPromptCommandId = "kiro-codex-ide.prompts.create";
-	static readonly refreshCommandId = "kiro-codex-ide.prompts.refresh";
-	static readonly runPromptCommandId = "kiro-codex-ide.prompts.run";
+	static readonly viewId = "openspec-for-copilot.views.promptsExplorer";
+	static readonly createPromptCommandId = "openspec-for-copilot.prompts.create";
+	static readonly refreshCommandId = "openspec-for-copilot.prompts.refresh";
+	static readonly runPromptCommandId = "openspec-for-copilot.prompts.run";
 
 	private readonly changeEmitter = new EventEmitter<TreeEventPayload>();
 	readonly onDidChangeTreeData: Event<TreeEventPayload> =
@@ -50,12 +51,18 @@ export class PromptsExplorerProvider implements TreeDataProvider<PromptItem> {
 		setTimeout(() => {
 			this.isLoading = false;
 			this.changeEmitter.fire();
-			// biome-ignore lint/style/noMagicNumbers: ignore
 		}, 120);
 	};
 
-	createPrompt = async (): Promise<void> => {
-		const rootUri = this.getPromptsRoot();
+	createPrompt = async (item?: PromptItem): Promise<void> => {
+		let rootUri: Uri | undefined;
+
+		if (item?.source === "global") {
+			rootUri = await this.getGlobalPromptsRoot();
+		} else {
+			rootUri = this.getPromptsRoot();
+		}
+
 		if (!rootUri) {
 			await window.showWarningMessage("Open a workspace to create prompts.");
 			return;
@@ -82,9 +89,10 @@ export class PromptsExplorerProvider implements TreeDataProvider<PromptItem> {
 			return;
 		}
 
-		const normalizedName = trimmedName.endsWith(".md")
-			? trimmedName
-			: `${trimmedName}.md`;
+		const normalizedName = this.normalizePromptFileName(
+			trimmedName,
+			item?.source === "global"
+		);
 
 		// biome-ignore lint/performance/useTopLevelRegex: ignore
 		const parts = normalizedName.split(/[\\/]+/).filter(Boolean);
@@ -125,7 +133,7 @@ export class PromptsExplorerProvider implements TreeDataProvider<PromptItem> {
 		}
 
 		try {
-			await addDocumentToCodexChat(item.resourceUri);
+			await addDocumentToCopilotChat(item.resourceUri);
 		} catch (error) {
 			const message =
 				error instanceof Error
@@ -139,7 +147,7 @@ export class PromptsExplorerProvider implements TreeDataProvider<PromptItem> {
 
 	getChildren = (element?: PromptItem): Promise<PromptItem[]> => {
 		if (!element) {
-			return Promise.resolve(this.getRootItems());
+			return this.getRootItems();
 		}
 
 		if (element.contextValue === "prompt-group-project") {
@@ -153,9 +161,9 @@ export class PromptsExplorerProvider implements TreeDataProvider<PromptItem> {
 		return Promise.resolve([]);
 	};
 
-	private readonly getRootItems = (): PromptItem[] => {
+	private readonly getRootItems = async (): Promise<PromptItem[]> => {
 		const projectDescription = this.configManager.getPath("prompts");
-		const globalDescription = this.getGlobalPromptsLabel();
+		const globalDescription = await this.getGlobalPromptsLabel();
 
 		return [
 			new PromptItem(
@@ -210,16 +218,16 @@ export class PromptsExplorerProvider implements TreeDataProvider<PromptItem> {
 		return this.createPromptItems(rootUri, "project");
 	};
 
-	private readonly getGlobalPromptItems = (): Promise<PromptItem[]> => {
-		const rootUri = this.getGlobalPromptsRoot();
+	private readonly getGlobalPromptItems = async (): Promise<PromptItem[]> => {
+		const rootUri = await this.getGlobalPromptsRoot();
 		if (!rootUri) {
-			return Promise.resolve([
+			return [
 				new PromptItem(
 					"Global prompts directory not found",
 					TreeItemCollapsibleState.None,
 					"prompts-empty"
 				),
-			]);
+			];
 		}
 
 		return this.createPromptItems(rootUri, "global");
@@ -229,13 +237,14 @@ export class PromptsExplorerProvider implements TreeDataProvider<PromptItem> {
 		rootUri: Uri,
 		source: PromptSource
 	): Promise<PromptItem[]> => {
-		const promptFiles = await this.readMarkdownFiles(rootUri);
+		const suffix = source === "global" ? "" : ".md";
+		const promptFiles = await this.readMarkdownFiles(rootUri, suffix);
 
 		if (promptFiles.length === 0) {
 			const label =
 				source === "project"
 					? this.configManager.getPath("prompts")
-					: this.getGlobalPromptsLabel();
+					: await this.getGlobalPromptsLabel();
 			return [
 				new PromptItem(
 					"No prompts found",
@@ -257,10 +266,12 @@ export class PromptsExplorerProvider implements TreeDataProvider<PromptItem> {
 					title: "Open Prompt",
 					arguments: [uri],
 				};
+				const isRunnable = pathString.endsWith(".prompt.md");
+				const contextValue = isRunnable ? "prompt-runnable" : "prompt";
 				return new PromptItem(
 					basename(pathString),
 					TreeItemCollapsibleState.None,
-					"prompt",
+					contextValue,
 					{
 						resourceUri: uri,
 						command,
@@ -277,26 +288,34 @@ export class PromptsExplorerProvider implements TreeDataProvider<PromptItem> {
 			"prompts-loading"
 		);
 
-	private readonly getGlobalPromptsRoot = (): Uri | undefined => {
+	private readonly getGlobalPromptsRoot = async (): Promise<
+		Uri | undefined
+	> => {
 		try {
+			if (isWindowsOrWsl()) {
+				const userDataPath = await getVSCodeUserDataPath();
+				return joinPath(Uri.file(userDataPath), "prompts");
+			}
+
 			const homeUri = Uri.file(homedir());
-			return joinPath(homeUri, ".codex", "prompts");
+			return joinPath(homeUri, ".github", "prompts");
 		} catch {
 			return;
 		}
 	};
 
-	private readonly getGlobalPromptsLabel = (): string => {
+	private readonly getGlobalPromptsLabel = async (): Promise<string> => {
+		if (isWindowsOrWsl()) {
+			const userDataPath = await getVSCodeUserDataPath();
+			return join(userDataPath, "prompts");
+		}
+
 		const home = homedir();
 		if (!home) {
-			return ".codex/prompts";
+			return ".github/prompts";
 		}
 
-		if (process.platform === "win32") {
-			return `${home}\\.codex\\prompts`;
-		}
-
-		return `${home}/.codex/prompts`;
+		return `${home}/.github/prompts`;
 	};
 
 	private readonly getPromptsRoot = (): Uri | undefined => {
@@ -310,19 +329,22 @@ export class PromptsExplorerProvider implements TreeDataProvider<PromptItem> {
 		}
 	};
 
-	private readonly readMarkdownFiles = async (dir: Uri): Promise<string[]> => {
+	private readonly readMarkdownFiles = async (
+		dir: Uri,
+		suffix: string
+	): Promise<string[]> => {
 		const results: string[] = [];
 		try {
 			const entries = await workspace.fs.readDirectory(dir);
 			for (const [name, type] of entries) {
 				const entryUri = joinPath(dir, name);
-				if (type === FileType.File && name.endsWith(".md")) {
+				if (type === FileType.File && name.endsWith(suffix)) {
 					results.push(entryUri.fsPath);
 					continue;
 				}
 
 				if (type === FileType.Directory) {
-					const nested = await this.readMarkdownFiles(entryUri);
+					const nested = await this.readMarkdownFiles(entryUri, suffix);
 					results.push(...nested);
 				}
 			}
@@ -340,15 +362,32 @@ export class PromptsExplorerProvider implements TreeDataProvider<PromptItem> {
 			return false;
 		}
 	};
+
+	private readonly normalizePromptFileName = (
+		name: string,
+		isGlobal: boolean
+	): string => {
+		if (isGlobal) {
+			if (name.endsWith(".prompt.md")) {
+				return name;
+			}
+			if (name.endsWith(".md")) {
+				// biome-ignore lint/performance/useTopLevelRegex: ignore
+				return name.replace(/\.md$/, ".prompt.md");
+			}
+			return `${name}.prompt.md`;
+		}
+		return name.endsWith(".md") ? name : `${name}.md`;
+	};
 }
 
-type PromptItemOptions = {
+interface PromptItemOptions {
 	resourceUri?: Uri;
 	command?: Command;
 	tooltip?: string;
 	description?: string;
 	source?: PromptSource;
-};
+}
 
 class PromptItem extends TreeItem {
 	readonly contextValue: string;
@@ -420,6 +459,29 @@ class PromptItem extends TreeItem {
 				"Create prompts under the configured prompts directory";
 		},
 		prompt: (item, options) => {
+			item.iconPath = new ThemeIcon("file-code");
+			if (!options) {
+				return;
+			}
+
+			if (!options.resourceUri) {
+				if (options.tooltip) {
+					item.tooltip = options.tooltip;
+				}
+				if (options.description) {
+					item.description = options.description;
+				}
+				return;
+			}
+
+			item.resourceUri = options.resourceUri;
+			const description =
+				options.description ??
+				PromptItem.formatResourceDescription(options.resourceUri);
+			item.description = description;
+			item.tooltip = options.tooltip ?? description;
+		},
+		"prompt-runnable": (item, options) => {
 			item.iconPath = new ThemeIcon("file-code");
 			if (!options) {
 				return;

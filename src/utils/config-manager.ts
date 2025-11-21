@@ -1,14 +1,14 @@
 import { join } from "path";
 import { type WorkspaceFolder, workspace } from "vscode";
 import {
+	DEFAULT_CONFIG,
 	DEFAULT_PATHS,
 	DEFAULT_VIEW_VISIBILITY,
 	VSC_CONFIG_NAMESPACE,
 } from "../constants";
-export type KiroCodexIdeSettings = {
+export interface OpenSpecSettings {
 	paths: {
 		specs: string;
-		steering: string;
 		prompts: string;
 	};
 	views: {
@@ -17,11 +17,12 @@ export type KiroCodexIdeSettings = {
 		prompts: { visible: boolean };
 		settings: { visible: boolean };
 	};
-};
+	chatLanguage: string;
+}
 
 export class ConfigManager {
 	private static instance: ConfigManager;
-	private settings: KiroCodexIdeSettings | null = null;
+	private settings: OpenSpecSettings | null = null;
 	private readonly workspaceFolder: WorkspaceFolder | undefined;
 
 	// Internal constants
@@ -39,13 +40,13 @@ export class ConfigManager {
 	}
 
 	// biome-ignore lint/suspicious/useAwait: ignore
-	async loadSettings(): Promise<KiroCodexIdeSettings> {
+	async loadSettings(): Promise<OpenSpecSettings> {
 		const settings = this.getDefaultSettings();
 		this.settings = settings;
 		return settings;
 	}
 
-	getSettings(): KiroCodexIdeSettings {
+	getSettings(): OpenSpecSettings {
 		if (!this.settings) {
 			this.settings = this.getDefaultSettings();
 		}
@@ -72,9 +73,8 @@ export class ConfigManager {
 		Record<keyof typeof DEFAULT_PATHS, string>
 	> {
 		const config = workspace.getConfiguration(VSC_CONFIG_NAMESPACE);
-		const promptsPath = config.get<string>("codex.promptsPath")?.trim();
-		const specsPath = config.get<string>("codex.specsPath")?.trim();
-		const steeringPath = config.get<string>("codex.steeringPath")?.trim();
+		const promptsPath = config.get<string>("copilot.promptsPath")?.trim();
+		const specsPath = config.get<string>("copilot.specsPath")?.trim();
 
 		const configuredPaths: Partial<Record<keyof typeof DEFAULT_PATHS, string>> =
 			{};
@@ -87,17 +87,18 @@ export class ConfigManager {
 			configuredPaths.specs = specsPath;
 		}
 
-		if (steeringPath) {
-			configuredPaths.steering = steeringPath;
-		}
-
 		return configuredPaths;
 	}
 
+	private getChatLanguage(): string {
+		const config = workspace.getConfiguration(VSC_CONFIG_NAMESPACE);
+		return config.get<string>("chatLanguage") ?? DEFAULT_CONFIG.chatLanguage;
+	}
+
 	private mergeSettings(
-		defaults: KiroCodexIdeSettings,
-		overrides: Partial<KiroCodexIdeSettings> = {}
-	): KiroCodexIdeSettings {
+		defaults: OpenSpecSettings,
+		overrides: Partial<OpenSpecSettings> = {}
+	): OpenSpecSettings {
 		const mergedPaths = {
 			...defaults.paths,
 			...(overrides.paths ?? {}),
@@ -125,11 +126,13 @@ export class ConfigManager {
 		return {
 			paths: mergedPaths,
 			views: mergedViews,
+			chatLanguage: overrides.chatLanguage ?? defaults.chatLanguage,
 		};
 	}
 
-	private getDefaultSettings(): KiroCodexIdeSettings {
+	private getDefaultSettings(): OpenSpecSettings {
 		const configuredPaths = this.getConfiguredPaths();
+		const chatLanguage = this.getChatLanguage();
 
 		return {
 			paths: { ...DEFAULT_PATHS, ...configuredPaths },
@@ -139,10 +142,11 @@ export class ConfigManager {
 				prompts: { visible: DEFAULT_VIEW_VISIBILITY.prompts },
 				settings: { visible: DEFAULT_VIEW_VISIBILITY.settings },
 			},
+			chatLanguage,
 		};
 	}
 	// biome-ignore lint/suspicious/useAwait: ignore
-	async saveSettings(settings: KiroCodexIdeSettings): Promise<void> {
+	async saveSettings(settings: OpenSpecSettings): Promise<void> {
 		this.settings = this.mergeSettings(this.getDefaultSettings(), settings);
 	}
 }

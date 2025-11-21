@@ -1,19 +1,20 @@
-export type CreateSpecFormData = {
-	summary: string;
+export interface CreateSpecFormData {
 	productContext: string;
+	keyScenarios: string;
 	technicalConstraints: string;
+	relatedFiles: string;
 	openQuestions: string;
-};
+}
 
-export type CreateSpecDraftState = {
+export interface CreateSpecDraftState {
 	formData: CreateSpecFormData;
 	lastUpdated: number;
-};
+}
 
-export type CreateSpecInitPayload = {
+export interface CreateSpecInitPayload {
 	shouldFocusPrimaryField: boolean;
 	draft?: CreateSpecDraftState;
-};
+}
 
 export type CreateSpecExtensionMessage =
 	| { type: "create-spec/init"; payload: CreateSpecInitPayload }
@@ -22,6 +23,6 @@ export type CreateSpecExtensionMessage =
 	| { type: "create-spec/confirm-close"; payload: { shouldClose: boolean } }
 	| { type: "create-spec/focus" };
 
-export type CreateSpecFieldErrors = {
-	summary?: string;
-};
+export interface CreateSpecFieldErrors {
+	productContext?: string;
+}

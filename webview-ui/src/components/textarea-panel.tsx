@@ -1,7 +1,7 @@
 import { useLayoutEffect, useRef } from "react";
 import type React from "react";
 
-type TextareaPanelProps = {
+interface TextareaPanelProps {
 	value: string;
 	onChange: React.ChangeEventHandler<HTMLTextAreaElement>;
 	onKeyDown?: React.KeyboardEventHandler<HTMLTextAreaElement>;
@@ -17,7 +17,7 @@ type TextareaPanelProps = {
 	/** Optional inline style for container */
 	containerStyle?: React.CSSProperties;
 	children?: React.ReactNode;
-};
+}
 
 /**
  * Reusable panel with VS Code themed container and a textarea on top.

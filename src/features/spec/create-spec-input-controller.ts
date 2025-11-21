@@ -12,7 +12,6 @@ import type { PromptLoader } from "../../services/prompt-loader";
 import type { ConfigManager } from "../../utils/config-manager";
 import { sendPromptToChat } from "../../utils/chat-prompt-runner";
 import { getWebviewContent } from "../../utils/get-webview-content";
-import { NotificationUtils } from "../../utils/notification-utils";
 import type {
 	CreateSpecDraftState,
 	CreateSpecFormData,
@@ -20,12 +19,12 @@ import type {
 	CreateSpecExtensionMessage,
 } from "./types";
 
-type CreateSpecInputControllerDependencies = {
+interface CreateSpecInputControllerDependencies {
 	context: ExtensionContext;
 	configManager: ConfigManager;
 	promptLoader: PromptLoader;
 	outputChannel: OutputChannel;
-};
+}
 
 const CREATE_SPEC_DRAFT_STATE_KEY = "createSpecDraftState";
 
@@ -39,20 +38,26 @@ const isMessageItem = (value: unknown): value is MessageItem => {
 };
 
 const normalizeFormData = (data: CreateSpecFormData): CreateSpecFormData => ({
-	summary: data.summary ?? "",
 	productContext: data.productContext ?? "",
+	keyScenarios: data.keyScenarios ?? "",
 	technicalConstraints: data.technicalConstraints ?? "",
+	relatedFiles: data.relatedFiles ?? "",
 	openQuestions: data.openQuestions ?? "",
 });
 
 const formatDescription = (data: CreateSpecFormData): string => {
 	const sections = [
-		`Summary:\n${data.summary.trim()}`,
 		data.productContext.trim()
-			? `Product Context:\n${data.productContext.trim()}`
+			? `Product Context / Goal:\n${data.productContext.trim()}`
+			: undefined,
+		data.keyScenarios.trim()
+			? `Key Scenarios / Acceptance Criteria:\n${data.keyScenarios.trim()}`
 			: undefined,
 		data.technicalConstraints.trim()
 			? `Technical Constraints:\n${data.technicalConstraints.trim()}`
+			: undefined,
+		data.relatedFiles.trim()
+			? `Related Files / Impact:\n${data.relatedFiles.trim()}`
 			: undefined,
 		data.openQuestions.trim()
 			? `Open Questions:\n${data.openQuestions.trim()}`
@@ -120,7 +125,7 @@ export class CreateSpecInputController {
 
 		try {
 			return window.createWebviewPanel(
-				"kiro.createSpecDialog",
+				"openspec.createSpecDialog",
 				"Create New Spec",
 				{
 					viewColumn: ViewColumn.Active,
@@ -138,7 +143,7 @@ export class CreateSpecInputController {
 			);
 			try {
 				return window.createWebviewPanel(
-					"kiro.createSpecPanel",
+					"openspec.createSpecPanel",
 					"Create New Spec",
 					ViewColumn.Active,
 					{
@@ -224,33 +229,42 @@ export class CreateSpecInputController {
 			return;
 		}
 
-		const sanitizedSummary = data.summary?.trim();
-		if (!sanitizedSummary) {
+		const sanitizedContext = data.productContext?.trim();
+		if (!sanitizedContext) {
 			await this.panel.webview.postMessage({
 				type: "create-spec/submit:error",
-				payload: { message: "Summary is required." },
+				payload: { message: "Product Context is required." },
 			});
 			return;
 		}
 
 		const normalized = normalizeFormData({
 			...data,
-			summary: sanitizedSummary,
+			productContext: sanitizedContext,
 		});
 
 		const payload = formatDescription(normalized);
 
 		try {
-			const prompt = this.promptLoader.renderPrompt("create-spec", {
-				description: payload,
-				workspacePath: workspaceFolder.uri.fsPath,
-				specBasePath: this.configManager.getPath("specs"),
-			});
+			const promptUri = Uri.joinPath(
+				workspaceFolder.uri,
+				".github",
+				"prompts",
+				"openspec-proposal.prompt.md"
+			);
+			let promptTemplate = "";
+			try {
+				const fileData = await workspace.fs.readFile(promptUri);
+				promptTemplate = new TextDecoder().decode(fileData);
+			} catch (error) {
+				throw new Error(
+					"Required prompt file not found: .github/prompts/openspec-proposal.prompt.md"
+				);
+			}
+
+			const prompt = `${promptTemplate}\n\nThe following sections describe the specification and context for this change request.\n\n${payload}\n\nIMPORTANT:\nAfter generating the proposal documents, you MUST STOP and ask the user for confirmation.\nDo NOT proceed with any implementation steps until the user has explicitly approved the proposal.`;
 
 			await sendPromptToChat(prompt);
-			NotificationUtils.showAutoDismissNotification(
-				"Sent the spec creation prompt to ChatGPT. Continue the flow there."
-			);
 
 			await this.clearDraftState();
 

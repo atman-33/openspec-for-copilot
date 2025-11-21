@@ -2,12 +2,12 @@ import type { ReactNode } from "react";
 
 export type StatusTone = "info" | "warning" | "error";
 
-export type StatusBannerProps = {
+export interface StatusBannerProps {
 	children: ReactNode;
 	tone: StatusTone;
 	role: "status" | "alert";
 	ariaLive?: "polite" | "assertive";
-};
+}
 
 const STATUS_TONE_CLASSES: Record<StatusTone, string> = {
 	info: "border-[color:color-mix(in_srgb,var(--vscode-foreground)_35%,transparent)] bg-[color:color-mix(in_srgb,var(--vscode-foreground)_12%,transparent)] text-[color:var(--vscode-foreground)]",

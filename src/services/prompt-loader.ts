@@ -66,7 +66,6 @@ export class PromptLoader {
 			const compiled = compile(template.content);
 			this.compiledTemplates.set(id, compiled);
 		} catch (error) {
-			// biome-ignore lint/suspicious/noConsole: ignore
 			console.error(`Failed to compile template ${id}:`, error);
 		}
 	}

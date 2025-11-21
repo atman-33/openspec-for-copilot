@@ -1,5 +1,5 @@
 import { homedir } from "os";
-import { join } from "node:path";
+import { basename, join } from "node:path";
 import type { FileSystemWatcher } from "vscode";
 import {
 	commands,
@@ -9,61 +9,33 @@ import {
 	type ExtensionContext,
 	languages,
 	type OutputChannel,
-	Range,
 	RelativePattern,
 	Uri,
 	window,
 	workspace,
-	WorkspaceEdit,
-	type WorkspaceFolder,
 } from "vscode";
 import { VSC_CONFIG_NAMESPACE } from "./constants";
 import { SpecManager } from "./features/spec/spec-manager";
 import { SteeringManager } from "./features/steering/steering-manager";
-import { CodexProvider } from "./providers/codex-provider";
+import { CopilotProvider } from "./providers/copilot-provider";
 import { OverviewProvider } from "./providers/overview-provider";
 import { PromptsExplorerProvider } from "./providers/prompts-explorer-provider";
 import { SpecExplorerProvider } from "./providers/spec-explorer-provider";
 import { SpecTaskCodeLensProvider } from "./providers/spec-task-code-lens-provider";
 import { SteeringExplorerProvider } from "./providers/steering-explorer-provider";
 import { PromptLoader } from "./services/prompt-loader";
-import { addDocumentToCodexChat } from "./utils/codex-chat-utils";
+import { sendPromptToChat } from "./utils/chat-prompt-runner";
 import { ConfigManager } from "./utils/config-manager";
+import { getVSCodeUserDataPath } from "./utils/platform-utils";
 
-let codexProvider: CodexProvider;
+let copilotProvider: CopilotProvider;
 let specManager: SpecManager;
 let steeringManager: SteeringManager;
 export let outputChannel: OutputChannel;
 
-const ensureWorkspaceCodexGitignore = async (folder: WorkspaceFolder) => {
-	const codexDir = Uri.joinPath(folder.uri, ".codex");
-	const gitignoreUri = Uri.joinPath(codexDir, ".gitignore");
-
-	try {
-		await workspace.fs.stat(gitignoreUri);
-		return;
-	} catch {
-		// File missing, continue to create it.
-	}
-
-	try {
-		await workspace.fs.createDirectory(codexDir);
-	} catch {
-		// Directory already exists or cannot be created; ignore and attempt to write the file.
-	}
-
-	try {
-		await workspace.fs.writeFile(gitignoreUri, Buffer.from("tmp/\n"));
-	} catch (error) {
-		outputChannel?.appendLine(
-			`Failed to create ${gitignoreUri.fsPath}: ${error}`
-		);
-	}
-};
-
 export async function activate(context: ExtensionContext) {
 	// Create output channel for debugging
-	outputChannel = window.createOutputChannel("Kiro for Codex - Debug");
+	outputChannel = window.createOutputChannel("OpenSpec for Copilot - Debug");
 
 	// Initialize PromptLoader
 	try {
@@ -81,19 +53,19 @@ export async function activate(context: ExtensionContext) {
 		outputChannel.appendLine("WARNING: No workspace folder found!");
 	}
 
-	if (workspaceFolders && workspaceFolders.length > 0) {
-		await Promise.all(workspaceFolders.map(ensureWorkspaceCodexGitignore));
-	}
-
-	// Initialize Codex provider
-	codexProvider = new CodexProvider(context, outputChannel);
+	// Initialize Copilot provider
+	copilotProvider = new CopilotProvider(context, outputChannel);
 
 	const configManager = ConfigManager.getInstance();
 	await configManager.loadSettings();
 
 	// Initialize feature managers with output channel
 	specManager = new SpecManager(context, outputChannel);
-	steeringManager = new SteeringManager(context, codexProvider, outputChannel);
+	steeringManager = new SteeringManager(
+		context,
+		copilotProvider,
+		outputChannel
+	);
 
 	// Register tree data providers
 	const overviewProvider = new OverviewProvider(context);
@@ -107,21 +79,21 @@ export async function activate(context: ExtensionContext) {
 
 	context.subscriptions.push(
 		window.registerTreeDataProvider(
-			"kiro-codex-ide.views.overview",
+			"openspec-for-copilot.views.overview",
 			overviewProvider
 		),
 		window.registerTreeDataProvider(
-			"kiro-codex-ide.views.specExplorer",
+			"openspec-for-copilot.views.specExplorer",
 			specExplorer
 		),
 		window.registerTreeDataProvider(
-			"kiro-codex-ide.views.steeringExplorer",
+			"openspec-for-copilot.views.steeringExplorer",
 			steeringExplorer
 		)
 	);
 	context.subscriptions.push(
 		window.registerTreeDataProvider(
-			"kiro-codex-ide.views.promptsExplorer",
+			"openspec-for-copilot.views.promptsExplorer",
 			promptsExplorer
 		)
 	);
@@ -211,7 +183,7 @@ function registerCommands(
 	promptsExplorer: PromptsExplorerProvider
 ) {
 	const createSpecCommand = commands.registerCommand(
-		"kiro-codex-ide.spec.create",
+		"openspec-for-copilot.spec.create",
 		async () => {
 			outputChannel.appendLine(
 				`[Spec] create command triggered at ${new Date().toISOString()}`
@@ -228,50 +200,49 @@ function registerCommands(
 	);
 
 	context.subscriptions.push(
+		commands.registerCommand("openspec-for-copilot.noop", () => {
+			// noop
+		}),
 		createSpecCommand,
 		commands.registerCommand(
-			"kiro-codex-ide.spec.navigate.requirements",
+			"openspec-for-copilot.spec.navigate.requirements",
 			async (specName: string) => {
 				await specManager.navigateToDocument(specName, "requirements");
 			}
 		),
 
 		commands.registerCommand(
-			"kiro-codex-ide.spec.navigate.design",
+			"openspec-for-copilot.spec.navigate.design",
 			async (specName: string) => {
 				await specManager.navigateToDocument(specName, "design");
 			}
 		),
 
 		commands.registerCommand(
-			"kiro-codex-ide.spec.navigate.tasks",
+			"openspec-for-copilot.spec.navigate.tasks",
 			async (specName: string) => {
 				await specManager.navigateToDocument(specName, "tasks");
 			}
 		),
 
 		commands.registerCommand(
-			"kiro-codex-ide.spec.implTask",
-			async (documentUri: Uri, lineNumber: number, taskDescription: string) => {
+			"openspec-for-copilot.spec.implTask",
+			async (documentUri: Uri) => {
 				outputChannel.appendLine(
-					`[Task Execute] Line ${lineNumber + 1}: ${taskDescription}`
+					`[Task Execute] Generating OpenSpec apply prompt for: ${documentUri.fsPath}`
 				);
+				await specManager.runOpenSpecApply(documentUri);
+			}
+		),
 
-				// Update task status to completed
-				const document = await workspace.openTextDocument(documentUri);
-				const edit = new WorkspaceEdit();
-				const line = document.lineAt(lineNumber);
-				const newLine = line.text.replace("- [ ]", "- [x]");
-				const range = new Range(lineNumber, 0, lineNumber, line.text.length);
-				edit.replace(documentUri, range, newLine);
-				await workspace.applyEdit(edit);
-
-				// Use Codex CLI to execute task
-				await specManager.implTask(documentUri.fsPath, taskDescription);
+		commands.registerCommand(
+			"openspec-for-copilot.spec.open",
+			async (relativePath: string, type: string) => {
+				await specManager.openDocument(relativePath, type);
 			}
 		),
 		// biome-ignore lint/suspicious/useAwait: ignore
-		commands.registerCommand("kiro-codex-ide.spec.refresh", async () => {
+		commands.registerCommand("openspec-for-copilot.spec.refresh", async () => {
 			outputChannel.appendLine("[Manual Refresh] Refreshing spec explorer...");
 			specExplorer.refresh();
 		})
@@ -281,60 +252,22 @@ function registerCommands(
 
 	// Steering commands
 	context.subscriptions.push(
-		commands.registerCommand("kiro-codex-ide.steering.create", async () => {
-			await steeringManager.createCustom();
-		}),
-
-		commands.registerCommand(
-			"kiro-codex-ide.steering.generateInitial",
-			async () => {
-				await steeringManager.init();
-			}
-		),
-
-		commands.registerCommand(
-			"kiro-codex-ide.steering.refine",
-			async (item: any) => {
-				// Item is always from tree view
-				const uri = Uri.file(item.resourcePath);
-				await steeringManager.refine(uri);
-			}
-		),
-
-		commands.registerCommand(
-			"kiro-codex-ide.steering.delete",
-			async (item: any) => {
-				outputChannel.appendLine(`[Steering] Deleting: ${item.label}`);
-
-				// Use SteeringManager to delete the document
-				const result = await steeringManager.delete(
-					item.label,
-					item.resourcePath
-				);
-
-				if (!result.success && result.error) {
-					window.showErrorMessage(result.error);
-				}
-			}
-		),
-
 		// Configuration commands
 		commands.registerCommand(
-			"kiro-codex-ide.steering.createUserRule",
+			"openspec-for-copilot.steering.createUserRule",
 			async () => {
 				await steeringManager.createUserConfiguration();
 			}
 		),
 
 		commands.registerCommand(
-			"kiro-codex-ide.steering.createProjectRule",
+			"openspec-for-copilot.steering.createProjectRule",
 			async () => {
 				await steeringManager.createProjectDocumentation();
 			}
 		),
 
-		// biome-ignore lint/suspicious/useAwait: ignore
-		commands.registerCommand("kiro-codex-ide.steering.refresh", async () => {
+		commands.registerCommand("openspec-for-copilot.steering.refresh", () => {
 			outputChannel.appendLine(
 				"[Manual Refresh] Refreshing steering explorer..."
 			);
@@ -348,8 +281,8 @@ function registerCommands(
 			const document = event.document;
 			const filePath = document.fileName;
 
-			// Check if this is an agent file in .codex directories
-			if (filePath.includes(".codex/agents/") && filePath.endsWith(".md")) {
+			// Check if this is an agent file in .copilot directories
+			if (filePath.includes(".copilot/agents/") && filePath.endsWith(".md")) {
 				// Show confirmation dialog
 				const result = await window.showWarningMessage(
 					"Are you sure you want to save changes to this agent file?",
@@ -370,64 +303,130 @@ function registerCommands(
 	// Spec delete command
 	context.subscriptions.push(
 		commands.registerCommand(
-			"kiro-codex-ide.spec.delete",
+			"openspec-for-copilot.spec.delete",
 			async (item: any) => {
 				await specManager.delete(item.label);
+			}
+		),
+		commands.registerCommand(
+			"openspec-for-copilot.spec.archiveChange",
+			async (item: any) => {
+				// item is SpecItem, item.specName is the ID
+				const changeId = item.specName;
+				if (!changeId) {
+					window.showErrorMessage("Could not determine change ID.");
+					return;
+				}
+
+				const ws = workspace.workspaceFolders?.[0];
+				if (!ws) {
+					window.showErrorMessage("No workspace folder found");
+					return;
+				}
+
+				const promptPath = Uri.joinPath(
+					ws.uri,
+					".github/prompts/openspec-archive.prompt.md"
+				);
+
+				try {
+					const promptContent = await workspace.fs.readFile(promptPath);
+					const promptString = new TextDecoder().decode(promptContent);
+					const fullPrompt = `${promptString}\n\nid: ${changeId}`;
+
+					outputChannel.appendLine(
+						`[Archive Change] Archiving change: ${changeId}`
+					);
+					await sendPromptToChat(fullPrompt);
+				} catch (error) {
+					window.showErrorMessage(
+						`Failed to read archive prompt: ${error instanceof Error ? error.message : String(error)}`
+					);
+				}
 			}
 		)
 	);
 
-	// Codex integration commands
-	// Codex CLI integration commands
+	// Copilot integration commands
+	// Copilot CLI integration commands
 
 	// Prompts commands
 	context.subscriptions.push(
-		// biome-ignore lint/suspicious/useAwait: ignore
-		commands.registerCommand("kiro-codex-ide.prompts.refresh", async () => {
+		commands.registerCommand("openspec-for-copilot.prompts.refresh", () => {
 			outputChannel.appendLine(
 				"[Manual Refresh] Refreshing prompts explorer..."
 			);
 			promptsExplorer.refresh();
 		}),
-		commands.registerCommand("kiro-codex-ide.prompts.create", async () => {
-			const ws = workspace.workspaceFolders?.[0];
-			if (!ws) {
-				window.showErrorMessage("No workspace folder found");
-				return;
-			}
-			const configManager = ConfigManager.getInstance();
-			const promptsPathLabel = configManager.getPath("prompts");
-			const name = await window.showInputBox({
-				title: "Create Prompt",
-				placeHolder: "prompt name (kebab-case)",
-				prompt: `A markdown file will be created under ${promptsPathLabel}`,
-				validateInput: (v) => (v ? undefined : "Name is required"),
-			});
-			if (!name) {
-				return;
-			}
-			let dir = Uri.joinPath(ws.uri, ".codex", "prompts");
-			try {
-				dir = Uri.file(configManager.getAbsolutePath("prompts"));
-			} catch {
-				// fall back to default under workspace
-			}
-			const file = Uri.joinPath(dir, `${name}.md`);
-			try {
-				await workspace.fs.createDirectory(dir);
-				const content = Buffer.from(
-					`# ${name}\n\nDescribe your prompt here. This file will be sent to Codex when executed.\n`
-				);
-				await workspace.fs.writeFile(file, content);
-				const doc = await workspace.openTextDocument(file);
-				await window.showTextDocument(doc);
-				promptsExplorer.refresh();
-			} catch (e) {
-				window.showErrorMessage(`Failed to create prompt: ${e}`);
-			}
-		}),
 		commands.registerCommand(
-			"kiro-codex-ide.prompts.run",
+			"openspec-for-copilot.prompts.createInstructions",
+			async () => {
+				await commands.executeCommand("workbench.command.new.instructions");
+			}
+		),
+		commands.registerCommand(
+			"openspec-for-copilot.prompts.createCopilotPrompt",
+			async () => {
+				await commands.executeCommand("workbench.command.new.prompt");
+			}
+		),
+		commands.registerCommand(
+			"openspec-for-copilot.prompts.create",
+			async (item?: any) => {
+				const ws = workspace.workspaceFolders?.[0];
+				if (!ws) {
+					window.showErrorMessage("No workspace folder found");
+					return;
+				}
+				const configManager = ConfigManager.getInstance();
+
+				let targetDir: Uri;
+				let promptsPathLabel: string;
+
+				// Determine target directory based on the item source
+				if (item?.source === "global") {
+					const home = homedir();
+					const globalPath = join(home, ".github", "prompts");
+					targetDir = Uri.file(globalPath);
+					promptsPathLabel = globalPath;
+				} else {
+					// Default to project scope
+					promptsPathLabel = configManager.getPath("prompts");
+					targetDir = Uri.joinPath(ws.uri, ".copilot", "prompts");
+					try {
+						targetDir = Uri.file(configManager.getAbsolutePath("prompts"));
+					} catch {
+						// fall back to default under workspace
+					}
+				}
+
+				const name = await window.showInputBox({
+					title: "Create Prompt",
+					placeHolder: "prompt name (kebab-case)",
+					prompt: `A markdown file will be created under ${promptsPathLabel}`,
+					validateInput: (v) => (v ? undefined : "Name is required"),
+				});
+				if (!name) {
+					return;
+				}
+
+				const file = Uri.joinPath(targetDir, `${name}.prompt.md`);
+				try {
+					await workspace.fs.createDirectory(targetDir);
+					const content = Buffer.from(
+						`# ${name}\n\nDescribe your prompt here. This file will be sent to Copilot when executed.\n`
+					);
+					await workspace.fs.writeFile(file, content);
+					const doc = await workspace.openTextDocument(file);
+					await window.showTextDocument(doc);
+					promptsExplorer.refresh();
+				} catch (e) {
+					window.showErrorMessage(`Failed to create prompt: ${e}`);
+				}
+			}
+		),
+		commands.registerCommand(
+			"openspec-for-copilot.prompts.run",
 			// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: ignore
 			async (filePathOrItem?: any) => {
 				try {
@@ -456,9 +455,34 @@ function registerCommands(
 						return;
 					}
 
-					await addDocumentToCodexChat(targetUri);
+					const fileData = await workspace.fs.readFile(targetUri);
+					const promptContent = new TextDecoder().decode(fileData);
+					await sendPromptToChat(promptContent);
 				} catch (e) {
 					window.showErrorMessage(`Failed to run prompt: ${e}`);
+				}
+			}
+		),
+		commands.registerCommand(
+			"openspec-for-copilot.prompts.delete",
+			async (item: any) => {
+				if (!item?.resourceUri) {
+					return;
+				}
+				const uri = item.resourceUri as Uri;
+				const confirm = await window.showWarningMessage(
+					`Are you sure you want to delete '${basename(uri.fsPath)}'?`,
+					{ modal: true },
+					"Delete"
+				);
+				if (confirm !== "Delete") {
+					return;
+				}
+				try {
+					await workspace.fs.delete(uri);
+					promptsExplorer.refresh();
+				} catch (e) {
+					window.showErrorMessage(`Failed to delete prompt: ${e}`);
 				}
 			}
 		)
@@ -469,34 +493,26 @@ function registerCommands(
 	// Group the following commands in a single subscriptions push
 	context.subscriptions.push(
 		// Overview and settings commands
-		commands.registerCommand("kiro-codex-ide.settings.open", async () => {
-			outputChannel.appendLine("Opening Kiro settings...");
+		commands.registerCommand("openspec-for-copilot.settings.open", async () => {
+			outputChannel.appendLine("Opening OpenSpec settings...");
 			await commands.executeCommand(
 				"workbench.action.openSettings",
 				VSC_CONFIG_NAMESPACE
 			);
 		}),
 		commands.registerCommand(
-			"kiro-codex-ide.settings.openGlobalConfig",
+			"openspec-for-copilot.settings.openGlobalConfig",
 			async () => {
-				outputChannel.appendLine("Opening global Codex config...");
-				const userHome =
-					homedir() || process.env.HOME || process.env.USERPROFILE;
+				outputChannel.appendLine("Opening MCP config...");
 
-				if (!userHome) {
-					window.showErrorMessage(
-						"Unable to resolve the user home directory for Codex config."
-					);
-					return;
-				}
-
-				const configUri = Uri.file(join(userHome, ".codex", "config.toml"));
+				const configPath = await getMcpConfigPath();
+				const configUri = Uri.file(configPath);
 
 				try {
 					await workspace.fs.stat(configUri);
 				} catch {
 					window.showWarningMessage(
-						`Global Codex config not found at ${configUri.fsPath}. Create the file manually to customize Codex CLI.`
+						`MCP config not found at ${configUri.fsPath}.`
 					);
 					return;
 				}
@@ -507,25 +523,35 @@ function registerCommands(
 				} catch (error) {
 					const message =
 						error instanceof Error ? error.message : String(error);
-					window.showErrorMessage(
-						`Failed to open global Codex config: ${message}`
-					);
+					window.showErrorMessage(`Failed to open MCP config: ${message}`);
 				}
 			}
 		),
 
 		// biome-ignore lint/suspicious/useAwait: ignore
-		commands.registerCommand("kiro-codex-ide.help.open", async () => {
-			outputChannel.appendLine("Opening Kiro help...");
-			const helpUrl = "https://github.com/atman-33/kiro-for-codex-ide#readme";
+		commands.registerCommand("openspec-for-copilot.help.open", async () => {
+			outputChannel.appendLine("Opening OpenSpec help...");
+			const helpUrl = "https://github.com/atman-33/openspec-for-copilot#readme";
 			env.openExternal(Uri.parse(helpUrl));
 		}),
 
-		commands.registerCommand("kiro-codex-ide.menu.open", async () => {
-			outputChannel.appendLine("Opening Kiro menu...");
+		// biome-ignore lint/suspicious/useAwait: ignore
+		commands.registerCommand("openspec-for-copilot.help.install", async () => {
+			outputChannel.appendLine("Opening OpenSpec installation guide...");
+			const installUrl = "https://github.com/Fission-AI/OpenSpec#readme";
+			env.openExternal(Uri.parse(installUrl));
+		}),
+
+		commands.registerCommand("openspec-for-copilot.menu.open", async () => {
+			outputChannel.appendLine("Opening OpenSpec menu...");
 			await toggleViews();
 		})
 	);
+}
+
+async function getMcpConfigPath(): Promise<string> {
+	const userDataPath = await getVSCodeUserDataPath();
+	return join(userDataPath, "mcp.json");
 }
 
 function setupFileWatchers(
@@ -534,8 +560,8 @@ function setupFileWatchers(
 	steeringExplorer: SteeringExplorerProvider,
 	promptsExplorer: PromptsExplorerProvider
 ) {
-	// Watch for changes in .codex directories with debouncing
-	const codexWatcher = workspace.createFileSystemWatcher("**/.codex/**/*");
+	// Watch for changes in .copilot directories with debouncing
+	const copilotWatcher = workspace.createFileSystemWatcher("**/.copilot/**/*");
 
 	let refreshTimeout: NodeJS.Timeout | undefined;
 	const debouncedRefresh = (event: string, uri: Uri) => {
@@ -548,7 +574,6 @@ function setupFileWatchers(
 			specExplorer.refresh();
 			steeringExplorer.refresh();
 			promptsExplorer.refresh();
-			// biome-ignore lint/style/noMagicNumbers: ignore
 		}, 1000); // Increase debounce time to 1 second
 	};
 
@@ -558,9 +583,9 @@ function setupFileWatchers(
 		watcher.onDidChange((uri) => debouncedRefresh("Change", uri));
 	};
 
-	attachWatcherHandlers(codexWatcher);
+	attachWatcherHandlers(copilotWatcher);
 
-	const watchers: FileSystemWatcher[] = [codexWatcher];
+	const watchers: FileSystemWatcher[] = [copilotWatcher];
 
 	const wsFolder = workspace.workspaceFolders?.[0];
 	if (wsFolder) {
@@ -576,7 +601,6 @@ function setupFileWatchers(
 		const configuredPaths = [
 			configManager.getPath("prompts"),
 			configManager.getPath("specs"),
-			configManager.getPath("steering"),
 		];
 
 		const extraPatterns = new Set<string>();
@@ -585,7 +609,7 @@ function setupFileWatchers(
 			if (!normalized || normalized.startsWith("..")) {
 				continue;
 			}
-			if (normalized === ".codex" || normalized.startsWith(".codex/")) {
+			if (normalized === ".copilot" || normalized.startsWith(".copilot/")) {
 				continue;
 			}
 			extraPatterns.add(`${normalized}/**/*`);
@@ -602,20 +626,21 @@ function setupFileWatchers(
 
 	context.subscriptions.push(...watchers);
 
-	// Watch for changes in CODEX.md files
+	// Watch for changes in copilot-instructions.md files
 	const globalHome = homedir() || process.env.USERPROFILE || "";
-	const globalCodexMdWatcher = workspace.createFileSystemWatcher(
-		new RelativePattern(globalHome, ".codex/CODEX.md")
+	const globalCopilotMdWatcher = workspace.createFileSystemWatcher(
+		new RelativePattern(globalHome, ".github/copilot-instructions.md")
 	);
-	const projectCodexMdWatcher =
-		workspace.createFileSystemWatcher("**/CODEX.md");
+	const projectCopilotMdWatcher = workspace.createFileSystemWatcher(
+		"**/copilot-instructions.md"
+	);
 
-	globalCodexMdWatcher.onDidCreate(() => steeringExplorer.refresh());
-	globalCodexMdWatcher.onDidDelete(() => steeringExplorer.refresh());
-	projectCodexMdWatcher.onDidCreate(() => steeringExplorer.refresh());
-	projectCodexMdWatcher.onDidDelete(() => steeringExplorer.refresh());
+	globalCopilotMdWatcher.onDidCreate(() => steeringExplorer.refresh());
+	globalCopilotMdWatcher.onDidDelete(() => steeringExplorer.refresh());
+	projectCopilotMdWatcher.onDidCreate(() => steeringExplorer.refresh());
+	projectCopilotMdWatcher.onDidDelete(() => steeringExplorer.refresh());
 
-	context.subscriptions.push(globalCodexMdWatcher, projectCodexMdWatcher);
+	context.subscriptions.push(globalCopilotMdWatcher, projectCopilotMdWatcher);
 }
 
 // biome-ignore lint/suspicious/noEmptyBlockStatements: ignore

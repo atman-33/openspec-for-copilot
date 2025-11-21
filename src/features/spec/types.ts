@@ -1,42 +1,43 @@
-export type CreateSpecFormData = {
-	summary: string;
+export interface CreateSpecFormData {
 	productContext: string;
+	keyScenarios: string;
 	technicalConstraints: string;
+	relatedFiles: string;
 	openQuestions: string;
-};
+}
 
-export type CreateSpecDraftState = {
+export interface CreateSpecDraftState {
 	formData: CreateSpecFormData;
 	lastUpdated: number;
-};
+}
 
-export type CreateSpecInitPayload = {
+export interface CreateSpecInitPayload {
 	shouldFocusPrimaryField: boolean;
 	draft?: CreateSpecDraftState;
-};
+}
 
-export type CreateSpecSubmitSuccessMessage = {
+export interface CreateSpecSubmitSuccessMessage {
 	type: "create-spec/submit:success";
-};
+}
 
-export type CreateSpecSubmitErrorMessage = {
+export interface CreateSpecSubmitErrorMessage {
 	type: "create-spec/submit:error";
 	payload: { message: string };
-};
+}
 
-export type CreateSpecConfirmCloseMessage = {
+export interface CreateSpecConfirmCloseMessage {
 	type: "create-spec/confirm-close";
 	payload: { shouldClose: boolean };
-};
+}
 
-export type CreateSpecFocusMessage = {
+export interface CreateSpecFocusMessage {
 	type: "create-spec/focus";
-};
+}
 
-export type CreateSpecInitMessage = {
+export interface CreateSpecInitMessage {
 	type: "create-spec/init";
 	payload: CreateSpecInitPayload;
-};
+}
 
 export type CreateSpecExtensionMessage =
 	| CreateSpecInitMessage
@@ -45,24 +46,28 @@ export type CreateSpecExtensionMessage =
 	| CreateSpecConfirmCloseMessage
 	| CreateSpecFocusMessage;
 
-export type CreateSpecSubmitMessage = {
+export interface CreateSpecSubmitMessage {
 	type: "create-spec/submit";
 	payload: CreateSpecFormData;
-};
+}
 
-export type CreateSpecAutosaveMessage = {
+export interface CreateSpecAutosaveMessage {
 	type: "create-spec/autosave";
 	payload: CreateSpecFormData;
-};
+}
 
-export type CreateSpecCloseAttemptMessage = {
+export interface CreateSpecCloseAttemptMessage {
 	type: "create-spec/close-attempt";
 	payload: { hasDirtyChanges: boolean };
-};
+}
 
-export type CreateSpecCancelMessage = { type: "create-spec/cancel" };
+export interface CreateSpecCancelMessage {
+	type: "create-spec/cancel";
+}
 
-export type CreateSpecReadyMessage = { type: "create-spec/ready" };
+export interface CreateSpecReadyMessage {
+	type: "create-spec/ready";
+}
 
 export type CreateSpecWebviewMessage =
 	| CreateSpecSubmitMessage

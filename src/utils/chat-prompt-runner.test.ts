@@ -1,89 +1,75 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { Uri, window, workspace } from "vscode";
+import { commands } from "vscode";
 import { sendPromptToChat } from "./chat-prompt-runner";
-import { addDocumentToCodexChat } from "./codex-chat-utils";
+import { ConfigManager } from "./config-manager";
 
-// Mock codex-chat-utils
-vi.mock("./codex-chat-utils", () => ({
-	addDocumentToCodexChat: vi.fn(),
+// Mock ConfigManager
+vi.mock("./config-manager", () => ({
+	ConfigManager: {
+		getInstance: vi.fn(),
+	},
 }));
 
 describe("chat-prompt-runner", () => {
-	const originalWorkspaceFolders = workspace.workspaceFolders;
+	const mockGetSettings = vi.fn();
 
 	beforeEach(() => {
 		vi.clearAllMocks();
-		vi.spyOn(workspace, "workspaceFolders", "get").mockReturnValue(
-			originalWorkspaceFolders
-		);
+		// Setup default mock behavior
+		vi.mocked(ConfigManager.getInstance).mockReturnValue({
+			getSettings: mockGetSettings,
+		} as any);
+		mockGetSettings.mockReturnValue({
+			chatLanguage: "English",
+		});
 	});
 
 	afterEach(() => {
 		vi.restoreAllMocks();
 	});
 
-	// 1. Happy Path: Test that sendPromptToChat creates a temporary file and opens it.
-	it("should create a temp file and open it in the chat", async () => {
+	it("should send the prompt to GitHub Copilot chat without modification when language is English", async () => {
 		const prompt = "Test prompt";
-		const mockUri = Uri.joinPath(
-			workspace.workspaceFolders![0].uri,
-			".codex",
-			"tmp",
-			"chat",
-			"prompt.md"
-		);
-		const mockDocument = { uri: mockUri, getText: () => prompt };
-
-		vi.mocked(workspace.openTextDocument).mockResolvedValue(
-			mockDocument as any
-		);
-		vi.mocked(Uri.joinPath).mockReturnValue(mockUri);
 
 		await sendPromptToChat(prompt);
 
-		expect(workspace.fs.createDirectory).toHaveBeenCalled();
-		expect(workspace.fs.writeFile).toHaveBeenCalled();
-		expect(workspace.openTextDocument).toHaveBeenCalledWith(mockUri);
-		expect(window.showTextDocument).toHaveBeenCalledWith(mockDocument, {
-			preview: false,
-			viewColumn: 1,
-		});
-		expect(addDocumentToCodexChat).toHaveBeenCalledWith(mockUri, {
-			preview: false,
-			viewColumn: 1,
-		});
-	});
-
-	// 2. Edge Case: Test that sendPromptToChat throws an error if there is no workspace folder.
-	it("should throw an error if no workspace folder is available", async () => {
-		vi.spyOn(workspace, "workspaceFolders", "get").mockReturnValue(undefined);
-		await expect(sendPromptToChat("test")).rejects.toThrow(
-			"Workspace folder is required to send prompts to chat."
+		expect(commands.executeCommand).toHaveBeenCalledWith(
+			"workbench.action.chat.open",
+			{
+				query: prompt,
+			}
 		);
 	});
 
-	// 3. Fail Safe / Mocks: Test that the temporary file has the correct content.
-	it("should write the correct content to the temporary file", async () => {
-		const prompt = "Here is a test prompt";
-		const mockUri = Uri.joinPath(
-			workspace.workspaceFolders![0].uri,
-			".codex",
-			"tmp",
-			"chat",
-			"prompt.md"
-		);
-		const mockDocument = { uri: mockUri, getText: () => prompt };
-
-		vi.mocked(workspace.openTextDocument).mockResolvedValue(
-			mockDocument as any
-		);
-		vi.mocked(Uri.joinPath).mockReturnValue(mockUri);
+	it("should append Japanese instruction when language is Japanese", async () => {
+		mockGetSettings.mockReturnValue({
+			chatLanguage: "Japanese",
+		});
+		const prompt = "Test prompt";
 
 		await sendPromptToChat(prompt);
 
-		expect(workspace.fs.writeFile).toHaveBeenCalledWith(
-			mockUri,
-			Buffer.from(prompt, "utf8")
+		expect(commands.executeCommand).toHaveBeenCalledWith(
+			"workbench.action.chat.open",
+			{
+				query: "Test prompt\n\n(Please respond in Japanese.)",
+			}
+		);
+	});
+
+	it("should append Spanish instruction when language is Spanish", async () => {
+		mockGetSettings.mockReturnValue({
+			chatLanguage: "Spanish",
+		});
+		const prompt = "Test prompt";
+
+		await sendPromptToChat(prompt);
+
+		expect(commands.executeCommand).toHaveBeenCalledWith(
+			"workbench.action.chat.open",
+			{
+				query: "Test prompt\n\n(Please respond in Spanish.)",
+			}
 		);
 	});
 });

@@ -3,17 +3,17 @@ import { PromptLoader } from "./prompt-loader";
 
 // Mock the prompts module
 vi.mock("../prompts/target", () => ({
-	spec: {
+	example: {
 		frontmatter: {
-			id: "spec-create-spec",
-			name: "Create Spec",
-			version: "0.1.0",
-			description: "Creates a new specification file.",
+			id: "example",
+			name: "Example Prompt",
+			version: "1.0.0",
+			description: "An example prompt",
 			variables: {
-				feature: { required: true },
+				name: { required: true },
 			},
 		},
-		content: "Feature: {{feature}}",
+		content: "Hello {{name}}!",
 	},
 }));
 
@@ -30,16 +30,16 @@ describe("PromptLoader", () => {
 
 	// 1. Happy Path: Test that renderPrompt correctly renders a prompt.
 	it("should render a prompt with the given variables", () => {
-		const rendered = loader.renderPrompt("spec-create-spec", {
-			feature: "New Login Flow",
+		const rendered = loader.renderPrompt("example", {
+			name: "World",
 		});
-		expect(rendered).toBe("Feature: New Login Flow");
+		expect(rendered).toBe("Hello World!");
 	});
 
 	// 2. Edge Case: Test that renderPrompt throws an error for missing required variables.
 	it("should throw an error if a required variable is missing", () => {
-		expect(() => loader.renderPrompt("spec-create-spec", {})).toThrow(
-			"Variable validation failed: Missing required variable: feature"
+		expect(() => loader.renderPrompt("example", {})).toThrow(
+			"Variable validation failed: Missing required variable: name"
 		);
 	});
 
@@ -47,7 +47,7 @@ describe("PromptLoader", () => {
 	it("should throw an error when trying to load a non-existent prompt", () => {
 		const promptId = "non-existent-prompt";
 		expect(() => loader.loadPrompt(promptId)).toThrow(
-			`Prompt not found: ${promptId}. Available prompts: spec-create-spec`
+			`Prompt not found: ${promptId}. Available prompts: example`
 		);
 	});
 });

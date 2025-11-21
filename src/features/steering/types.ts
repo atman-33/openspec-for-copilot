@@ -1,19 +1,19 @@
-export type CreateSteeringFormData = {
+export interface CreateSteeringFormData {
 	summary: string;
 	audience: string;
 	keyPractices: string;
 	antiPatterns: string;
-};
+}
 
-export type CreateSteeringDraftState = {
+export interface CreateSteeringDraftState {
 	formData: CreateSteeringFormData;
 	lastUpdated: number;
-};
+}
 
-export type CreateSteeringInitPayload = {
+export interface CreateSteeringInitPayload {
 	shouldFocusPrimaryField: boolean;
 	draft?: CreateSteeringDraftState;
-};
+}
 
 export type CreateSteeringExtensionMessage =
 	| { type: "create-steering/init"; payload: CreateSteeringInitPayload }
@@ -22,32 +22,32 @@ export type CreateSteeringExtensionMessage =
 	| { type: "create-steering/confirm-close"; payload: { shouldClose: boolean } }
 	| { type: "create-steering/focus" };
 
-export type CreateSteeringFieldErrors = {
+export interface CreateSteeringFieldErrors {
 	summary?: string;
-};
+}
 
-export type CreateSteeringSubmitMessage = {
+export interface CreateSteeringSubmitMessage {
 	type: "create-steering/submit";
 	payload: CreateSteeringFormData;
-};
+}
 
-export type CreateSteeringAutosaveMessage = {
+export interface CreateSteeringAutosaveMessage {
 	type: "create-steering/autosave";
 	payload: CreateSteeringFormData;
-};
+}
 
-export type CreateSteeringCloseAttemptMessage = {
+export interface CreateSteeringCloseAttemptMessage {
 	type: "create-steering/close-attempt";
 	payload: { hasDirtyChanges: boolean };
-};
+}
 
-export type CreateSteeringCancelMessage = {
+export interface CreateSteeringCancelMessage {
 	type: "create-steering/cancel";
-};
+}
 
-export type CreateSteeringReadyMessage = {
+export interface CreateSteeringReadyMessage {
 	type: "create-steering/ready";
-};
+}
 
 export type CreateSteeringWebviewMessage =
 	| CreateSteeringSubmitMessage

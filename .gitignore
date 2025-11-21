@@ -22,6 +22,4 @@ coverage/
 repomix-output*
 
 .serena
-GEMINI.md
-
-.codex/specs/
+.codex

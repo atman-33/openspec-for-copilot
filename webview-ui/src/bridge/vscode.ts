@@ -1,13 +1,12 @@
 // Minimal wrapper around acquireVsCodeApi with a dev-friendly fallback
 
-type VsCodeApi = {
+interface VsCodeApi {
 	postMessage: (message: any) => void;
 	getState: () => any;
 	setState: (state: any) => void;
-};
+}
 
 declare global {
-	// biome-ignore lint/nursery/useConsistentTypeDefinitions: ignore
 	interface Window {
 		acquireVsCodeApi?: () => VsCodeApi;
 	}
@@ -30,7 +29,7 @@ if (
 				window.dispatchEvent(
 					new MessageEvent("message", {
 						data: {
-							type: "codex.chat/echoResult",
+							type: "openspec.chat/echoResult",
 							id: msg.id,
 							text: msg.text,
 							ts: Date.now(),
