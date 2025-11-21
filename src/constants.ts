@@ -13,6 +13,7 @@ export const DEFAULT_CONFIG = {
 		prompts: true,
 		settings: false,
 	},
+	chatLanguage: "English",
 } as const;
 
 // Legacy exports for backward compatibility (can be removed after updating all references)

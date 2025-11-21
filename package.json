@@ -77,6 +77,24 @@
           "type": "string",
           "default": ".github/prompts",
           "description": "Path where Copilot prompt files are stored."
+        },
+        "openspec-for-copilot.chatLanguage": {
+          "type": "string",
+          "default": "English",
+          "enum": [
+            "English",
+            "Japanese",
+            "Spanish",
+            "French",
+            "German",
+            "Chinese (Simplified)",
+            "Chinese (Traditional)",
+            "Italian",
+            "Portuguese (Brazil)",
+            "Korean",
+            "Russian"
+          ],
+          "description": "The language GitHub Copilot should use for responses."
         }
       }
     },

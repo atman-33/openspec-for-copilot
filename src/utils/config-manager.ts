@@ -1,6 +1,7 @@
 import { join } from "path";
 import { type WorkspaceFolder, workspace } from "vscode";
 import {
+	DEFAULT_CONFIG,
 	DEFAULT_PATHS,
 	DEFAULT_VIEW_VISIBILITY,
 	VSC_CONFIG_NAMESPACE,
@@ -16,6 +17,7 @@ export interface OpenSpecSettings {
 		prompts: { visible: boolean };
 		settings: { visible: boolean };
 	};
+	chatLanguage: string;
 }
 
 export class ConfigManager {
@@ -88,6 +90,11 @@ export class ConfigManager {
 		return configuredPaths;
 	}
 
+	private getChatLanguage(): string {
+		const config = workspace.getConfiguration(VSC_CONFIG_NAMESPACE);
+		return config.get<string>("chatLanguage") ?? DEFAULT_CONFIG.chatLanguage;
+	}
+
 	private mergeSettings(
 		defaults: OpenSpecSettings,
 		overrides: Partial<OpenSpecSettings> = {}
@@ -119,11 +126,13 @@ export class ConfigManager {
 		return {
 			paths: mergedPaths,
 			views: mergedViews,
+			chatLanguage: overrides.chatLanguage ?? defaults.chatLanguage,
 		};
 	}
 
 	private getDefaultSettings(): OpenSpecSettings {
 		const configuredPaths = this.getConfiguredPaths();
+		const chatLanguage = this.getChatLanguage();
 
 		return {
 			paths: { ...DEFAULT_PATHS, ...configuredPaths },
@@ -133,6 +142,7 @@ export class ConfigManager {
 				prompts: { visible: DEFAULT_VIEW_VISIBILITY.prompts },
 				settings: { visible: DEFAULT_VIEW_VISIBILITY.settings },
 			},
+			chatLanguage,
 		};
 	}
 	// biome-ignore lint/suspicious/useAwait: ignore
