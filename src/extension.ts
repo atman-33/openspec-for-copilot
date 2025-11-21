@@ -226,6 +226,9 @@ function registerCommands(
 	);
 
 	context.subscriptions.push(
+		commands.registerCommand("kiro-codex-ide.noop", () => {
+			// noop
+		}),
 		createSpecCommand,
 		commands.registerCommand(
 			"kiro-codex-ide.spec.navigate.requirements",
@@ -542,7 +545,6 @@ function setupFileWatchers(
 			specExplorer.refresh();
 			steeringExplorer.refresh();
 			promptsExplorer.refresh();
-			// biome-ignore lint/style/noMagicNumbers: ignore
 		}, 1000); // Increase debounce time to 1 second
 	};
 

@@ -41,14 +41,32 @@ export class SpecTaskCodeLensProvider implements CodeLensProvider {
 
 		// Create a single CodeLens at the top of the file
 		const range = new Range(0, 0, 0, 0);
-		const codeLens = new CodeLens(range, {
-			title: "$(play) Start Task",
-			tooltip: "Click to generate OpenSpec apply prompt",
-			command: "kiro-codex-ide.spec.implTask",
-			arguments: [document.uri],
-		});
+		const text = document.getText();
+		const hasIncompleteTasks = text.includes("- [ ]");
+		const hasCompletedTasks = text.includes("- [x]");
 
-		return [codeLens];
+		if (hasIncompleteTasks) {
+			return [
+				new CodeLens(range, {
+					title: "$(play) Start All Tasks",
+					tooltip: "Click to generate OpenSpec apply prompt",
+					command: "kiro-codex-ide.spec.implTask",
+					arguments: [document.uri],
+				}),
+			];
+		}
+
+		if (hasCompletedTasks) {
+			return [
+				new CodeLens(range, {
+					title: "$(check) All Tasks Completed",
+					tooltip: "All tasks are completed",
+					command: "kiro-codex-ide.noop",
+				}),
+			];
+		}
+
+		return [];
 	}
 
 	private isSpecTaskDocument(document: TextDocument): boolean {
