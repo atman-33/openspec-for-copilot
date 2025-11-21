@@ -341,13 +341,13 @@ export class PromptsExplorerProvider implements TreeDataProvider<PromptItem> {
 	};
 }
 
-type PromptItemOptions = {
+interface PromptItemOptions {
 	resourceUri?: Uri;
 	command?: Command;
 	tooltip?: string;
 	description?: string;
 	source?: PromptSource;
-};
+}
 
 class PromptItem extends TreeItem {
 	readonly contextValue: string;

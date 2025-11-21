@@ -1,4 +1,4 @@
-# Kiro for Codex IDE
+# OpenSpec for Copilot
 
 [![Visual Studio Marketplace](https://img.shields.io/vscode-marketplace/v/atman-dev.kiro-for-codex-ide.svg?style=flat-square)](https://marketplace.visualstudio.com/items?itemName=atman-dev.kiro-for-codex-ide)
 [![Downloads](https://img.shields.io/vscode-marketplace/d/atman-dev.kiro-for-codex-ide.svg?style=flat-square)](https://marketplace.visualstudio.com/items?itemName=atman-dev.kiro-for-codex-ide)

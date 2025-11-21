@@ -12,14 +12,14 @@ import {
 import { VSC_CONFIG_NAMESPACE } from "../constants";
 import { ConfigManager } from "../utils/config-manager";
 
-export type CodexAvailabilityResult = {
+export interface CodexAvailabilityResult {
 	isAvailable: boolean;
 	isInstalled: boolean;
 	version: string | null;
 	isCompatible: boolean;
 	errorMessage: string | null;
 	setupGuidance: string | null;
-};
+}
 
 export class CodexProvider {
 	private readonly context: ExtensionContext;
@@ -85,7 +85,7 @@ export class CodexProvider {
 	 */
 	async invokeCodexSplitView(
 		prompt: string,
-		title = "Kiro for Codex IDE Code"
+		title = "OpenSpec for Copilot Code"
 	): Promise<Terminal> {
 		try {
 			// Create temp file with the prompt
@@ -123,7 +123,6 @@ export class CodexProvider {
 					// Ignore cleanup errors
 					this.outputChannel.appendLine(`Failed to cleanup temp file: ${e}`);
 				}
-				// biome-ignore lint/style/noMagicNumbers: ignore
 			}, 30_000); // 30 seconds delay to give Codex time to read the file
 
 			// Return the terminal for potential renaming
@@ -143,7 +142,6 @@ export class CodexProvider {
 		terminal.show();
 
 		// Small delay to ensure terminal is focused
-		// biome-ignore lint/style/noMagicNumbers: ignore
 		await new Promise((resolve) => setTimeout(resolve, 100));
 		this.outputChannel.appendLine(
 			`[CodexProvider] ${terminal.name} Terminal renamed to: ${newName}`
@@ -193,7 +191,7 @@ export class CodexProvider {
 			let shellIntegrationChecks = 0;
 			// Wait for shell integration to be available
 			const checkShellIntegration = setInterval(() => {
-				shellIntegrationChecks++;
+				shellIntegrationChecks += 1;
 
 				if (terminal.shellIntegration) {
 					clearInterval(checkShellIntegration);
@@ -236,11 +234,9 @@ export class CodexProvider {
 										`[Codex] Failed to cleanup temp file: ${e}`
 									);
 								}
-								// biome-ignore lint/style/noMagicNumbers: ignore
 							}, 1000);
 						}
 					});
-					// biome-ignore lint/style/noMagicNumbers: ignore
 				} else if (shellIntegrationChecks > 20) {
 					// After 2 seconds
 					// Fallback: execute without shell integration
@@ -260,10 +256,8 @@ export class CodexProvider {
 						} catch (e) {
 							// Ignore cleanup errors
 						}
-						// biome-ignore lint/style/noMagicNumbers: ignore
 					}, 5000);
 				}
-				// biome-ignore lint/style/noMagicNumbers: ignore
 			}, 100);
 		});
 	}

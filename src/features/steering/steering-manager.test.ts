@@ -9,7 +9,6 @@ import { SteeringManager } from "./steering-manager";
 vi.mock("../../services/prompt-loader", () => {
 	const mockRenderPrompt = vi.fn();
 	return {
-		// biome-ignore lint/style/useNamingConvention: ignore
 		PromptLoader: {
 			getInstance: () => ({
 				renderPrompt: mockRenderPrompt,
@@ -29,7 +28,6 @@ const { openMock, createSteeringInputControllerMock } = vi.hoisted(() => {
 	};
 });
 vi.mock("./create-steering-input-controller", () => ({
-	// biome-ignore lint/style/useNamingConvention: ignore
 	CreateSteeringInputController: createSteeringInputControllerMock,
 }));
 

@@ -1,6 +1,6 @@
 {
   "name": "kiro-for-codex-ide",
-  "displayName": "Kiro for Codex IDE",
+  "displayName": "OpenSpec for Copilot",
   "description": "Spec-driven development with Codex CLI - inspired by Kiro",
   "version": "0.1.6",
   "author": "atman-33",
@@ -46,7 +46,7 @@
   },
   "contributes": {
     "configuration": {
-      "title": "Kiro for Codex IDE",
+      "title": "OpenSpec for Copilot",
       "properties": {
         "kiro-codex-ide.views.specs.visible": {
           "type": "boolean",
@@ -89,7 +89,7 @@
       "activitybar": [
         {
           "id": "kiro-codex-ide",
-          "title": "Kiro for Codex IDE",
+          "title": "OpenSpec for Copilot",
           "icon": "./icons/kiro.svg"
         }
       ]
@@ -138,109 +138,109 @@
       },
       {
         "view": "kiro-codex-ide.views.overview",
-        "contents": "Configure Kiro for Codex IDE\n\n[$(gear) Open Settings](command:kiro-codex-ide.settings.open)\n[$(file-text) Open Global Config (config.toml)](command:kiro-codex-ide.settings.openGlobalConfig)\n[$(question) Help](command:kiro-codex-ide.help.open)"
+        "contents": "Configure OpenSpec for Copilot\n\n[$(gear) Open Settings](command:kiro-codex-ide.settings.open)\n[$(file-text) Open MCP Config (mcp.json)](command:kiro-codex-ide.settings.openGlobalConfig)\n[$(question) Help](command:kiro-codex-ide.help.open)"
       }
     ],
     "commands": [
       {
         "command": "kiro-codex-ide.spec.create",
         "title": "Create New Spec",
-        "category": "Kiro for Codex IDE",
+        "category": "OpenSpec for Copilot",
         "icon": "$(plus)"
       },
       {
         "command": "kiro-codex-ide.spec.refresh",
         "title": "Refresh Specs",
-        "category": "Kiro for Codex IDE",
+        "category": "OpenSpec for Copilot",
         "icon": "$(refresh)"
       },
       {
         "command": "kiro-codex-ide.spec.delete",
         "title": "Delete Spec",
-        "category": "Kiro for Codex IDE",
+        "category": "OpenSpec for Copilot",
         "icon": "$(trash)"
       },
       {
         "command": "kiro-codex-ide.spec.archiveChange",
         "title": "Archive Change",
-        "category": "Kiro for Codex IDE",
+        "category": "OpenSpec for Copilot",
         "icon": "$(archive)"
       },
       {
         "command": "kiro-codex-ide.spec.implTask",
         "title": "Implement Task",
-        "category": "Kiro for Codex IDE"
+        "category": "OpenSpec for Copilot"
       },
       {
         "command": "kiro-codex-ide.steering.refine",
         "title": "Refine Steering",
-        "category": "Kiro for Codex IDE",
+        "category": "OpenSpec for Copilot",
         "icon": "$(sparkle)"
       },
       {
         "command": "kiro-codex-ide.steering.delete",
         "title": "Delete Steering",
-        "category": "Kiro for Codex IDE",
+        "category": "OpenSpec for Copilot",
         "icon": "$(trash)"
       },
       {
         "command": "kiro-codex-ide.steering.refresh",
         "title": "Refresh Steering",
-        "category": "Kiro for Codex IDE",
+        "category": "OpenSpec for Copilot",
         "icon": "$(refresh)"
       },
       {
         "command": "kiro-codex-ide.steering.createUserRule",
         "title": "Create User Rule",
-        "category": "Kiro for Codex IDE",
+        "category": "OpenSpec for Copilot",
         "icon": "$(globe)"
       },
       {
         "command": "kiro-codex-ide.steering.createProjectRule",
         "title": "Create Project Rule",
-        "category": "Kiro for Codex IDE",
+        "category": "OpenSpec for Copilot",
         "icon": "$(root-folder)"
       },
       {
         "command": "kiro-codex-ide.prompts.create",
         "title": "Create Prompt",
-        "category": "Kiro for Codex IDE",
+        "category": "OpenSpec for Copilot",
         "icon": "$(plus)"
       },
       {
         "command": "kiro-codex-ide.prompts.refresh",
         "title": "Refresh Prompts",
-        "category": "Kiro for Codex IDE",
+        "category": "OpenSpec for Copilot",
         "icon": "$(refresh)"
       },
       {
         "command": "kiro-codex-ide.prompts.run",
         "title": "Run Prompt",
-        "category": "Kiro for Codex IDE",
+        "category": "OpenSpec for Copilot",
         "icon": "$(play)"
       },
       {
         "command": "kiro-codex-ide.prompts.delete",
         "title": "Delete Prompt",
-        "category": "Kiro for Codex IDE",
+        "category": "OpenSpec for Copilot",
         "icon": "$(trash)"
       },
       {
         "command": "kiro-codex-ide.settings.open",
-        "title": "Kiro Settings",
-        "category": "Kiro for Codex IDE",
+        "title": "OpenSpec Settings",
+        "category": "OpenSpec for Copilot",
         "icon": "$(gear)"
       },
       {
         "command": "kiro-codex-ide.settings.openGlobalConfig",
-        "title": "Open Global Config (config.toml)",
-        "category": "Kiro for Codex IDE",
+        "title": "Open MCP Config (mcp.json)",
+        "category": "OpenSpec for Copilot",
         "icon": "$(file-text)"
       },
       {
         "command": "kiroCodex.help.open",
-        "title": "Kiro Help",
-        "category": "Kiro for Codex",
+        "title": "OpenSpec Help",
+        "category": "OpenSpec for Copilot",
         "icon": "$(question)"
       }
     ],

@@ -1,3 +1,6 @@
+import { exec } from "child_process";
+import { release } from "os";
+import { promisify } from "util";
 import { homedir } from "os";
 import { basename, join } from "node:path";
 import type { FileSystemWatcher } from "vscode";
@@ -545,24 +548,16 @@ function registerCommands(
 		commands.registerCommand(
 			"kiro-codex-ide.settings.openGlobalConfig",
 			async () => {
-				outputChannel.appendLine("Opening global Codex config...");
-				const userHome =
-					homedir() || process.env.HOME || process.env.USERPROFILE;
+				outputChannel.appendLine("Opening MCP config...");
 
-				if (!userHome) {
-					window.showErrorMessage(
-						"Unable to resolve the user home directory for Codex config."
-					);
-					return;
-				}
-
-				const configUri = Uri.file(join(userHome, ".codex", "config.toml"));
+				const configPath = await getMcpConfigPath();
+				const configUri = Uri.file(configPath);
 
 				try {
 					await workspace.fs.stat(configUri);
 				} catch {
 					window.showWarningMessage(
-						`Global Codex config not found at ${configUri.fsPath}. Create the file manually to customize Codex CLI.`
+						`MCP config not found at ${configUri.fsPath}.`
 					);
 					return;
 				}
@@ -573,17 +568,15 @@ function registerCommands(
 				} catch (error) {
 					const message =
 						error instanceof Error ? error.message : String(error);
-					window.showErrorMessage(
-						`Failed to open global Codex config: ${message}`
-					);
+					window.showErrorMessage(`Failed to open MCP config: ${message}`);
 				}
 			}
 		),
 
 		// biome-ignore lint/suspicious/useAwait: ignore
 		commands.registerCommand("kiro-codex-ide.help.open", async () => {
-			outputChannel.appendLine("Opening Kiro help...");
-			const helpUrl = "https://github.com/atman-33/kiro-for-codex-ide#readme";
+			outputChannel.appendLine("Opening OpenSpec help...");
+			const helpUrl = "https://github.com/atman-33/openspec-for-copilot#readme";
 			env.openExternal(Uri.parse(helpUrl));
 		}),
 
@@ -592,6 +585,49 @@ function registerCommands(
 			await toggleViews();
 		})
 	);
+}
+
+const WSL_REGEX = /microsoft|wsl/i;
+
+async function getMcpConfigPath(): Promise<string> {
+	const isWsl = process.platform === "linux" && WSL_REGEX.test(release());
+
+	if (process.platform === "win32") {
+		return join(process.env.APPDATA || "", "Code", "User", "mcp.json");
+	}
+
+	if (isWsl) {
+		try {
+			const execAsync = promisify(exec);
+			const { stdout: winAppData } = await execAsync(
+				'cmd.exe /C "echo %APPDATA%"'
+			);
+			const trimmedWinAppData = winAppData.trim();
+			const { stdout: wslPath } = await execAsync(
+				`wslpath -u "${trimmedWinAppData}"`
+			);
+			const appDataPath = wslPath.trim();
+			return join(appDataPath, "Code", "User", "mcp.json");
+		} catch (error) {
+			outputChannel.appendLine(
+				`Failed to resolve Windows path in WSL: ${error}`
+			);
+			// Fallback to Linux path if resolution fails
+		}
+	}
+
+	if (process.platform === "darwin") {
+		return join(
+			homedir(),
+			"Library",
+			"Application Support",
+			"Code",
+			"User",
+			"mcp.json"
+		);
+	}
+
+	return join(homedir(), ".config", "Code", "User", "mcp.json");
 }
 
 function setupFileWatchers(

@@ -8,7 +8,7 @@ import type {
 
 const SUMMARY_HELPER_ID = "create-steering-summary-helper";
 
-type CreateSteeringFormProps = {
+interface CreateSteeringFormProps {
 	formData: CreateSteeringFormData;
 	fieldErrors: CreateSteeringFieldErrors;
 	isSubmitting: boolean;
@@ -22,7 +22,7 @@ type CreateSteeringFormProps = {
 	audienceRef: MutableRefObject<HTMLTextAreaElement | null>;
 	keyPracticesRef: MutableRefObject<HTMLTextAreaElement | null>;
 	antiPatternsRef: MutableRefObject<HTMLTextAreaElement | null>;
-};
+}
 
 export const CreateSteeringForm = ({
 	formData,

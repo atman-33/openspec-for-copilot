@@ -5,7 +5,7 @@ import type { CreateSpecFieldErrors, CreateSpecFormData } from "../types";
 
 const SUMMARY_HELPER_ID = "create-spec-summary-helper";
 
-type CreateSpecFormProps = {
+interface CreateSpecFormProps {
 	formData: CreateSpecFormData;
 	fieldErrors: CreateSpecFieldErrors;
 	isSubmitting: boolean;
@@ -19,7 +19,7 @@ type CreateSpecFormProps = {
 	productContextRef: MutableRefObject<HTMLTextAreaElement | null>;
 	technicalConstraintsRef: MutableRefObject<HTMLTextAreaElement | null>;
 	openQuestionsRef: MutableRefObject<HTMLTextAreaElement | null>;
-};
+}
 
 export const CreateSpecForm = ({
 	formData,

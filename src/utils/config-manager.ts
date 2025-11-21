@@ -5,7 +5,7 @@ import {
 	DEFAULT_VIEW_VISIBILITY,
 	VSC_CONFIG_NAMESPACE,
 } from "../constants";
-export type KiroCodexIdeSettings = {
+export interface KiroCodexIdeSettings {
 	paths: {
 		specs: string;
 		steering: string;
@@ -17,7 +17,7 @@ export type KiroCodexIdeSettings = {
 		prompts: { visible: boolean };
 		settings: { visible: boolean };
 	};
-};
+}
 
 export class ConfigManager {
 	private static instance: ConfigManager;

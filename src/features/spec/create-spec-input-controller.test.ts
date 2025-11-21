@@ -11,7 +11,6 @@ vi.mock("../../utils/chat-prompt-runner", () => ({
 }));
 
 vi.mock("../../utils/notification-utils", () => ({
-	// biome-ignore lint/style/useNamingConvention: ignore
 	NotificationUtils: {
 		showAutoDismissNotification: vi.fn(),
 	},
@@ -239,7 +238,6 @@ describe("CreateSpecInputController", () => {
 		const controller = createController();
 		await controller.open();
 
-		// biome-ignore lint/style/noMagicNumbers: ignore
 		const nowSpy = vi.spyOn(Date, "now").mockReturnValue(1_700_000_000_000);
 
 		await emitMessage({

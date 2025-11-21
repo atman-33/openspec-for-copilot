@@ -20,12 +20,12 @@ import type {
 	CreateSpecExtensionMessage,
 } from "./types";
 
-type CreateSpecInputControllerDependencies = {
+interface CreateSpecInputControllerDependencies {
 	context: ExtensionContext;
 	configManager: ConfigManager;
 	promptLoader: PromptLoader;
 	outputChannel: OutputChannel;
-};
+}
 
 const CREATE_SPEC_DRAFT_STATE_KEY = "createSpecDraftState";
 

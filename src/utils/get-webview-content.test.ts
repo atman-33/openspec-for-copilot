@@ -24,7 +24,7 @@ describe("get-webview-content", () => {
 		expect(html).toContain(
 			'href="file:///mock/extension/dist/webview/app/assets/index.css"'
 		);
-		expect(html).toContain("<title>Kiro for Codex IDE</title>");
+		expect(html).toContain("<title>OpenSpec for Copilot</title>");
 	});
 
 	// 2. Edge Case: Test getNonce function for correct length and format.
@@ -34,7 +34,6 @@ describe("get-webview-content", () => {
 		const html = getWebviewContent(mockWebview, mockExtensionUri, "test");
 		const nonceMatch = html.match(/script-src 'nonce-([a-zA-Z0-9]{32})'/);
 		expect(nonceMatch).not.toBeNull();
-		// biome-ignore lint/style/noMagicNumbers: ignore
 		expect(nonceMatch?.[1].length).toBe(32);
 	});
 
