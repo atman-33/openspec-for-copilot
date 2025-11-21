@@ -47,7 +47,7 @@ OpenSpec for Copilot is a Visual Studio Code extension that gives GitHub Copilot
 ## Important Constraints
 - Honor product, tech, and structure rules captured in `openspec/AGENTS.md`; deviations require updates through the documented steering workflows.
 - Access steering, spec, and prompt paths via `ConfigManager` helpers; do not hardcode `openspec` paths or bypass VS Code `workspace.fs` APIs.
-- Route all Copilot interactions through `CodexProvider.invokeCodexSplitView`/`invokeCodexHeadless` to keep chat sessions consistent and temporary payloads under global storage or temp directories.
+- Route all Copilot interactions through `CopilotProvider.invokeCopilotSplitView`/`CopilotProvider.invokeCopilotHeadless` to keep chat sessions consistent and temporary payloads under global storage or temp directories.
 - Avoid silently overwriting user-authored `openspec` content—manager methods guard against unintended deletions and must remain the single touchpoint for file mutations.
 - Maintain separation between extension code and webview bundle; webview assets should be produced via `npm run build:webview` and loaded from `dist/`.
 
