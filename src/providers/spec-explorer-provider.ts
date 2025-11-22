@@ -54,15 +54,15 @@ export class SpecExplorerProvider implements TreeDataProvider<SpecItem> {
 		if (!element) {
 			return [
 				new SpecItem(
-					"Current Specs",
-					TreeItemCollapsibleState.Expanded,
-					"group-specs",
-					this.context
-				),
-				new SpecItem(
 					"Changes",
 					TreeItemCollapsibleState.Expanded,
 					"group-changes",
+					this.context
+				),
+				new SpecItem(
+					"Current Specs",
+					TreeItemCollapsibleState.Expanded,
+					"group-specs",
 					this.context
 				),
 			];
