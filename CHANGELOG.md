@@ -2,6 +2,15 @@
 
 ---
 
+## v0.3.1 2025-11-22
+
+### Changed
+
+- update icon image
+- Merge remote-tracking branch 'origin/main'
+- add Project Agents group and rename functionality in Prompts explorer
+- Merge pull request #8 from atman-33/version-bump/v0.3.0
+
 ## v0.3.0 2025-11-22
 
 ### Added
