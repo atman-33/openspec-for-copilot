@@ -264,8 +264,14 @@
         "icon": "$(play)"
       },
       {
+        "command": "openspec-for-copilot.prompts.rename",
+        "title": "Rename",
+        "category": "OpenSpec for Copilot",
+        "icon": "$(edit)"
+      },
+      {
         "command": "openspec-for-copilot.prompts.delete",
-        "title": "Delete Prompt",
+        "title": "Delete",
         "category": "OpenSpec for Copilot",
         "icon": "$(trash)"
       },
@@ -343,9 +349,14 @@
           "group": "inline"
         },
         {
+          "command": "openspec-for-copilot.prompts.rename",
+          "when": "view == openspec-for-copilot.views.promptsExplorer && (viewItem == prompt || viewItem == prompt-runnable)",
+          "group": "7_modification@1"
+        },
+        {
           "command": "openspec-for-copilot.prompts.delete",
           "when": "view == openspec-for-copilot.views.promptsExplorer && (viewItem == prompt || viewItem == prompt-runnable)",
-          "group": "7_modification"
+          "group": "7_modification@2"
         }
       ],
       "commandPalette": [

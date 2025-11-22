@@ -20,6 +20,7 @@ export const workspace = {
 		readDirectory: vi.fn(),
 		stat: vi.fn(),
 		delete: vi.fn(),
+		rename: vi.fn(),
 	},
 	openTextDocument: vi.fn(),
 	onDidChangeConfiguration: vi.fn(),

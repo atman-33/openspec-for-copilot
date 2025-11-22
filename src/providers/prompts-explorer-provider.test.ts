@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { ExtensionContext } from "vscode";
-import { FileType, Uri, workspace } from "vscode";
+import { FileType, Uri, window, workspace } from "vscode";
 import { PromptsExplorerProvider } from "./prompts-explorer-provider";
 import { ConfigManager } from "../utils/config-manager";
 
@@ -21,6 +21,7 @@ describe("PromptsExplorerProvider", () => {
 	} as ExtensionContext;
 	const projectRoot = "/fake/workspace/.github/prompts";
 	const globalRoot = "/home/test/.github/prompts";
+	const agentsRoot = "/fake/workspace/.github/agents";
 
 	beforeEach(() => {
 		vi.clearAllMocks();
@@ -35,15 +36,22 @@ describe("PromptsExplorerProvider", () => {
 		);
 		vi.mocked(workspace.fs.readDirectory).mockReset();
 		vi.mocked(workspace.fs.readDirectory).mockResolvedValue([] as any);
+		vi.mocked(workspace.fs.rename).mockReset();
+		vi.mocked(workspace.fs.rename).mockResolvedValue();
+		vi.mocked(window.showInputBox).mockReset();
 
 		provider = new PromptsExplorerProvider(context);
 	});
 
-	it("returns global, project prompts, and project instructions groups at the root", async () => {
+	it("returns all prompt groups at the root", async () => {
 		const rootItems = await provider.getChildren();
-		expect(rootItems).toHaveLength(3);
-		const [globalGroup, projectPromptsGroup, projectInstructionsGroup] =
-			rootItems;
+		expect(rootItems).toHaveLength(4);
+		const [
+			globalGroup,
+			projectPromptsGroup,
+			projectInstructionsGroup,
+			projectAgentsGroup,
+		] = rootItems;
 
 		expect(globalGroup.label).toBe("Global");
 		expect(globalGroup.contextValue).toBe("prompt-group-global");
@@ -58,6 +66,10 @@ describe("PromptsExplorerProvider", () => {
 			"prompt-group-project-instructions"
 		);
 		expect(projectInstructionsGroup.description).toBe(".github/instructions");
+
+		expect(projectAgentsGroup.label).toBe("Project Agents");
+		expect(projectAgentsGroup.contextValue).toBe("prompt-group-project-agents");
+		expect(projectAgentsGroup.description).toBe(".github/agents");
 	});
 
 	it("lists project prompts within the project prompts group", async () => {
@@ -110,6 +122,23 @@ describe("PromptsExplorerProvider", () => {
 		).toBe(true);
 	});
 
+	it("lists project agents within the project agents group", async () => {
+		vi.mocked(workspace.fs.readDirectory).mockImplementation((uri) => {
+			if (uri.fsPath === agentsRoot) {
+				return Promise.resolve([["agent.md", FileType.File]] as any);
+			}
+			return Promise.resolve([] as any);
+		});
+
+		const rootItems = await provider.getChildren();
+		const projectAgentsGroup = rootItems[3];
+		const agents = await provider.getChildren(projectAgentsGroup);
+
+		expect(agents.map((item) => item.label)).toEqual(["agent.md"]);
+		expect(agents.every((item) => item.contextValue === "prompt")).toBe(true);
+		expect(agents.every((item) => item.source === "project-agents")).toBe(true);
+	});
+
 	it("shows an empty state when the global directory is missing", async () => {
 		vi.mocked(workspace.fs.readDirectory).mockImplementation((uri) => {
 			if (uri.fsPath.startsWith(globalRoot)) {
@@ -124,5 +153,24 @@ describe("PromptsExplorerProvider", () => {
 		expect(globalPrompts).toHaveLength(1);
 		expect(globalPrompts[0].label).toBe("No prompts found");
 		expect(globalPrompts[0].contextValue).toBe("prompts-empty");
+	});
+
+	it("renames a prompt file when the rename command succeeds", async () => {
+		const item = {
+			resourceUri: Uri.file(`${projectRoot}/example.md`),
+		};
+		vi.mocked(window.showInputBox).mockResolvedValue("renamed.md");
+		const refreshSpy = vi.spyOn(provider, "refresh");
+
+		await provider.renamePrompt(item as any);
+
+		expect(workspace.fs.rename).toHaveBeenCalledWith(
+			item.resourceUri,
+			expect.objectContaining({
+				fsPath: `${projectRoot}/renamed.md`,
+			}),
+			{ overwrite: false }
+		);
+		expect(refreshSpy).toHaveBeenCalled();
 	});
 });
