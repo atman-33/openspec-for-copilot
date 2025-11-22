@@ -39,21 +39,28 @@ describe("PromptsExplorerProvider", () => {
 		provider = new PromptsExplorerProvider(context);
 	});
 
-	it("returns project and global groups at the root", async () => {
+	it("returns global, project prompts, and project instructions groups at the root", async () => {
 		const rootItems = await provider.getChildren();
-		expect(rootItems).toHaveLength(2);
-		const [projectGroup, globalGroup] = rootItems;
-
-		expect(projectGroup.label).toBe("Project");
-		expect(projectGroup.contextValue).toBe("prompt-group-project");
-		expect(projectGroup.description).toBe(".github/prompts");
+		expect(rootItems).toHaveLength(3);
+		const [globalGroup, projectPromptsGroup, projectInstructionsGroup] =
+			rootItems;
 
 		expect(globalGroup.label).toBe("Global");
 		expect(globalGroup.contextValue).toBe("prompt-group-global");
 		expect(globalGroup.description).toBe(globalRoot);
+
+		expect(projectPromptsGroup.label).toBe("Project Prompts");
+		expect(projectPromptsGroup.contextValue).toBe("prompt-group-project");
+		expect(projectPromptsGroup.description).toBe(".github/prompts");
+
+		expect(projectInstructionsGroup.label).toBe("Project Instructions");
+		expect(projectInstructionsGroup.contextValue).toBe(
+			"prompt-group-project-instructions"
+		);
+		expect(projectInstructionsGroup.description).toBe(".github/instructions");
 	});
 
-	it("lists project prompts within the project group", async () => {
+	it("lists project prompts within the project prompts group", async () => {
 		vi.mocked(workspace.fs.readDirectory).mockImplementation((uri) => {
 			if (uri.fsPath === projectRoot) {
 				return Promise.resolve([
@@ -67,8 +74,8 @@ describe("PromptsExplorerProvider", () => {
 			return Promise.resolve([] as any);
 		});
 
-		const [projectGroup] = await provider.getChildren();
-		const projectPrompts = await provider.getChildren(projectGroup);
+		const [, projectPromptsGroup] = await provider.getChildren();
+		const projectPrompts = await provider.getChildren(projectPromptsGroup);
 
 		expect(projectPrompts.map((item) => item.label)).toEqual([
 			"alpha.md",
@@ -77,9 +84,30 @@ describe("PromptsExplorerProvider", () => {
 		expect(projectPrompts.every((item) => item.contextValue === "prompt")).toBe(
 			true
 		);
-		expect(projectPrompts.every((item) => item.source === "project")).toBe(
+		expect(
+			projectPrompts.every((item) => item.source === "project-prompts")
+		).toBe(true);
+	});
+
+	it("lists project instructions within the project instructions group", async () => {
+		const instructionsRoot = "/fake/workspace/.github/instructions";
+		vi.mocked(workspace.fs.readDirectory).mockImplementation((uri) => {
+			if (uri.fsPath === instructionsRoot) {
+				return Promise.resolve([["guide.md", FileType.File]] as any);
+			}
+			return Promise.resolve([] as any);
+		});
+
+		const [, , projectInstructionsGroup] = await provider.getChildren();
+		const instructions = await provider.getChildren(projectInstructionsGroup);
+
+		expect(instructions.map((item) => item.label)).toEqual(["guide.md"]);
+		expect(instructions.every((item) => item.contextValue === "prompt")).toBe(
 			true
 		);
+		expect(
+			instructions.every((item) => item.source === "project-instructions")
+		).toBe(true);
 	});
 
 	it("shows an empty state when the global directory is missing", async () => {
@@ -90,7 +118,7 @@ describe("PromptsExplorerProvider", () => {
 			return Promise.resolve([] as any);
 		});
 
-		const [, globalGroup] = await provider.getChildren();
+		const [globalGroup] = await provider.getChildren();
 		const globalPrompts = await provider.getChildren(globalGroup);
 
 		expect(globalPrompts).toHaveLength(1);

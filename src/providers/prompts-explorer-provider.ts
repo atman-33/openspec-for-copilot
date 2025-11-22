@@ -21,7 +21,7 @@ import { getVSCodeUserDataPath, isWindowsOrWsl } from "../utils/platform-utils";
 
 const { joinPath } = Uri;
 
-type PromptSource = "project" | "global";
+type PromptSource = "project-prompts" | "project-instructions" | "global";
 
 type TreeEventPayload = PromptItem | undefined | null | void;
 
@@ -59,6 +59,8 @@ export class PromptsExplorerProvider implements TreeDataProvider<PromptItem> {
 
 		if (item?.source === "global") {
 			rootUri = await this.getGlobalPromptsRoot();
+		} else if (item?.source === "project-instructions") {
+			rootUri = this.getInstructionsRoot();
 		} else {
 			rootUri = this.getPromptsRoot();
 		}
@@ -151,7 +153,11 @@ export class PromptsExplorerProvider implements TreeDataProvider<PromptItem> {
 		}
 
 		if (element.contextValue === "prompt-group-project") {
-			return this.getPromptGroupChildren("project");
+			return this.getPromptGroupChildren("project-prompts");
+		}
+
+		if (element.contextValue === "prompt-group-project-instructions") {
+			return this.getPromptGroupChildren("project-instructions");
 		}
 
 		if (element.contextValue === "prompt-group-global") {
@@ -163,6 +169,7 @@ export class PromptsExplorerProvider implements TreeDataProvider<PromptItem> {
 
 	private readonly getRootItems = async (): Promise<PromptItem[]> => {
 		const projectDescription = this.configManager.getPath("prompts");
+		const instructionsDescription = ".github/instructions";
 		const globalDescription = await this.getGlobalPromptsLabel();
 
 		return [
@@ -177,13 +184,23 @@ export class PromptsExplorerProvider implements TreeDataProvider<PromptItem> {
 				}
 			),
 			new PromptItem(
-				"Project",
+				"Project Prompts",
 				TreeItemCollapsibleState.Collapsed,
 				"prompt-group-project",
 				{
 					description: projectDescription,
 					tooltip: `Project prompts located at ${projectDescription}`,
-					source: "project",
+					source: "project-prompts",
+				}
+			),
+			new PromptItem(
+				"Project Instructions",
+				TreeItemCollapsibleState.Collapsed,
+				"prompt-group-project-instructions",
+				{
+					description: instructionsDescription,
+					tooltip: `Project instructions located at ${instructionsDescription}`,
+					source: "project-instructions",
 				}
 			),
 		];
@@ -196,8 +213,12 @@ export class PromptsExplorerProvider implements TreeDataProvider<PromptItem> {
 			return Promise.resolve([this.createLoadingItem()]);
 		}
 
-		if (source === "project") {
+		if (source === "project-prompts") {
 			return this.getProjectPromptItems();
+		}
+
+		if (source === "project-instructions") {
+			return this.getProjectInstructionItems();
 		}
 
 		return this.getGlobalPromptItems();
@@ -215,7 +236,22 @@ export class PromptsExplorerProvider implements TreeDataProvider<PromptItem> {
 			]);
 		}
 
-		return this.createPromptItems(rootUri, "project");
+		return this.createPromptItems(rootUri, "project-prompts");
+	};
+
+	private readonly getProjectInstructionItems = (): Promise<PromptItem[]> => {
+		const rootUri = this.getInstructionsRoot();
+		if (!rootUri) {
+			return Promise.resolve([
+				new PromptItem(
+					"Open a workspace to manage instructions",
+					TreeItemCollapsibleState.None,
+					"prompts-empty"
+				),
+			]);
+		}
+
+		return this.createPromptItems(rootUri, "project-instructions");
 	};
 
 	private readonly getGlobalPromptItems = async (): Promise<PromptItem[]> => {
@@ -242,7 +278,7 @@ export class PromptsExplorerProvider implements TreeDataProvider<PromptItem> {
 
 		if (promptFiles.length === 0) {
 			const label =
-				source === "project"
+				source === "project-prompts"
 					? this.configManager.getPath("prompts")
 					: await this.getGlobalPromptsLabel();
 			return [
@@ -327,6 +363,13 @@ export class PromptsExplorerProvider implements TreeDataProvider<PromptItem> {
 			const fallback = this.configManager.getPath("prompts");
 			return workspaceUri ? joinPath(workspaceUri, fallback) : undefined;
 		}
+	};
+
+	private readonly getInstructionsRoot = (): Uri | undefined => {
+		const workspaceUri = workspace.workspaceFolders?.[0]?.uri;
+		return workspaceUri
+			? joinPath(workspaceUri, ".github", "instructions")
+			: undefined;
 	};
 
 	private readonly readMarkdownFiles = async (
@@ -505,6 +548,7 @@ class PromptItem extends TreeItem {
 			item.tooltip = options.tooltip ?? description;
 		},
 		"prompt-group-project": PromptItem.applyFolderContext,
+		"prompt-group-project-instructions": PromptItem.applyFolderContext,
 		"prompt-group-global": PromptItem.applyFolderContext,
 	};
 }
