@@ -167,16 +167,6 @@ export class PromptsExplorerProvider implements TreeDataProvider<PromptItem> {
 
 		return [
 			new PromptItem(
-				"Project",
-				TreeItemCollapsibleState.Collapsed,
-				"prompt-group-project",
-				{
-					description: projectDescription,
-					tooltip: `Project prompts located at ${projectDescription}`,
-					source: "project",
-				}
-			),
-			new PromptItem(
 				"Global",
 				TreeItemCollapsibleState.Collapsed,
 				"prompt-group-global",
@@ -184,6 +174,16 @@ export class PromptsExplorerProvider implements TreeDataProvider<PromptItem> {
 					description: globalDescription,
 					tooltip: `Global prompts located at ${globalDescription}`,
 					source: "global",
+				}
+			),
+			new PromptItem(
+				"Project",
+				TreeItemCollapsibleState.Collapsed,
+				"prompt-group-project",
+				{
+					description: projectDescription,
+					tooltip: `Project prompts located at ${projectDescription}`,
+					source: "project",
 				}
 			),
 		];

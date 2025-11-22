@@ -2,6 +2,6 @@
 
 ## 1. Implementation
 
-- [ ] Update `SpecExplorerProvider` to render "Changes" before "Current Specs"
-- [ ] Update `PromptsExplorerProvider` to render "Global" before "Project"
-- [ ] Verify the order in the sidebar views
+- [x] Update `SpecExplorerProvider` to render "Changes" before "Current Specs"
+- [x] Update `PromptsExplorerProvider` to render "Global" before "Project"
+- [x] Verify the order in the sidebar views
