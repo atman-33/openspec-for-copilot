@@ -264,7 +264,7 @@ export class CreateSpecInputController {
 
 			const prompt = `${promptTemplate}\n\nThe following sections describe the specification and context for this change request.\n\n${payload}\n\nIMPORTANT:\nAfter generating the proposal documents, you MUST STOP and ask the user for confirmation.\nDo NOT proceed with any implementation steps until the user has explicitly approved the proposal.`;
 
-			await sendPromptToChat(prompt);
+			await sendPromptToChat(prompt, { instructionType: "createSpec" });
 
 			await this.clearDraftState();
 

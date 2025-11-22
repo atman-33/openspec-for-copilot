@@ -103,6 +103,10 @@ All settings live under the `openspec-for-copilot` namespace.
 | `views.prompts.visible` | boolean | `true` | Toggle the Prompts explorer. |
 | `views.steering.visible` | boolean | `true` | Toggle the Steering explorer. |
 | `views.settings.visible` | boolean | `true` | Toggle the Settings overview. |
+| `customInstructions.global` | string | `""` | Global custom instructions appended to all prompts. |
+| `customInstructions.createSpec` | string | `""` | Custom instructions for "Create Spec". |
+| `customInstructions.startAllTask` | string | `""` | Custom instructions for "Start All Tasks". |
+| `customInstructions.runPrompt` | string | `""` | Custom instructions for "Run Prompt". |
 
 Paths accept custom locations inside the workspace; the extension mirrors watchers to match custom directories.
 
