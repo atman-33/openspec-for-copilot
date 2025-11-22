@@ -2,6 +2,14 @@
 
 ---
 
+## v0.3.2 2025-11-22
+
+### Changed
+
+- Merge remote-tracking branch 'origin/main'
+- update screenshot images
+- Merge pull request #9 from atman-33/version-bump/v0.3.1
+
 ## v0.3.1 2025-11-22
 
 ### Changed
