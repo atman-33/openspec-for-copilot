@@ -277,10 +277,14 @@ export class PromptsExplorerProvider implements TreeDataProvider<PromptItem> {
 		const promptFiles = await this.readMarkdownFiles(rootUri, suffix);
 
 		if (promptFiles.length === 0) {
-			const label =
-				source === "project-prompts"
-					? this.configManager.getPath("prompts")
-					: await this.getGlobalPromptsLabel();
+			let label: string;
+			if (source === "project-prompts") {
+				label = this.configManager.getPath("prompts");
+			} else if (source === "project-instructions") {
+				label = ".github/instructions";
+			} else {
+				label = await this.getGlobalPromptsLabel();
+			}
 			return [
 				new PromptItem(
 					"No prompts found",
