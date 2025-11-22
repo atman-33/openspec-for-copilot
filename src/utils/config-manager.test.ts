@@ -48,6 +48,12 @@ describe("ConfigManager", () => {
 				settings: { visible: DEFAULT_VIEW_VISIBILITY.settings },
 			},
 			chatLanguage: "English",
+			customInstructions: {
+				global: "",
+				createSpec: "",
+				startAllTask: "",
+				runPrompt: "",
+			},
 		});
 	});
 });

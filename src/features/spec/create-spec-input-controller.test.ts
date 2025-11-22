@@ -218,12 +218,14 @@ describe("CreateSpecInputController", () => {
 		});
 
 		expect(sendPromptToChat).toHaveBeenCalledWith(
-			expect.stringContaining("Prompt Template")
+			expect.stringContaining("Prompt Template"),
+			{ instructionType: "createSpec" }
 		);
 		expect(sendPromptToChat).toHaveBeenCalledWith(
 			expect.stringContaining(
 				"Key Scenarios / Acceptance Criteria:\nFeature idea"
-			)
+			),
+			{ instructionType: "createSpec" }
 		);
 		expect(workspaceStateUpdateMock).toHaveBeenCalledWith(
 			"createSpecDraftState",
