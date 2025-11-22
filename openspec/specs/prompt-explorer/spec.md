@@ -4,12 +4,13 @@
 TBD - created by archiving change add-global-prompt-folders. Update Purpose after archive.
 ## Requirements
 ### Requirement: Prompt Source Grouping
-The Prompts tree MUST organize prompt items under `Project` and `Global` group nodes.
+The Prompts tree MUST organize prompt items under `Global`, `Project Prompts`, and `Project Instructions` group nodes, in that order.
 
-#### Scenario: Render project and global groups
-- **GIVEN** a workspace that contains `.copilot/prompts` files and the user has global prompts available
-- **WHEN** the Prompts view is opened in the sidebar
-- **THEN** the tree shows a `Project` group containing project prompts and a `Global` group containing the global prompts
+#### Scenario: View Project Prompts
+Given I have files in `.github/prompts`
+When I open the Prompts view
+Then I should see a "Project Prompts" group
+And it should list the files from `.github/prompts`
 
 ### Requirement: Resolve Global Prompt Directory
 The extension MUST locate the platform-specific global prompt directory when populating the Prompts view.
@@ -100,4 +101,13 @@ The Prompts Explorer SHALL display "Global" before "Project".
 - Given the Prompts Explorer is opened
 - When the tree view is rendered
 - Then "Global" should appear before "Project"
+
+### Requirement: Project Instructions Display
+The Prompts tree MUST include a `Project Instructions` group node that lists files from the `.github/instructions` directory.
+
+#### Scenario: View Project Instructions
+Given I have files in `.github/instructions`
+When I open the Prompts view
+Then I should see a "Project Instructions" group
+And it should list the files from `.github/instructions`
 
