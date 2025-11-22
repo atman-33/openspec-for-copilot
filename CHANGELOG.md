@@ -2,6 +2,20 @@
 
 ---
 
+## v0.3.0 2025-11-22
+
+### Added
+
+- update SVG icon design for improved visual clarity
+- add rename functionality for prompts in the explorer view
+
+### Changed
+
+- feature/improve-prompts-view
+- add Project Agents group and rename functionality in Prompts explorer
+- add project instructions display in Prompts view with separate grouping
+- Merge pull request #6 from atman-33/version-bump/v0.2.1
+
 ## v0.2.1 2025-11-22
 
 ### Added
