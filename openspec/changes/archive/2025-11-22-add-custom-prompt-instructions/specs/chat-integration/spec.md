@@ -1,6 +1,6 @@
 # Spec: Chat Integration with Custom Instructions
 
-## MODIFIED Requirements
+## ADDED Requirements
 
 ### Requirement: Inject Custom Instructions
 The `sendPromptToChat` utility MUST append configured custom instructions to the prompt before the language instruction.
