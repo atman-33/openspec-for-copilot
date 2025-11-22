@@ -1,4 +1,4 @@
-import { basename, join } from "path";
+import { basename, dirname, join } from "path";
 import { homedir } from "os";
 import {
 	type Command,
@@ -21,7 +21,13 @@ import { getVSCodeUserDataPath, isWindowsOrWsl } from "../utils/platform-utils";
 
 const { joinPath } = Uri;
 
-type PromptSource = "project-prompts" | "project-instructions" | "global";
+type PromptSource =
+	| "project-prompts"
+	| "project-instructions"
+	| "project-agents"
+	| "global";
+
+const invalidFileNamePattern = /[\\/:*?"<>|]/;
 
 type TreeEventPayload = PromptItem | undefined | null | void;
 
@@ -61,6 +67,8 @@ export class PromptsExplorerProvider implements TreeDataProvider<PromptItem> {
 			rootUri = await this.getGlobalPromptsRoot();
 		} else if (item?.source === "project-instructions") {
 			rootUri = this.getInstructionsRoot();
+		} else if (item?.source === "project-agents") {
+			rootUri = this.getAgentsRoot();
 		} else {
 			rootUri = this.getPromptsRoot();
 		}
@@ -128,6 +136,52 @@ export class PromptsExplorerProvider implements TreeDataProvider<PromptItem> {
 		this.refresh();
 	};
 
+	renamePrompt = async (item?: PromptItem): Promise<void> => {
+		if (!item?.resourceUri) {
+			await window.showInformationMessage("Select a file to rename.");
+			return;
+		}
+
+		const sourceUri = item.resourceUri;
+		const currentName = basename(sourceUri.fsPath);
+		const newName = await window.showInputBox({
+			prompt: "Enter new file name",
+			value: currentName,
+			validateInput: (value) => {
+				const trimmed = value.trim();
+				if (!trimmed) {
+					return "File name is required";
+				}
+				if (invalidFileNamePattern.test(trimmed)) {
+					return "Invalid characters in file name";
+				}
+				if (trimmed === "." || trimmed === ".." || trimmed.includes("..")) {
+					return "Relative segments are not allowed";
+				}
+				return;
+			},
+		});
+
+		const trimmedName = newName?.trim();
+		if (!trimmedName || trimmedName === currentName) {
+			return;
+		}
+
+		const targetPath = join(dirname(sourceUri.fsPath), trimmedName);
+		const targetUri = Uri.file(targetPath);
+
+		try {
+			await workspace.fs.rename(sourceUri, targetUri, { overwrite: false });
+		} catch (error) {
+			const message =
+				error instanceof Error ? error.message : "Failed to rename file.";
+			await window.showErrorMessage(`Failed to rename file: ${message}`);
+			return;
+		}
+
+		this.refresh();
+	};
+
 	runPrompt = async (item?: PromptItem): Promise<void> => {
 		if (!item?.resourceUri) {
 			await window.showInformationMessage("Select a prompt to run.");
@@ -160,6 +214,10 @@ export class PromptsExplorerProvider implements TreeDataProvider<PromptItem> {
 			return this.getPromptGroupChildren("project-instructions");
 		}
 
+		if (element.contextValue === "prompt-group-project-agents") {
+			return this.getPromptGroupChildren("project-agents");
+		}
+
 		if (element.contextValue === "prompt-group-global") {
 			return this.getPromptGroupChildren("global");
 		}
@@ -170,6 +228,7 @@ export class PromptsExplorerProvider implements TreeDataProvider<PromptItem> {
 	private readonly getRootItems = async (): Promise<PromptItem[]> => {
 		const projectDescription = this.configManager.getPath("prompts");
 		const instructionsDescription = ".github/instructions";
+		const agentsDescription = ".github/agents";
 		const globalDescription = await this.getGlobalPromptsLabel();
 
 		return [
@@ -203,6 +262,16 @@ export class PromptsExplorerProvider implements TreeDataProvider<PromptItem> {
 					source: "project-instructions",
 				}
 			),
+			new PromptItem(
+				"Project Agents",
+				TreeItemCollapsibleState.Collapsed,
+				"prompt-group-project-agents",
+				{
+					description: agentsDescription,
+					tooltip: `Project agents located at ${agentsDescription}`,
+					source: "project-agents",
+				}
+			),
 		];
 	};
 
@@ -219,6 +288,10 @@ export class PromptsExplorerProvider implements TreeDataProvider<PromptItem> {
 
 		if (source === "project-instructions") {
 			return this.getProjectInstructionItems();
+		}
+
+		if (source === "project-agents") {
+			return this.getProjectAgentItems();
 		}
 
 		return this.getGlobalPromptItems();
@@ -254,6 +327,21 @@ export class PromptsExplorerProvider implements TreeDataProvider<PromptItem> {
 		return this.createPromptItems(rootUri, "project-instructions");
 	};
 
+	private readonly getProjectAgentItems = (): Promise<PromptItem[]> => {
+		const rootUri = this.getAgentsRoot();
+		if (!rootUri) {
+			return Promise.resolve([
+				new PromptItem(
+					"Open a workspace to manage agents",
+					TreeItemCollapsibleState.None,
+					"prompts-empty"
+				),
+			]);
+		}
+
+		return this.createPromptItems(rootUri, "project-agents");
+	};
+
 	private readonly getGlobalPromptItems = async (): Promise<PromptItem[]> => {
 		const rootUri = await this.getGlobalPromptsRoot();
 		if (!rootUri) {
@@ -282,6 +370,8 @@ export class PromptsExplorerProvider implements TreeDataProvider<PromptItem> {
 				label = this.configManager.getPath("prompts");
 			} else if (source === "project-instructions") {
 				label = ".github/instructions";
+			} else if (source === "project-agents") {
+				label = ".github/agents";
 			} else {
 				label = await this.getGlobalPromptsLabel();
 			}
@@ -373,6 +463,13 @@ export class PromptsExplorerProvider implements TreeDataProvider<PromptItem> {
 		const workspaceUri = workspace.workspaceFolders?.[0]?.uri;
 		return workspaceUri
 			? joinPath(workspaceUri, ".github", "instructions")
+			: undefined;
+	};
+
+	private readonly getAgentsRoot = (): Uri | undefined => {
+		const workspaceUri = workspace.workspaceFolders?.[0]?.uri;
+		return workspaceUri
+			? joinPath(workspaceUri, ".github", "agents")
 			: undefined;
 	};
 
@@ -553,6 +650,7 @@ class PromptItem extends TreeItem {
 		},
 		"prompt-group-project": PromptItem.applyFolderContext,
 		"prompt-group-project-instructions": PromptItem.applyFolderContext,
+		"prompt-group-project-agents": PromptItem.applyFolderContext,
 		"prompt-group-global": PromptItem.applyFolderContext,
 	};
 }

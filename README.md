@@ -21,8 +21,10 @@ It allows you to visually manage Specs, Steering documents (AGENTS.md), and cust
 - **Execute Tasks**: Open `tasks.md` and use the "Start Task" CodeLens to send task context to GitHub Copilot Chat for implementation.
 
 ### 🧩 Prompt Management
-- **Custom Prompts**: Manage Markdown prompts under `.github/prompts` (configurable).
+- **Custom Prompts**: Manage Markdown prompts under `.github/prompts` (configurable) alongside instructions and agents to keep all project guidance in one place.
+- **Project Instructions & Agents**: The Prompts explorer now shows `Project Instructions` and `Project Agents` groups, surfacing `.github/instructions` and `.github/agents` files (in that order) so you can reference reusable instructions and agent definitions without leaving VS Code.
 - **Run Prompts**: Execute prompts directly from the tree view, passing the context to GitHub Copilot Chat.
+- **Rename or Delete**: Use the item context menu to rename or delete prompts, instructions, and agents without leaving the explorer. `Rename` always appears above `Delete` for quick edits.
 
 ## Installation
 
@@ -114,6 +116,7 @@ Paths accept custom locations inside the workspace; the extension mirrors watche
 ```
 .github/
 ├── prompts/                # Markdown prompts
+├── agents/                 # Project agent definitions surfaced in the Prompts view
 openspec/
 ├── AGENTS.md               # Project-specific steering rules
 ├── project.md              # Project specification

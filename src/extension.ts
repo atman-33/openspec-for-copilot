@@ -466,6 +466,12 @@ function registerCommands(
 			}
 		),
 		commands.registerCommand(
+			"openspec-for-copilot.prompts.rename",
+			async (item?: any) => {
+				await promptsExplorer.renamePrompt(item);
+			}
+		),
+		commands.registerCommand(
 			"openspec-for-copilot.prompts.delete",
 			async (item: any) => {
 				if (!item?.resourceUri) {
