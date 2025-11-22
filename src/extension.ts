@@ -457,7 +457,9 @@ function registerCommands(
 
 					const fileData = await workspace.fs.readFile(targetUri);
 					const promptContent = new TextDecoder().decode(fileData);
-					await sendPromptToChat(promptContent);
+					await sendPromptToChat(promptContent, {
+						instructionType: "runPrompt",
+					});
 				} catch (e) {
 					window.showErrorMessage(`Failed to run prompt: ${e}`);
 				}

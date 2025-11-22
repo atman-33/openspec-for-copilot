@@ -71,12 +71,14 @@
         "openspec-for-copilot.copilot.specsPath": {
           "type": "string",
           "default": "openspec",
-          "description": "Path where Copilot specification files are stored."
+          "description": "Path where Copilot specification files are stored.",
+          "order": 1
         },
         "openspec-for-copilot.copilot.promptsPath": {
           "type": "string",
           "default": ".github/prompts",
-          "description": "Path where Copilot prompt files are stored."
+          "description": "Path where Copilot prompt files are stored.",
+          "order": 2
         },
         "openspec-for-copilot.chatLanguage": {
           "type": "string",
@@ -94,7 +96,36 @@
             "Korean",
             "Russian"
           ],
-          "description": "The language GitHub Copilot should use for responses."
+          "description": "The language GitHub Copilot should use for responses.",
+          "order": 3
+        },
+        "openspec-for-copilot.customInstructions.global": {
+          "type": "string",
+          "default": "",
+          "editPresentation": "multilineText",
+          "description": "Global custom instructions appended to all prompts.",
+          "order": 4
+        },
+        "openspec-for-copilot.customInstructions.createSpec": {
+          "type": "string",
+          "default": "",
+          "editPresentation": "multilineText",
+          "description": "Custom instructions appended when creating a spec.",
+          "order": 5
+        },
+        "openspec-for-copilot.customInstructions.startAllTask": {
+          "type": "string",
+          "default": "",
+          "editPresentation": "multilineText",
+          "description": "Custom instructions appended when starting all tasks.",
+          "order": 6
+        },
+        "openspec-for-copilot.customInstructions.runPrompt": {
+          "type": "string",
+          "default": "",
+          "editPresentation": "multilineText",
+          "description": "Custom instructions appended when running a prompt.",
+          "order": 7
         }
       }
     },

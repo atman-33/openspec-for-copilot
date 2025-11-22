@@ -18,6 +18,12 @@ export interface OpenSpecSettings {
 		settings: { visible: boolean };
 	};
 	chatLanguage: string;
+	customInstructions: {
+		global: string;
+		createSpec: string;
+		startAllTask: string;
+		runPrompt: string;
+	};
 }
 
 export class ConfigManager {
@@ -95,6 +101,16 @@ export class ConfigManager {
 		return config.get<string>("chatLanguage") ?? DEFAULT_CONFIG.chatLanguage;
 	}
 
+	private getCustomInstructions(): OpenSpecSettings["customInstructions"] {
+		const config = workspace.getConfiguration(VSC_CONFIG_NAMESPACE);
+		return {
+			global: config.get<string>("customInstructions.global") ?? "",
+			createSpec: config.get<string>("customInstructions.createSpec") ?? "",
+			startAllTask: config.get<string>("customInstructions.startAllTask") ?? "",
+			runPrompt: config.get<string>("customInstructions.runPrompt") ?? "",
+		};
+	}
+
 	private mergeSettings(
 		defaults: OpenSpecSettings,
 		overrides: Partial<OpenSpecSettings> = {}
@@ -123,16 +139,33 @@ export class ConfigManager {
 			},
 		};
 
+		const mergedCustomInstructions = {
+			global:
+				overrides.customInstructions?.global ??
+				defaults.customInstructions.global,
+			createSpec:
+				overrides.customInstructions?.createSpec ??
+				defaults.customInstructions.createSpec,
+			startAllTask:
+				overrides.customInstructions?.startAllTask ??
+				defaults.customInstructions.startAllTask,
+			runPrompt:
+				overrides.customInstructions?.runPrompt ??
+				defaults.customInstructions.runPrompt,
+		};
+
 		return {
 			paths: mergedPaths,
 			views: mergedViews,
 			chatLanguage: overrides.chatLanguage ?? defaults.chatLanguage,
+			customInstructions: mergedCustomInstructions,
 		};
 	}
 
 	private getDefaultSettings(): OpenSpecSettings {
 		const configuredPaths = this.getConfiguredPaths();
 		const chatLanguage = this.getChatLanguage();
+		const customInstructions = this.getCustomInstructions();
 
 		return {
 			paths: { ...DEFAULT_PATHS, ...configuredPaths },
@@ -143,6 +176,7 @@ export class ConfigManager {
 				settings: { visible: DEFAULT_VIEW_VISIBILITY.settings },
 			},
 			chatLanguage,
+			customInstructions,
 		};
 	}
 	// biome-ignore lint/suspicious/useAwait: ignore
