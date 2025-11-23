@@ -2,6 +2,19 @@
 
 ---
 
+## v0.3.3 2025-11-23
+
+### Added
+
+- implement "New Agent File" command and menu integration
+
+### Changed
+
+- feature/new-agent-file
+- add "New Agent File" button to Prompts view with command integration and ordering
+- add "New Agent File" button to Prompts view with command integration
+- Merge pull request #10 from atman-33/version-bump/v0.3.2
+
 ## v0.3.2 2025-11-22
 
 ### Changed
