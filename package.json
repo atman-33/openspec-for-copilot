@@ -240,6 +240,12 @@
         "icon": "$(plus)"
       },
       {
+        "command": "openspec-for-copilot.prompts.createAgentFile",
+        "title": "New Agent File",
+        "category": "OpenSpec for Copilot",
+        "icon": "$(robot)"
+      },
+      {
         "command": "openspec-for-copilot.prompts.createInstructions",
         "title": "New Instructions File",
         "category": "OpenSpec for Copilot",
@@ -310,6 +316,11 @@
           "command": "openspec-for-copilot.steering.refresh",
           "when": "view == openspec-for-copilot.views.steeringExplorer",
           "group": "navigation@3"
+        },
+        {
+          "command": "openspec-for-copilot.prompts.createAgentFile",
+          "when": "view == openspec-for-copilot.views.promptsExplorer",
+          "group": "navigation@1"
         },
         {
           "command": "openspec-for-copilot.prompts.createInstructions",

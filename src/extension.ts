@@ -493,6 +493,12 @@ function registerCommands(
 					window.showErrorMessage(`Failed to delete prompt: ${e}`);
 				}
 			}
+		),
+		commands.registerCommand(
+			"openspec-for-copilot.prompts.createAgentFile",
+			async () => {
+				await commands.executeCommand("workbench.command.new.agent");
+			}
 		)
 	);
 
