@@ -211,9 +211,6 @@ export const createDetailedDesignCommandHandler = (
 			});
 
 			specExplorer.refresh();
-			window.showInformationMessage(
-				`Sent prompt to Copilot Chat for change '${changeId}'.`
-			);
 		} catch (error) {
 			const message = error instanceof Error ? error.message : String(error);
 			window.showErrorMessage(message);
