@@ -57,6 +57,7 @@ export async function activate(context: ExtensionContext) {
 	);
 
 	const services: ExtensionServices = {
+		extensionUri: context.extensionUri,
 		outputChannel,
 		configManager,
 		specManager,

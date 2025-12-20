@@ -31,7 +31,10 @@ const getWorkspaceFolderOrThrow = (): WorkspaceFolder => {
 	return ws;
 };
 
-const ensureDetailedDesignPromptTemplate = async (wsUri: Uri) => {
+const ensureDetailedDesignPromptTemplate = async (
+	wsUri: Uri,
+	extensionUri: Uri
+) => {
 	const promptsDir = Uri.joinPath(wsUri, ".github", "prompts");
 	const promptPath = Uri.joinPath(
 		promptsDir,
@@ -43,15 +46,28 @@ const ensureDetailedDesignPromptTemplate = async (wsUri: Uri) => {
 		return promptPath;
 	} catch {
 		await workspace.fs.createDirectory(promptsDir);
-		const starterPrompt = Buffer.from(
-			"# OpenSpec: Create Detailed Design\n\n" +
-				"You are helping create a detailed design document for an OpenSpec change.\n" +
-				"Use the provided change documents as the source of truth.\n\n" +
-				"Output requirements:\n" +
-				"- Return ONLY the final Markdown for detailed-design.md (no explanations).\n" +
-				"- Use clear headings: Purpose, Scope, Inputs, Architecture, Data Flow, Risks, Open Questions.\n"
+		const templateUri = Uri.joinPath(
+			extensionUri,
+			"src",
+			"resources",
+			"prompts",
+			"openspec-create-detailed-design.prompt.md"
 		);
-		await workspace.fs.writeFile(promptPath, starterPrompt);
+
+		let templateBytes: Uint8Array;
+		try {
+			templateBytes = await workspace.fs.readFile(templateUri);
+		} catch (error) {
+			throw new Error(
+				"Missing packaged prompt template: " +
+					templateUri.fsPath +
+					" (" +
+					(error instanceof Error ? error.message : String(error)) +
+					")"
+			);
+		}
+
+		await workspace.fs.writeFile(promptPath, templateBytes);
 		return promptPath;
 	}
 };
@@ -161,7 +177,10 @@ export const createDetailedDesignCommandHandler = (
 			const changeBase = Uri.joinPath(ws.uri, "openspec", "changes", changeId);
 			const outputPath = Uri.joinPath(changeBase, "detailed-design.md");
 
-			const promptPath = await ensureDetailedDesignPromptTemplate(ws.uri);
+			const promptPath = await ensureDetailedDesignPromptTemplate(
+				ws.uri,
+				services.extensionUri
+			);
 			const promptTemplate = await readUtf8OrThrow(promptPath, "prompt file");
 
 			const { proposal, tasks, design } =
