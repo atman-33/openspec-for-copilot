@@ -8,6 +8,7 @@ import {
 	TreeItem,
 	TreeItemCollapsibleState,
 	workspace,
+	Uri,
 } from "vscode";
 import type { SpecManager } from "../features/spec/spec-manager";
 
@@ -40,6 +41,19 @@ export class SpecExplorerProvider implements TreeDataProvider<SpecItem> {
 
 	refresh(): void {
 		this._onDidChangeTreeData.fire();
+	}
+
+	private async fileExists(relativePath: string): Promise<boolean> {
+		if (!workspace.workspaceFolders) {
+			return false;
+		}
+		const uri = Uri.joinPath(workspace.workspaceFolders[0].uri, relativePath);
+		try {
+			await workspace.fs.stat(uri);
+			return true;
+		} catch {
+			return false;
+		}
 	}
 
 	getTreeItem(element: SpecItem): TreeItem {
@@ -118,57 +132,76 @@ export class SpecExplorerProvider implements TreeDataProvider<SpecItem> {
 
 		if (element.contextValue === "change") {
 			const basePath = `openspec/changes/${element.specName}`;
-			return [
-				new SpecItem(
-					"Proposal",
-					TreeItemCollapsibleState.None,
-					"spec-document",
-					this.context,
-					element.specName,
-					"proposal",
-					{
-						command: SpecExplorerProvider.openSpecCommandId,
-						title: "Open Proposal",
-						arguments: [`${basePath}/proposal.md`, "proposal"],
-					},
-					`${basePath}/proposal.md`
-				),
-				new SpecItem(
-					"Tasks",
-					TreeItemCollapsibleState.None,
-					"spec-document",
-					this.context,
-					element.specName,
-					"tasks",
-					{
-						command: SpecExplorerProvider.openSpecCommandId,
-						title: "Open Tasks",
-						arguments: [`${basePath}/tasks.md`, "tasks"],
-					},
-					`${basePath}/tasks.md`
-				),
-				new SpecItem(
-					"Design",
-					TreeItemCollapsibleState.None,
-					"spec-document",
-					this.context,
-					element.specName,
-					"design",
-					{
-						command: SpecExplorerProvider.openSpecCommandId,
-						title: "Open Design",
-						arguments: [`${basePath}/design.md`, "design"],
-					},
-					`${basePath}/design.md`
-				),
+			const items: SpecItem[] = [];
+
+			if (await this.fileExists(`${basePath}/proposal.md`)) {
+				items.push(
+					new SpecItem(
+						"Proposal",
+						TreeItemCollapsibleState.None,
+						"spec-document",
+						this.context,
+						element.specName,
+						"proposal",
+						{
+							command: SpecExplorerProvider.openSpecCommandId,
+							title: "Open Proposal",
+							arguments: [`${basePath}/proposal.md`, "proposal"],
+						},
+						`${basePath}/proposal.md`
+					)
+				);
+			}
+
+			if (await this.fileExists(`${basePath}/tasks.md`)) {
+				items.push(
+					new SpecItem(
+						"Tasks",
+						TreeItemCollapsibleState.None,
+						"spec-document",
+						this.context,
+						element.specName,
+						"tasks",
+						{
+							command: SpecExplorerProvider.openSpecCommandId,
+							title: "Open Tasks",
+							arguments: [`${basePath}/tasks.md`, "tasks"],
+						},
+						`${basePath}/tasks.md`
+					)
+				);
+			}
+
+			if (await this.fileExists(`${basePath}/design.md`)) {
+				items.push(
+					new SpecItem(
+						"Design",
+						TreeItemCollapsibleState.None,
+						"spec-document",
+						this.context,
+						element.specName,
+						"design",
+						{
+							command: SpecExplorerProvider.openSpecCommandId,
+							title: "Open Design",
+							arguments: [`${basePath}/design.md`, "design"],
+						},
+						`${basePath}/design.md`
+					)
+				);
+			}
+
+			items.push(
 				new SpecItem(
 					"Specs",
 					TreeItemCollapsibleState.Collapsed,
 					"change-specs-group",
 					this.context,
 					element.specName
-				),
-			];
+				)
+			);
+
+			return items;
 		}
 
 		if (element.contextValue === "change-specs-group") {
