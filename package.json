@@ -217,6 +217,12 @@
         "icon": "$(file-text)"
       },
       {
+        "command": "openspec-for-copilot.spec.updateSpecsFromDetailedDesign",
+        "title": "Update Specs from Detailed Design",
+        "category": "OpenSpec for Copilot",
+        "icon": "$(sync)"
+      },
+      {
         "command": "openspec-for-copilot.spec.implTask",
         "title": "Implement Task",
         "category": "OpenSpec for Copilot"
@@ -361,9 +367,14 @@
           "group": "7_modification@1"
         },
         {
-          "command": "openspec-for-copilot.spec.archiveChange",
+          "command": "openspec-for-copilot.spec.updateSpecsFromDetailedDesign",
           "when": "view == openspec-for-copilot.views.specExplorer && viewItem == change",
           "group": "7_modification@2"
+        },
+        {
+          "command": "openspec-for-copilot.spec.archiveChange",
+          "when": "view == openspec-for-copilot.views.specExplorer && viewItem == change",
+          "group": "7_modification@3"
         },
         {
           "command": "openspec-for-copilot.prompts.run",

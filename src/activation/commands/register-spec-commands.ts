@@ -3,6 +3,7 @@ import type { ExtensionContext } from "vscode";
 import type { SpecExplorerProvider } from "../../providers/spec-explorer-provider";
 import type { ExtensionServices } from "../extension-services";
 import { createDetailedDesignCommandHandler } from "../../features/spec/commands/create-detailed-design";
+import { updateSpecsFromDetailedDesignCommandHandler } from "../../features/spec/commands/update-specs-from-detailed-design";
 import { sendPromptToChat } from "../../utils/chat-prompt-runner";
 
 export const registerSpecCommands = (
@@ -81,6 +82,10 @@ export const registerSpecCommands = (
 		commands.registerCommand(
 			"openspec-for-copilot.spec.createDetailedDesign",
 			createDetailedDesignCommandHandler(services, specExplorer)
+		),
+		commands.registerCommand(
+			"openspec-for-copilot.spec.updateSpecsFromDetailedDesign",
+			updateSpecsFromDetailedDesignCommandHandler(services, specExplorer)
 		),
 		commands.registerCommand(
 			"openspec-for-copilot.spec.archiveChange",
