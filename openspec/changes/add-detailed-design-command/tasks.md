@@ -22,6 +22,6 @@
 
 ## 5. Validation
 - [x] 5.1 Add/adjust unit tests for the tree provider change (showing `detailed-design.md` when present).
-- [ ] 5.2 Add/adjust unit tests for prompt bootstrapping (creates prompt only when missing).
+- [x] 5.2 Add/adjust unit tests for prompt bootstrapping (creates prompt only when missing).
 - [x] 5.3 Run `npm run compile`.
 - [x] 5.4 Run `openspec validate add-detailed-design-command --strict`.

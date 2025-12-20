@@ -17,6 +17,7 @@ export const workspace = {
 	fs: {
 		createDirectory: vi.fn(),
 		writeFile: vi.fn(),
+		readFile: vi.fn(),
 		readDirectory: vi.fn(),
 		stat: vi.fn(),
 		delete: vi.fn(),
