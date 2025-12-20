@@ -72,40 +72,40 @@ const ensureUpdateSpecsPromptTemplate = async (
 	}
 };
 
-const readChangeDocumentsOrThrow = async (changeBase: Uri) => {
+const getRelativePath = (uri: Uri) => workspace.asRelativePath(uri, false);
+
+const getChangeDocumentPaths = async (changeBase: Uri) => {
 	const detailedDesignPath = Uri.joinPath(changeBase, "detailed-design.md");
 	const proposalPath = Uri.joinPath(changeBase, "proposal.md");
 	const tasksPath = Uri.joinPath(changeBase, "tasks.md");
 	const designPath = Uri.joinPath(changeBase, "design.md");
 
-	const detailedDesign = await readUtf8OrThrow(
-		detailedDesignPath,
-		"detailed-design.md"
-	);
-	const proposal = await readUtf8OrThrow(proposalPath, "proposal.md");
-	const tasks = await readUtf8OrThrow(tasksPath, "tasks.md");
-
-	let design: string | null = null;
+	let hasDesign = false;
 	try {
-		design = await readUtf8OrThrow(designPath, "design.md");
+		await workspace.fs.stat(designPath);
+		hasDesign = true;
 	} catch {
-		design = null;
+		hasDesign = false;
 	}
 
-	return { detailedDesign, proposal, tasks, design };
+	return {
+		detailedDesignPath: getRelativePath(detailedDesignPath),
+		proposalPath: getRelativePath(proposalPath),
+		tasksPath: getRelativePath(tasksPath),
+		designPath: hasDesign ? getRelativePath(designPath) : null,
+	};
 };
 
-const readDeltaSpecsOrThrow = async (
+const getDeltaSpecPaths = async (
 	changeBase: Uri,
 	specManager: ExtensionServices["specManager"],
 	changeId: string
 ) => {
 	const deltaSpecNames = await specManager.getChangeSpecs(changeId);
-	const deltaSpecs: Array<{ name: string; content: string }> = [];
+	const deltaSpecs: Array<{ name: string; path: string }> = [];
 	for (const specName of deltaSpecNames) {
 		const specUri = Uri.joinPath(changeBase, "specs", specName, "spec.md");
-		const content = await readUtf8OrThrow(specUri, `delta spec ${specName}`);
-		deltaSpecs.push({ name: specName, content });
+		deltaSpecs.push({ name: specName, path: getRelativePath(specUri) });
 	}
 	return deltaSpecs;
 };
@@ -113,36 +113,37 @@ const readDeltaSpecsOrThrow = async (
 const composeUpdateSpecsPrompt = (args: {
 	promptTemplate: string;
 	changeId: string;
-	detailedDesign: string;
-	proposal: string;
-	tasks: string;
-	design: string | null;
-	deltaSpecs: Array<{ name: string; content: string }>;
+	detailedDesignPath: string;
+	proposalPath: string;
+	tasksPath: string;
+	designPath: string | null;
+	deltaSpecs: Array<{ name: string; path: string }>;
 }) => {
 	const sections: string[] = [];
 	sections.push(args.promptTemplate.trim());
 	sections.push(`\n\n---\n\n# Inputs\n\nchange-id: ${args.changeId}`);
+
+	sections.push("\n\nPlease refer to the following files for context:");
 	sections.push(
-		`\n\n## detailed-design.md (Source of Truth)\n\n\`\`\`markdown\n${args.detailedDesign}\n\`\`\``
+		`\n- **detailed-design.md** (Source of Truth): [${args.detailedDesignPath}](${args.detailedDesignPath})`
 	);
 	sections.push(
-		`\n\n## proposal.md (Target)\n\n\`\`\`markdown\n${args.proposal}\n\`\`\``
+		`- **proposal.md** (Target): [${args.proposalPath}](${args.proposalPath})`
 	);
 	sections.push(
-		`\n\n## tasks.md (Target)\n\n\`\`\`markdown\n${args.tasks}\n\`\`\``
+		`- **tasks.md** (Target): [${args.tasksPath}](${args.tasksPath})`
 	);
-	if (args.design) {
+
+	if (args.designPath) {
 		sections.push(
-			`\n\n## design.md (Target)\n\n\`\`\`markdown\n${args.design}\n\`\`\``
+			`- **design.md** (Target): [${args.designPath}](${args.designPath})`
 		);
 	}
 
 	if (args.deltaSpecs.length > 0) {
-		sections.push("\n\n## delta specs (Target)\n");
+		sections.push("- **delta specs** (Target):");
 		for (const s of args.deltaSpecs) {
-			sections.push(
-				`\n\n### ${s.name}/spec.md\n\n\`\`\`markdown\n${s.content}\n\`\`\``
-			);
+			sections.push(`  - [${s.path}](${s.path})`);
 		}
 	}
 
@@ -171,8 +172,8 @@ export const updateSpecsFromDetailedDesignCommandHandler =
 				"prompt template"
 			);
 
-			const docs = await readChangeDocumentsOrThrow(changeBase);
-			const deltaSpecs = await readDeltaSpecsOrThrow(
+			const docs = await getChangeDocumentPaths(changeBase);
+			const deltaSpecs = await getDeltaSpecPaths(
 				changeBase,
 				services.specManager,
 				changeId
@@ -181,10 +182,10 @@ export const updateSpecsFromDetailedDesignCommandHandler =
 			const prompt = composeUpdateSpecsPrompt({
 				promptTemplate,
 				changeId,
-				detailedDesign: docs.detailedDesign,
-				proposal: docs.proposal,
-				tasks: docs.tasks,
-				design: docs.design,
+				detailedDesignPath: docs.detailedDesignPath,
+				proposalPath: docs.proposalPath,
+				tasksPath: docs.tasksPath,
+				designPath: docs.designPath,
 				deltaSpecs,
 			});
 

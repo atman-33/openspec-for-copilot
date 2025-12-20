@@ -72,35 +72,38 @@ const ensureDetailedDesignPromptTemplate = async (
 	}
 };
 
-const readChangeDocumentsOrThrow = async (changeBase: Uri) => {
+const getRelativePath = (uri: Uri) => workspace.asRelativePath(uri, false);
+
+const getChangeDocumentPaths = async (changeBase: Uri) => {
 	const proposalPath = Uri.joinPath(changeBase, "proposal.md");
 	const tasksPath = Uri.joinPath(changeBase, "tasks.md");
 	const designPath = Uri.joinPath(changeBase, "design.md");
 
-	const proposal = await readUtf8OrThrow(proposalPath, "proposal.md");
-	const tasks = await readUtf8OrThrow(tasksPath, "tasks.md");
-
-	let design: string | null = null;
+	let hasDesign = false;
 	try {
-		design = await readUtf8OrThrow(designPath, "design.md");
+		await workspace.fs.stat(designPath);
+		hasDesign = true;
 	} catch {
-		design = null;
+		hasDesign = false;
 	}
 
-	return { proposal, tasks, design };
+	return {
+		proposalPath: getRelativePath(proposalPath),
+		tasksPath: getRelativePath(tasksPath),
+		designPath: hasDesign ? getRelativePath(designPath) : null,
+	};
 };
 
-const readDeltaSpecsOrThrow = async (
+const getDeltaSpecPaths = async (
 	changeBase: Uri,
 	specManager: ExtensionServices["specManager"],
 	changeId: string
 ) => {
 	const deltaSpecNames = await specManager.getChangeSpecs(changeId);
-	const deltaSpecs: Array<{ name: string; content: string }> = [];
+	const deltaSpecs: Array<{ name: string; path: string }> = [];
 	for (const specName of deltaSpecNames) {
 		const specUri = Uri.joinPath(changeBase, "specs", specName, "spec.md");
-		const content = await readUtf8OrThrow(specUri, `delta spec ${specName}`);
-		deltaSpecs.push({ name: specName, content });
+		deltaSpecs.push({ name: specName, path: getRelativePath(specUri) });
 	}
 	return deltaSpecs;
 };
@@ -108,28 +111,29 @@ const readDeltaSpecsOrThrow = async (
 const composeDetailedDesignPrompt = (args: {
 	promptTemplate: string;
 	changeId: string;
-	proposal: string;
-	tasks: string;
-	design: string | null;
-	deltaSpecs: Array<{ name: string; content: string }>;
+	proposalPath: string;
+	tasksPath: string;
+	designPath: string | null;
+	deltaSpecs: Array<{ name: string; path: string }>;
 }) => {
 	const sections: string[] = [];
 	sections.push(args.promptTemplate.trim());
 	sections.push(`\n\n---\n\n# Inputs\n\nchange-id: ${args.changeId}`);
+
+	sections.push("\n\nPlease refer to the following files for context:");
 	sections.push(
-		`\n\n## proposal.md\n\n\`\`\`markdown\n${args.proposal}\n\`\`\``
+		`\n- **proposal.md**: [${args.proposalPath}](${args.proposalPath})`
 	);
-	sections.push(`\n\n## tasks.md\n\n\`\`\`markdown\n${args.tasks}\n\`\`\``);
-	if (args.design) {
-		sections.push(`\n\n## design.md\n\n\`\`\`markdown\n${args.design}\n\`\`\``);
+	sections.push(`- **tasks.md**: [${args.tasksPath}](${args.tasksPath})`);
+
+	if (args.designPath) {
+		sections.push(`- **design.md**: [${args.designPath}](${args.designPath})`);
 	}
 
 	if (args.deltaSpecs.length > 0) {
-		sections.push("\n\n## delta specs\n");
+		sections.push("- **delta specs**:");
 		for (const s of args.deltaSpecs) {
-			sections.push(
-				`\n\n### ${s.name}/spec.md\n\n\`\`\`markdown\n${s.content}\n\`\`\``
-			);
+			sections.push(`  - [${s.path}](${s.path})`);
 		}
 	}
 
@@ -183,9 +187,9 @@ export const createDetailedDesignCommandHandler = (
 			);
 			const promptTemplate = await readUtf8OrThrow(promptPath, "prompt file");
 
-			const { proposal, tasks, design } =
-				await readChangeDocumentsOrThrow(changeBase);
-			const deltaSpecs = await readDeltaSpecsOrThrow(
+			const { proposalPath, tasksPath, designPath } =
+				await getChangeDocumentPaths(changeBase);
+			const deltaSpecs = await getDeltaSpecPaths(
 				changeBase,
 				specManager,
 				changeId
@@ -194,9 +198,9 @@ export const createDetailedDesignCommandHandler = (
 			const composedPrompt = composeDetailedDesignPrompt({
 				promptTemplate,
 				changeId,
-				proposal,
-				tasks,
-				design,
+				proposalPath,
+				tasksPath,
+				designPath,
 				deltaSpecs,
 			});
 
