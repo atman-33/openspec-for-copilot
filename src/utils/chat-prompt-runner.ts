@@ -5,10 +5,10 @@ export interface ChatContext {
 	instructionType?: "createSpec" | "startAllTask" | "runPrompt";
 }
 
-export const sendPromptToChat = async (
+export const buildChatPrompt = (
 	prompt: string,
 	context?: ChatContext
-): Promise<void> => {
+): string => {
 	const configManager = ConfigManager.getInstance();
 	const settings = configManager.getSettings();
 	const language = settings.chatLanguage;
@@ -33,6 +33,15 @@ export const sendPromptToChat = async (
 	if (language !== "English") {
 		finalPrompt += `\n\n(Please respond in ${language}.)`;
 	}
+
+	return finalPrompt;
+};
+
+export const sendPromptToChat = async (
+	prompt: string,
+	context?: ChatContext
+): Promise<void> => {
+	const finalPrompt = buildChatPrompt(prompt, context);
 
 	await commands.executeCommand("workbench.action.chat.open", {
 		query: finalPrompt,

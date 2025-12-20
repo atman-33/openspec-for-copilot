@@ -44,6 +44,9 @@ describe("SpecExplorerProvider", () => {
 			if (fsPath.endsWith("design.md")) {
 				return Promise.resolve({} as any); // Exists
 			}
+			if (fsPath.endsWith("detailed-design.md")) {
+				return Promise.resolve({} as any); // Exists
+			}
 			return Promise.resolve({} as any);
 		});
 
@@ -68,6 +71,7 @@ describe("SpecExplorerProvider", () => {
 		expect(labels).toContain("Proposal");
 		expect(labels).not.toContain("Tasks");
 		expect(labels).toContain("Design");
+		expect(labels).toContain("Detailed Design");
 		expect(labels).toContain("Specs");
 	});
 });

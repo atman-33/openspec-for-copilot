@@ -309,6 +309,180 @@ function registerCommands(
 			}
 		),
 		commands.registerCommand(
+			"openspec-for-copilot.spec.createDetailedDesign",
+			// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: command handler is stepwise and guarded
+			async (item: any) => {
+				const changeId = item.specName;
+				if (!changeId) {
+					window.showErrorMessage("Could not determine change ID.");
+					return;
+				}
+
+				const ws = workspace.workspaceFolders?.[0];
+				if (!ws) {
+					window.showErrorMessage("No workspace folder found");
+					return;
+				}
+
+				const promptsDir = Uri.joinPath(ws.uri, ".github", "prompts");
+				const promptPath = Uri.joinPath(
+					promptsDir,
+					"openspec-add-detailed-design.prompt.md"
+				);
+
+				// Bootstrap prompt file only if missing
+				try {
+					await workspace.fs.stat(promptPath);
+				} catch {
+					await workspace.fs.createDirectory(promptsDir);
+					const starterPrompt = Buffer.from(
+						"# OpenSpec: Add Detailed Design\n\n" +
+							"You are helping create a detailed design document for an OpenSpec change.\n" +
+							"Use the provided change documents as the source of truth.\n\n" +
+							"Output requirements:\n" +
+							"- Return ONLY the final Markdown for detailed-design.md (no explanations).\n" +
+							"- Use clear headings: Purpose, Scope, Inputs, Architecture, Data Flow, Risks, Open Questions.\n"
+					);
+					await workspace.fs.writeFile(promptPath, starterPrompt);
+				}
+
+				const changeBase = Uri.joinPath(
+					ws.uri,
+					"openspec",
+					"changes",
+					changeId
+				);
+				const proposalPath = Uri.joinPath(changeBase, "proposal.md");
+				const tasksPath = Uri.joinPath(changeBase, "tasks.md");
+				const designPath = Uri.joinPath(changeBase, "design.md");
+				const outputPath = Uri.joinPath(changeBase, "detailed-design.md");
+
+				const readUtf8OrThrow = async (uri: Uri, label: string) => {
+					try {
+						const data = await workspace.fs.readFile(uri);
+						return new TextDecoder().decode(data);
+					} catch (error) {
+						throw new Error(
+							`Missing or unreadable ${label}: ${uri.fsPath} (${error instanceof Error ? error.message : String(error)})`
+						);
+					}
+				};
+
+				let promptTemplate = "";
+				try {
+					promptTemplate = await readUtf8OrThrow(promptPath, "prompt file");
+				} catch (error) {
+					window.showErrorMessage(
+						`Failed to read detailed design prompt: ${error instanceof Error ? error.message : String(error)}`
+					);
+					return;
+				}
+
+				let proposal = "";
+				let tasks = "";
+				let design: string | null = null;
+				try {
+					proposal = await readUtf8OrThrow(proposalPath, "proposal.md");
+					tasks = await readUtf8OrThrow(tasksPath, "tasks.md");
+
+					try {
+						design = await readUtf8OrThrow(designPath, "design.md");
+					} catch {
+						design = null;
+					}
+				} catch (error) {
+					window.showErrorMessage(
+						`Failed to read change documents: ${error instanceof Error ? error.message : String(error)}`
+					);
+					return;
+				}
+
+				// A: use only delta specs under openspec/changes/<id>/specs/**/spec.md
+				const deltaSpecNames = await specManager.getChangeSpecs(changeId);
+				const deltaSpecs: Array<{ name: string; content: string }> = [];
+				for (const specName of deltaSpecNames) {
+					const specUri = Uri.joinPath(
+						changeBase,
+						"specs",
+						specName,
+						"spec.md"
+					);
+					try {
+						const content = await readUtf8OrThrow(
+							specUri,
+							`delta spec ${specName}`
+						);
+						deltaSpecs.push({ name: specName, content });
+					} catch (error) {
+						window.showErrorMessage(
+							`Failed to read delta spec '${specName}': ${error instanceof Error ? error.message : String(error)}`
+						);
+						return;
+					}
+				}
+
+				const sections: string[] = [];
+				sections.push(promptTemplate.trim());
+				sections.push(`\n\n---\n\n# Inputs\n\nchange-id: ${changeId}`);
+				sections.push(
+					`\n\n## proposal.md\n\n\`\`\`markdown\n${proposal}\n\`\`\``
+				);
+				sections.push(`\n\n## tasks.md\n\n\`\`\`markdown\n${tasks}\n\`\`\``);
+				if (design) {
+					sections.push(
+						`\n\n## design.md\n\n\`\`\`markdown\n${design}\n\`\`\``
+					);
+				}
+
+				if (deltaSpecs.length > 0) {
+					sections.push("\n\n## delta specs\n");
+					for (const s of deltaSpecs) {
+						sections.push(
+							`\n\n### ${s.name}/spec.md\n\n\`\`\`markdown\n${s.content}\n\`\`\``
+						);
+					}
+				}
+
+				sections.push(
+					"\n\n---\n\nNow generate the detailed design document. Return ONLY Markdown for detailed-design.md.\n\n" +
+						"After generating the Markdown, I will paste it into: openspec/changes/" +
+						changeId +
+						"/detailed-design.md"
+				);
+
+				const composedPrompt = sections.join("\n");
+
+				// Ensure the file exists so it appears in the Specs tree.
+				try {
+					await workspace.fs.stat(outputPath);
+				} catch {
+					const scaffold = Buffer.from(
+						"# Detailed Design\n\n" +
+							'> Run "Create Detailed Design" to send context to Copilot Chat, then paste the result here.\n'
+					);
+					await workspace.fs.writeFile(outputPath, scaffold);
+				}
+
+				try {
+					const doc = await workspace.openTextDocument(outputPath);
+					await window.showTextDocument(doc);
+				} catch {
+					// ignore UI open failures
+				}
+
+				outputChannel.appendLine(
+					`[Detailed Design] Sending prompt to Copilot Chat for: ${changeId}`
+				);
+				await sendPromptToChat(composedPrompt, {
+					instructionType: "runPrompt",
+				});
+				specExplorer.refresh();
+				window.showInformationMessage(
+					`Sent prompt to Copilot Chat for change '${changeId}'.`
+				);
+			}
+		),
+		commands.registerCommand(
 			"openspec-for-copilot.spec.archiveChange",
 			async (item: any) => {
 				// item is SpecItem, item.specName is the ID
