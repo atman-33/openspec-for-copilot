@@ -5,7 +5,8 @@ description: Generate a detailed technical design document for an OpenSpec chang
 $ARGUMENTS
 <!-- OPENSPEC:START -->
 **Guardrails**
-- Output ONLY the final Markdown for `openspec/changes/<change-id>/detailed-design.md` (no preface, no explanations).
+- Do NOT output the Markdown content in the chat. Instead, use the file creation tool to create `openspec/changes/<change-id>/detailed-design.md`.
+- After creating the file, ask the user to review its content.
 - Design only: do NOT implement code.
 - Keep the design specific and actionable; avoid vague statements.
 - When you mention file paths, ALWAYS prefix them with `<RepositoryName>/`.
