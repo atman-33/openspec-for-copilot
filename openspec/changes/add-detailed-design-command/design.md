@@ -18,13 +18,14 @@ This change adds a new Specs view context menu action that generates a consolida
    - `openspec/changes/<change-id>/design.md` (if present)
    - all delta specs under `openspec/changes/<change-id>/specs/**/spec.md`
 4. Extension sends a composed prompt to Copilot chat.
-5. Extension writes `openspec/changes/<change-id>/detailed-design.md`.
-6. Specs view refreshes so `detailed-design.md` appears and is navigable.
+5. Extension scaffolds `openspec/changes/<change-id>/detailed-design.md` if missing and opens it for editing.
+6. User pastes the Copilot output into `detailed-design.md`.
+7. Specs view refreshes so `detailed-design.md` appears and is navigable.
 
 ## Error Handling
 - If required inputs (proposal/tasks) are missing, show an actionable error and do not invoke Copilot.
 - If the prompt file cannot be created or read, show an actionable error.
-- If Copilot invocation fails, surface the failure without writing a partial `detailed-design.md`.
+- If Copilot invocation fails, surface the failure; do not modify `detailed-design.md` content.
 
 ## Testing Strategy
 - Provider test: `detailed-design.md` is only included in the change node children when present.

@@ -9,8 +9,10 @@ The Spec Explorer SHALL provide a context menu command on change items to genera
 Given I am in the Specs view
 And I right-click on a change item
 When I select "Create Detailed Design"
-Then the extension should generate `detailed-design.md` under `openspec/changes/<change-id>/`
-And the content should be produced using the prompt at `.github/prompts/openspec-add-detailed-design.prompt.md` plus the change documents as inputs
+Then the extension should ensure `detailed-design.md` exists under `openspec/changes/<change-id>/` (scaffold if missing)
+And the extension should open `detailed-design.md` for editing
+And Copilot Chat should be invoked using the prompt at `.github/prompts/openspec-add-detailed-design.prompt.md` plus the change documents as inputs
+And I should paste the Copilot output into `detailed-design.md`
 
 ### Requirement: Prompt Bootstrapping
 The system SHALL create `.github/prompts/openspec-add-detailed-design.prompt.md` with starter content if it does not already exist.
