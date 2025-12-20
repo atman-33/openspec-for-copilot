@@ -1,7 +1,7 @@
 # Design: Create Detailed Design
 
 ## Overview
-This change adds a new Specs view context menu action that generates a consolidated `detailed-design.md` for a selected change. The generation uses a user-editable Copilot prompt stored in `.github/prompts/openspec-add-detailed-design.prompt.md`.
+This change adds a new Specs view context menu action that generates a consolidated `detailed-design.md` for a selected change. The generation uses a user-editable Copilot prompt stored in `.github/prompts/openspec-create-detailed-design.prompt.md`.
 
 ## Key Decisions
 - **Scope / target node**: The command is attached to Specs view *change* items (context value `change`), because the inputs (proposal/tasks/design/delta specs) are organized under `openspec/changes/<change-id>/`.
@@ -12,7 +12,7 @@ This change adds a new Specs view context menu action that generates a consolida
 1. User triggers "Create Detailed Design" on a change item.
 2. Extension ensures the prompt file exists (create starter if missing).
 3. Extension reads:
-   - `.github/prompts/openspec-add-detailed-design.prompt.md`
+   - `.github/prompts/openspec-create-detailed-design.prompt.md`
    - `openspec/changes/<change-id>/proposal.md`
    - `openspec/changes/<change-id>/tasks.md`
    - `openspec/changes/<change-id>/design.md` (if present)

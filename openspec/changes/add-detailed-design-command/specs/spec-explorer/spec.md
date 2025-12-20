@@ -11,16 +11,16 @@ And I right-click on a change item
 When I select "Create Detailed Design"
 Then the extension should ensure `detailed-design.md` exists under `openspec/changes/<change-id>/` (scaffold if missing)
 And the extension should open `detailed-design.md` for editing
-And Copilot Chat should be invoked using the prompt at `.github/prompts/openspec-add-detailed-design.prompt.md` plus the change documents as inputs
+And Copilot Chat should be invoked using the prompt at `.github/prompts/openspec-create-detailed-design.prompt.md` plus the change documents as inputs
 And I should paste the Copilot output into `detailed-design.md`
 
 ### Requirement: Prompt Bootstrapping
-The system SHALL create `.github/prompts/openspec-add-detailed-design.prompt.md` with starter content if it does not already exist.
+The system SHALL create `.github/prompts/openspec-create-detailed-design.prompt.md` with starter content if it does not already exist.
 
 #### Scenario: Missing Prompt File
-Given `.github/prompts/openspec-add-detailed-design.prompt.md` does not exist
+Given `.github/prompts/openspec-create-detailed-design.prompt.md` does not exist
 When I run "Create Detailed Design" for a change
-Then the system should create `.github/prompts/openspec-add-detailed-design.prompt.md`
+Then the system should create `.github/prompts/openspec-create-detailed-design.prompt.md`
 And it should not overwrite the file on subsequent runs
 
 ### Requirement: Detailed Design Visibility

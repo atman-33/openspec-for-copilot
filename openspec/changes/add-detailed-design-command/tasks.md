@@ -5,7 +5,7 @@
 - [x] 1.2 Add "Create Detailed Design" to the Specs view item context menu for change items, ordered above "Archive Change".
 
 ## 2. Prompt Bootstrapping
-- [x] 2.1 On command execution, ensure `.github/prompts/openspec-add-detailed-design.prompt.md` exists; if missing, create it with a minimal starter prompt.
+- [x] 2.1 On command execution, ensure `.github/prompts/openspec-create-detailed-design.prompt.md` exists; if missing, create it with a minimal starter prompt.
 - [x] 2.2 Do not overwrite the prompt file if it already exists.
 
 ## 3. Prompt Execution + File Generation

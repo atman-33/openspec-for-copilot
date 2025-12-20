@@ -327,7 +327,7 @@ function registerCommands(
 				const promptsDir = Uri.joinPath(ws.uri, ".github", "prompts");
 				const promptPath = Uri.joinPath(
 					promptsDir,
-					"openspec-add-detailed-design.prompt.md"
+					"openspec-create-detailed-design.prompt.md"
 				);
 
 				// Bootstrap prompt file only if missing
@@ -336,7 +336,7 @@ function registerCommands(
 				} catch {
 					await workspace.fs.createDirectory(promptsDir);
 					const starterPrompt = Buffer.from(
-						"# OpenSpec: Add Detailed Design\n\n" +
+						"# OpenSpec: Create Detailed Design\n\n" +
 							"You are helping create a detailed design document for an OpenSpec change.\n" +
 							"Use the provided change documents as the source of truth.\n\n" +
 							"Output requirements:\n" +
