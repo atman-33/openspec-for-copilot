@@ -2,6 +2,37 @@
 
 ---
 
+## v0.4.0 2025-12-21
+
+### Added
+
+- implement "Update Specs from Detailed Design" command and related functionality
+- enhance extension services with URI support and add detailed design prompt template
+- add command for creating detailed design and integrate into spec explorer
+- hide missing change files in sidebar
+
+### Changed
+
+- feature/detailed-design
+- enhance README with detailed design workflow and update specs instructions
+- update guardrails in prompts to clarify output handling and user review steps
+- streamline document path handling and update prompt composition in detailed design commands
+- add "Create Detailed Design" and "Update Specs from Detailed Design" commands with associated documentation and specs
+- add "Update Specs from Detailed Design" command and related documentation
+- add unit tests for prompt bootstrapping and ensure no overwrite occurs
+- Add steering commands and related services
+- ensure detailed-design.md is scaffolded if missing and open for editing
+- add detailed design command with context menu integration and prompt handling
+- add proposal and specification for hiding missing change files in sidebar
+- feature/hide-empty-changes
+- add proposal and tasks for hiding missing change files in sidebar
+- Merge pull request #12 from atman-33/version-bump/v0.3.3
+
+### Fixed
+
+- remove information message after sending prompt to Copilot Chat
+- update prompt file references from 'openspec-add-detailed-design' to 'openspec-create-detailed-design'
+
 ## v0.3.3 2025-11-23
 
 ### Added
