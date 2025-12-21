@@ -18,6 +18,7 @@ It allows you to visually manage Specs, Steering documents (AGENTS.md), and cust
 - **Create Specs**: Run `OpenSpec for Copilot: Create New Spec` (`openspec-for-copilot.spec.create`) to open the creation dialog. Define your summary, product context, and constraints.
 - **Generate with Copilot**: The extension compiles your input into an optimized OpenSpec prompt and sends it to **GitHub Copilot Chat** to generate the full specification (Requirements, Design, Tasks).
 - **Manage Specs**: Browse generated specs in the **Specs** view.
+- **Detailed Design**: Generate a detailed design document from a change, and update specs based on it.
 - **Execute Tasks**: Open `tasks.md` and use the "Start Task" CodeLens to send task context to GitHub Copilot Chat for implementation.
 
 ### 🧩 Prompt Management
@@ -79,14 +80,19 @@ Search for "OpenSpec for Copilot" in the VS Code Marketplace and install the ext
 
    ![Create new Spec](./screenshots/010-create-new-spec.png)
 
-### 2. Implement Tasks
+### 2. Detailed Design Workflow (Optional)
+1. Right-click on a Change ID in the **Specs** view.
+2. Select **Create Detailed Design**. Copilot Chat will generate a detailed design document.
+3. Once the design is finalized, right-click the change again and select **Update Specs from Detailed Design** to synchronize other documents.
+
+### 3. Implement Tasks
 1. Open a generated `tasks.md` file.
 2. Click **Start All Tasks** above a checklist item.
 3. GitHub Copilot Chat will open with the task context. Interact with it to implement the code.
 
    ![Start All Tasks](./screenshots/020-start-all-tasksk.png)
 
-### 3. Archive Change
+### 4. Archive Change
 1. Right-click on a Change ID in the **Specs** view.
 2. Select **Archive Change** from the context menu.
 3. The change will be moved to the archive.

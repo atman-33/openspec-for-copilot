@@ -60,6 +60,7 @@ export class SpecExplorerProvider implements TreeDataProvider<SpecItem> {
 		return element;
 	}
 
+	// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: tree provider branching is clearer than over-abstraction
 	async getChildren(element?: SpecItem): Promise<SpecItem[]> {
 		if (!(workspace.workspaceFolders && this.specManager)) {
 			return [];
@@ -191,6 +192,25 @@ export class SpecExplorerProvider implements TreeDataProvider<SpecItem> {
 				);
 			}
 
+			if (await this.fileExists(`${basePath}/detailed-design.md`)) {
+				items.push(
+					new SpecItem(
+						"Detailed Design",
+						TreeItemCollapsibleState.None,
+						"spec-document",
+						this.context,
+						element.specName,
+						"detailed-design",
+						{
+							command: SpecExplorerProvider.openSpecCommandId,
+							title: "Open Detailed Design",
+							arguments: [`${basePath}/detailed-design.md`, "design"],
+						},
+						`${basePath}/detailed-design.md`
+					)
+				);
+			}
+
 			items.push(
 				new SpecItem(
 					"Specs",
@@ -316,6 +336,8 @@ class SpecItem extends TreeItem {
 			this.iconPath = new ThemeIcon("chip");
 		} else if (this.documentType === "design") {
 			this.iconPath = new ThemeIcon("layers");
+		} else if (this.documentType === "detailed-design") {
+			this.iconPath = new ThemeIcon("file-text");
 		} else if (this.documentType === "tasks") {
 			this.iconPath = new ThemeIcon("tasklist");
 		} else if (this.documentType === "proposal") {
