@@ -2,6 +2,17 @@
 
 ---
 
+## v0.4.1 2025-12-21
+
+### Changed
+
+- fix/create-spec-autosave
+- Merge pull request #15 from atman-33/version-bump/v0.4.0
+
+### Fixed
+
+- implement autosave functionality in CreateSpecView
+
 ## v0.4.0 2025-12-21
 
 ### Added
