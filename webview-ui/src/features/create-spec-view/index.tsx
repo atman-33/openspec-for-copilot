@@ -93,7 +93,7 @@ export const CreateSpecView = () => {
 	const [closeWarningVisible, setCloseWarningVisible] = useState(false);
 
 	const lastPersistedRef = useRef<CreateSpecFormData>(EMPTY_FORM);
-	// const autosaveTimeoutRef = useRef<number | undefined>();
+	const autosaveTimeoutRef = useRef<number | undefined>();
 
 	const productContextRef = useRef<HTMLTextAreaElement>(null);
 	const keyScenariosRef = useRef<HTMLTextAreaElement>(null);
@@ -106,12 +106,12 @@ export const CreateSpecView = () => {
 		[formData]
 	);
 
-	// const clearAutosaveTimer = useCallback(() => {
-	// 	if (autosaveTimeoutRef.current) {
-	// 		window.clearTimeout(autosaveTimeoutRef.current);
-	// 		autosaveTimeoutRef.current = undefined;
-	// 	}
-	// }, []);
+	const clearAutosaveTimer = useCallback(() => {
+		if (autosaveTimeoutRef.current) {
+			window.clearTimeout(autosaveTimeoutRef.current);
+			autosaveTimeoutRef.current = undefined;
+		}
+	}, []);
 
 	const persistDraft = useCallback((data: CreateSpecFormData) => {
 		const normalized = normalizeFormData(data);
@@ -130,15 +130,15 @@ export const CreateSpecView = () => {
 		vscode.postMessage({ type: "create-spec/autosave", payload: normalized });
 	}, []);
 
-	// const scheduleAutosave = useCallback(
-	// 	(data: CreateSpecFormData) => {
-	// 		clearAutosaveTimer();
-	// 		autosaveTimeoutRef.current = window.setTimeout(() => {
-	// 			persistDraft(data);
-	// 		}, AUTOSAVE_DEBOUNCE_MS);
-	// 	},
-	// 	[clearAutosaveTimer, persistDraft]
-	// );
+	const scheduleAutosave = useCallback(
+		(data: CreateSpecFormData) => {
+			clearAutosaveTimer();
+			autosaveTimeoutRef.current = window.setTimeout(() => {
+				persistDraft(data);
+			}, AUTOSAVE_DEBOUNCE_MS);
+		},
+		[clearAutosaveTimer, persistDraft]
+	);
 
 	const handleFieldChange = useCallback(
 		(field: keyof CreateSpecFormData) =>
@@ -149,12 +149,11 @@ export const CreateSpecView = () => {
 						...previous,
 						[field]: value,
 					};
-					// scheduleAutosave(next);
+					scheduleAutosave(next);
 					return next;
 				});
 			},
-		// [scheduleAutosave]
-		[]
+		[scheduleAutosave]
 	);
 
 	const validateForm = useCallback((current: CreateSpecFormData): boolean => {
@@ -185,7 +184,7 @@ export const CreateSpecView = () => {
 				return;
 			}
 
-			// clearAutosaveTimer();
+			clearAutosaveTimer();
 			setIsSubmitting(true);
 			setSubmissionError(undefined);
 
@@ -194,16 +193,16 @@ export const CreateSpecView = () => {
 				payload: normalized,
 			});
 		},
-		[formData, isSubmitting, validateForm]
+		[clearAutosaveTimer, formData, isSubmitting, validateForm]
 	);
 
 	const handleCancel = useCallback(() => {
-		// clearAutosaveTimer();
+		clearAutosaveTimer();
 		vscode.postMessage({
 			type: "create-spec/close-attempt",
 			payload: { hasDirtyChanges: isDirty },
 		});
-	}, [isDirty]);
+	}, [clearAutosaveTimer, isDirty]);
 
 	const focusPrimaryField = useCallback(() => {
 		window.setTimeout(() => {
@@ -241,9 +240,9 @@ export const CreateSpecView = () => {
 		vscode.postMessage({ type: "create-spec/ready" });
 
 		return () => {
-			// clearAutosaveTimer();
+			clearAutosaveTimer();
 		};
-	}, []);
+	}, [clearAutosaveTimer]);
 
 	useEffect(() => {
 		const handleMessage = (event: MessageEvent<CreateSpecExtensionMessage>) => {
