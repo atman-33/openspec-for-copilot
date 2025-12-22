@@ -3,6 +3,7 @@ import type { ExtensionContext } from "vscode";
 import type { SpecExplorerProvider } from "../../providers/spec-explorer-provider";
 import type { ExtensionServices } from "../extension-services";
 import { createDetailedDesignCommandHandler } from "../../features/spec/commands/create-detailed-design";
+import { createGitHubIssueCommandHandler } from "../../features/spec/commands/create-github-issue";
 import { updateSpecsFromDetailedDesignCommandHandler } from "../../features/spec/commands/update-specs-from-detailed-design";
 import { sendPromptToChat } from "../../utils/chat-prompt-runner";
 
@@ -122,6 +123,10 @@ export const registerSpecCommands = (
 					);
 				}
 			}
+		),
+		commands.registerCommand(
+			"openspec-for-copilot.spec.createGitHubIssue",
+			createGitHubIssueCommandHandler(services)
 		)
 	);
 };
