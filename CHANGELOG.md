@@ -2,6 +2,18 @@
 
 ---
 
+## v0.5.0 2025-12-22
+
+### Added
+
+- add Create GitHub Issue command and prompt template
+
+### Changed
+
+- feature/create-issue-from-spec
+- add Create GitHub Issue command and related documentation
+- Merge pull request #17 from atman-33/version-bump/v0.4.1
+
 ## v0.4.1 2025-12-21
 
 ### Changed
