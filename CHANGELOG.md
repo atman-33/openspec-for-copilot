@@ -2,6 +2,14 @@
 
 ---
 
+## v0.5.1 2025-12-22
+
+### Changed
+
+- update-readme
+- update README to include Create GitHub Issue feature and instructions
+- Merge pull request #19 from atman-33/version-bump/v0.5.0
+
 ## v0.5.0 2025-12-22
 
 ### Added
