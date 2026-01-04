@@ -53,6 +53,7 @@ describe("ConfigManager", () => {
 				global: "",
 				createSpec: "",
 				startAllTask: "",
+				archiveChange: "",
 				runPrompt: "",
 			},
 		});

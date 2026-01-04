@@ -32,6 +32,7 @@ describe("chat-prompt-runner", () => {
 				global: "",
 				createSpec: "",
 				startAllTask: "",
+				archiveChange: "",
 				runPrompt: "",
 			},
 		});
@@ -62,6 +63,7 @@ describe("chat-prompt-runner", () => {
 				global: "",
 				createSpec: "",
 				startAllTask: "",
+				archiveChange: "",
 				runPrompt: "",
 			},
 		});
@@ -85,6 +87,7 @@ describe("chat-prompt-runner", () => {
 				global: "",
 				createSpec: "",
 				startAllTask: "",
+				archiveChange: "",
 				runPrompt: "",
 			},
 		});
@@ -108,6 +111,7 @@ describe("chat-prompt-runner", () => {
 				global: "Global Context",
 				createSpec: "",
 				startAllTask: "",
+				archiveChange: "",
 				runPrompt: "",
 			},
 		});
@@ -131,6 +135,7 @@ describe("chat-prompt-runner", () => {
 				global: "",
 				createSpec: "Specific Context",
 				startAllTask: "",
+				archiveChange: "",
 				runPrompt: "",
 			},
 		});
@@ -154,6 +159,7 @@ describe("chat-prompt-runner", () => {
 				global: "Global Context",
 				createSpec: "Specific Context",
 				startAllTask: "",
+				archiveChange: "",
 				runPrompt: "",
 			},
 		});
@@ -177,6 +183,7 @@ describe("chat-prompt-runner", () => {
 				global: "Global Context",
 				createSpec: "Specific Context",
 				startAllTask: "",
+				archiveChange: "",
 				runPrompt: "",
 			},
 		});
@@ -193,6 +200,30 @@ describe("chat-prompt-runner", () => {
 		);
 	});
 
+	it("should append archive change specific custom instruction", async () => {
+		mockGetSettings.mockReturnValue({
+			aiAgent: "github-copilot",
+			chatLanguage: "English",
+			customInstructions: {
+				global: "",
+				createSpec: "",
+				startAllTask: "",
+				archiveChange: "Archive Context",
+				runPrompt: "",
+			},
+		});
+		const prompt = "Archive this change";
+
+		await sendPromptToChat(prompt, { instructionType: "archiveChange" });
+
+		expect(commands.executeCommand).toHaveBeenCalledWith(
+			"workbench.action.chat.open",
+			{
+				query: "Archive this change\n\nArchive Context",
+			}
+		);
+	});
+
 	it("should send the prompt to Codex when aiAgent is codex", async () => {
 		const { CodexService } = await import("../services/codex-service");
 
@@ -203,6 +234,7 @@ describe("chat-prompt-runner", () => {
 				global: "",
 				createSpec: "",
 				startAllTask: "",
+				archiveChange: "",
 				runPrompt: "",
 			},
 		});

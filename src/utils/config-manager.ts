@@ -25,6 +25,7 @@ export interface OpenSpecSettings {
 		global: string;
 		createSpec: string;
 		startAllTask: string;
+		archiveChange: string;
 		runPrompt: string;
 	};
 }
@@ -116,6 +117,8 @@ export class ConfigManager {
 			global: config.get<string>("customInstructions.global") ?? "",
 			createSpec: config.get<string>("customInstructions.createSpec") ?? "",
 			startAllTask: config.get<string>("customInstructions.startAllTask") ?? "",
+			archiveChange:
+				config.get<string>("customInstructions.archiveChange") ?? "",
 			runPrompt: config.get<string>("customInstructions.runPrompt") ?? "",
 		};
 	}
@@ -158,6 +161,9 @@ export class ConfigManager {
 			startAllTask:
 				overrides.customInstructions?.startAllTask ??
 				defaults.customInstructions.startAllTask,
+			archiveChange:
+				overrides.customInstructions?.archiveChange ??
+				defaults.customInstructions.archiveChange,
 			runPrompt:
 				overrides.customInstructions?.runPrompt ??
 				defaults.customInstructions.runPrompt,
