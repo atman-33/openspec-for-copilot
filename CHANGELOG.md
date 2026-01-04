@@ -2,6 +2,31 @@
 
 ---
 
+## v0.6.0 2026-01-04
+
+### Added
+
+- implement archive change custom instructions and update related components
+- enhance prompt with detailed design guidance if available
+- implement automatic cleanup for Codex temp files older than 7 days
+- add support for Codex Chat integration with configuration option
+
+### Changed
+
+- feature/prompt-tweak
+- add custom instructions for "Archive Change" to README
+- add custom instructions for "Archive Change" workflow and update related specs
+- add custom instructions for "Archive Change" workflow
+- feature/add-codex-support
+- update README to include Codex Chat support and clarify chat agent usage
+- add support for Codex Chat integration and automatic cleanup of temp files
+- remove thread pooling from Vitest commands for consistency
+- add support for Codex Chat integration with configuration option
+- update .gitignore and .vscodeignore to include new configuration files
+- remove spec for "Create GitHub Issue" command from Spec Explorer
+- add "Create GitHub Issue" command to Spec Explorer with context menu integration
+- Merge pull request #21 from atman-33/version-bump/v0.5.1
+
 ## v0.5.1 2025-12-22
 
 ### Changed
