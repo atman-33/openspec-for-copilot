@@ -5,9 +5,9 @@
 [![GitHub stars](https://img.shields.io/github/stars/atman-33/openspec-for-copilot.svg?style=flat-square)](https://github.com/atman-33/openspec-for-copilot/stargazers)
 [![GitHub issues](https://img.shields.io/github/issues/atman-33/openspec-for-copilot.svg?style=flat-square)](https://github.com/atman-33/openspec-for-copilot/issues)
 
-OpenSpec for Copilot is a VS Code extension that brings Spec-Driven Development (SDD) to your workflow, leveraging [OpenSpec](https://github.com/Fission-AI/OpenSpec) prompts and **GitHub Copilot**.
+OpenSpec for Copilot is a VS Code extension that brings Spec-Driven Development (SDD) to your workflow, leveraging [OpenSpec](https://github.com/Fission-AI/OpenSpec) prompts and chat agents like **GitHub Copilot Chat**.
 
-It allows you to visually manage Specs, Steering documents (AGENTS.md), and custom prompts, seamlessly integrating with GitHub Copilot Chat to generate high-quality documentation and code.
+It allows you to visually manage Specs, Steering documents (AGENTS.md), and custom prompts, seamlessly integrating with GitHub Copilot Chat by default, with optional **Codex Chat** support.
 
 ![Create new Spec](./screenshots/image.png)
 
@@ -16,23 +16,24 @@ It allows you to visually manage Specs, Steering documents (AGENTS.md), and cust
 ### 📝 Spec Management
 
 - **Create Specs**: Run `OpenSpec for Copilot: Create New Spec` (`openspec-for-copilot.spec.create`) to open the creation dialog. Define your summary, product context, and constraints.
-- **Generate with Copilot**: The extension compiles your input into an optimized OpenSpec prompt and sends it to **GitHub Copilot Chat** to generate the full specification (Requirements, Design, Tasks).
+- **Generate with Chat**: The extension compiles your input into an optimized OpenSpec prompt and sends it to the configured chat agent (GitHub Copilot Chat by default) to generate the full specification (Requirements, Design, Tasks).
 - **Manage Specs**: Browse generated specs in the **Specs** view.
 - **Detailed Design**: Generate a detailed design document from a change, and update specs based on it.
 - **Create GitHub Issue**: Generate a GitHub issue from a spec change, including references to proposal, design, and tasks.
-- **Execute Tasks**: Open `tasks.md` and use the "Start Task" CodeLens to send task context to GitHub Copilot Chat for implementation.
+- **Execute Tasks**: Open `tasks.md` and use the "Start Task" CodeLens to send task context to the configured chat agent for implementation.
 
 ### 🧩 Prompt Management
 - **Custom Prompts**: Manage Markdown prompts under `.github/prompts` (configurable) alongside instructions and agents to keep all project guidance in one place.
 - **Project Instructions & Agents**: The Prompts explorer now shows `Project Instructions` and `Project Agents` groups, surfacing `.github/instructions` and `.github/agents` files (in that order) so you can reference reusable instructions and agent definitions without leaving VS Code.
-- **Run Prompts**: Execute prompts directly from the tree view, passing the context to GitHub Copilot Chat.
+- **Run Prompts**: Execute prompts directly from the tree view, passing the context to the configured chat agent.
 - **Rename or Delete**: Use the item context menu to rename or delete prompts, instructions, and agents without leaving the explorer. `Rename` always appears above `Delete` for quick edits.
 
 ## Installation
 
 ### Prerequisites
 - Visual Studio Code 1.84.0 or newer.
-- **[GitHub Copilot Chat](https://marketplace.visualstudio.com/items?itemName=GitHub.copilot-chat)** extension must be installed.
+- **[GitHub Copilot Chat](https://marketplace.visualstudio.com/items?itemName=GitHub.copilot-chat)** extension must be installed (default).
+- For Codex mode, a VS Code extension that provides the `chatgpt.addToThread` command must be installed.
 - **[OpenSpec](https://github.com/Fission-AI/OpenSpec)** must be globally installed and initialized.
 
 ### OpenSpec Global Installation and Initialization:
@@ -76,27 +77,27 @@ Search for "OpenSpec for Copilot" in the VS Code Marketplace and install the ext
 1. Open the **Specs** view in the Activity Bar.
 2. Click **Create New Spec**.
 3. Fill in the details (Product Context is required).
-4. Click **Create Spec**. This will open GitHub Copilot Chat with a generated prompt.
+4. Click **Create Spec**. This will open chat with a generated prompt.
 5. Follow the chat instructions to generate the spec files.
 
    ![Create new Spec](./screenshots/010-create-new-spec.png)
 
 ### 2. Detailed Design Workflow (Optional)
 1. Right-click on a Change ID in the **Specs** view.
-2. Select **Create Detailed Design**. Copilot Chat will generate a detailed design document.
+2. Select **Create Detailed Design**. Chat will generate a detailed design document.
 3. Once the design is finalized, right-click the change again and select **Update Specs from Detailed Design** to synchronize other documents.
 
 ### 3. Implement Tasks
 1. Open a generated `tasks.md` file.
 2. Click **Start All Tasks** above a checklist item.
-3. GitHub Copilot Chat will open with the task context. Interact with it to implement the code.
+3. Chat will open with the task context. Interact with it to implement the code.
 
    ![Start All Tasks](./screenshots/020-start-all-tasksk.png)
 
 ### 4. Create GitHub Issue
 1. Right-click on a Change ID in the **Specs** view.
 2. Select **Create GitHub Issue** from the context menu.
-3. Copilot Chat will open with a prompt to create a GitHub issue based on the spec documents.
+3. Chat will open with a prompt to create a GitHub issue based on the spec documents.
 4. Review the generated issue title and body, then create the issue.
 
 ### 5. Archive Change
@@ -111,6 +112,7 @@ All settings live under the `openspec-for-copilot` namespace.
 
 | Setting | Type | Default | Purpose |
 | --- | --- | --- | --- |
+| `aiAgent` | string | `github-copilot` | Select which chat agent to use for sending prompts (`github-copilot` or `codex`). |
 | `chatLanguage` | string | `English` | The language GitHub Copilot should use for responses. |
 | `copilot.specsPath` | string | `openspec` | Workspace-relative path for generated specs. |
 | `copilot.promptsPath` | string | `.github/prompts` | Workspace-relative path for Markdown prompts. |
@@ -122,6 +124,8 @@ All settings live under the `openspec-for-copilot` namespace.
 | `customInstructions.createSpec` | string | `""` | Custom instructions for "Create Spec". |
 | `customInstructions.startAllTask` | string | `""` | Custom instructions for "Start All Tasks". |
 | `customInstructions.runPrompt` | string | `""` | Custom instructions for "Run Prompt". |
+
+Note: In Codex mode, prompts are written to temporary Markdown files under `~/.codex/.tmp/` and sent via `chatgpt.addToThread`.
 
 Paths accept custom locations inside the workspace; the extension mirrors watchers to match custom directories.
 
