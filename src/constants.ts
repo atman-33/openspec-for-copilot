@@ -7,6 +7,7 @@ export const DEFAULT_CONFIG = {
 		prompts: ".github/prompts",
 		specs: "openspec",
 	},
+	aiAgent: "github-copilot",
 	views: {
 		specs: true,
 		steering: true,

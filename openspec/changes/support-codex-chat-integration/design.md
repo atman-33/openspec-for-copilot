@@ -4,7 +4,7 @@
 The `ChatPromptRunner` or equivalent service responsible for sending instructions to the AI agent will be updated to support multiple strategies.
 
 ### Configuration
-A new configuration item `openspec.aiAgent` will be added to `package.json`.
+A new configuration item `openspec-for-copilot.aiAgent` will be added to `package.json`.
 -   Type: `string`
 -   Enum: `['github-copilot', 'codex']`
 -   Default: `'github-copilot'`

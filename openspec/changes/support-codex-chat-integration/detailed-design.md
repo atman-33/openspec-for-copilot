@@ -1,12 +1,12 @@
 ### 1. Overview
 This change adds support for Codex Chat (via the ChatGPT extension) as a destination for chat instructions, in addition to the existing GitHub Copilot Chat.
-Users will be able to select the AI agent to use via the `openspec.aiAgent` setting.
+Users will be able to select the AI agent to use via the `openspec-for-copilot.aiAgent` setting.
 When Codex Chat is selected, the instruction content is written to a temporary file, opened in the editor, and the `chatgpt.addToThread` command is executed.
 
 ### 2. Scope & Constraints
 
 #### In Scope
-- Add `openspec.aiAgent` setting to `package.json`.
+- Add `openspec-for-copilot.aiAgent` setting to `package.json`.
 - Support reading the new setting in `ConfigManager`.
 - Implement agent dispatch logic in `ChatPromptRunner` (or `sendPromptToChat`).
 - Implement the workflow for Codex (create temporary file, open, select, execute command).
@@ -201,12 +201,12 @@ export const sendPromptToCodex = async (prompt: string): Promise<void> => {
 #### 6.2. Manual Verification Scenarios
 
 **Scenario A: GitHub Copilot (Default)**
-1. Confirm that the `openspec.aiAgent` setting is `github-copilot` (or unset).
+1. Confirm that the `openspec-for-copilot.aiAgent` setting is `github-copilot` (or unset).
 2. Execute any command (e.g., "Create Spec").
 3. Verify that the GitHub Copilot Chat panel opens and the prompt is entered.
 
 **Scenario B: Codex**
-1. Change the `openspec.aiAgent` setting to `codex`.
+1. Change the `openspec-for-copilot.aiAgent` setting to `codex`.
 2. Execute any command.
 3. Verify that a new Markdown file is created under `~/.codex/.tmp/`.
 4. Verify that the file opens in the editor and the text is selected.

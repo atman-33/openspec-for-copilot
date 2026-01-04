@@ -80,6 +80,15 @@
           "description": "Path where Copilot prompt files are stored.",
           "order": 2
         },
+        "openspec-for-copilot.aiAgent": {
+          "type": "string",
+          "default": "github-copilot",
+          "enum": [
+            "github-copilot",
+            "codex"
+          ],
+          "description": "Select which chat agent to use for sending prompts."
+        },
         "openspec-for-copilot.chatLanguage": {
           "type": "string",
           "default": "English",
