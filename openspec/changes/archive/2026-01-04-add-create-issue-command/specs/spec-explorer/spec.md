@@ -2,8 +2,8 @@
 
 ## ADDED Requirements
 
-### Create GitHub Issue Command
-The Spec Explorer shall provide a command to create a GitHub issue based on the selected change spec.
+### Requirement: Create GitHub Issue Command
+The Spec Explorer SHALL provide a command to create a GitHub issue based on the selected change spec.
 
 #### Scenario: User creates GitHub issue from change
 - Given the user has the Specs view open

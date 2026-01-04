@@ -1,4 +1,5 @@
 import { commands } from "vscode";
+import { CodexService } from "../services/codex-service";
 import { ConfigManager } from "./config-manager";
 
 export interface ChatContext {
@@ -42,6 +43,13 @@ export const sendPromptToChat = async (
 	context?: ChatContext
 ): Promise<void> => {
 	const finalPrompt = buildChatPrompt(prompt, context);
+	const configManager = ConfigManager.getInstance();
+	const { aiAgent } = configManager.getSettings();
+
+	if (aiAgent === "codex") {
+		await CodexService.addPromptToThread(finalPrompt);
+		return;
+	}
 
 	await commands.executeCommand("workbench.action.chat.open", {
 		query: finalPrompt,

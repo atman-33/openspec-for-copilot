@@ -47,6 +47,7 @@ describe("ConfigManager", () => {
 				prompts: { visible: DEFAULT_VIEW_VISIBILITY.prompts },
 				settings: { visible: DEFAULT_VIEW_VISIBILITY.settings },
 			},
+			aiAgent: "github-copilot",
 			chatLanguage: "English",
 			customInstructions: {
 				global: "",

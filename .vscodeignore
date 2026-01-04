@@ -46,3 +46,5 @@ AGENTS.md
 .repomix/**
 repomix-output*
 openspec/**
+.claude/**
+.skillportrc

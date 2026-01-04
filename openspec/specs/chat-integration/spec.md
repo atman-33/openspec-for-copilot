@@ -51,3 +51,47 @@ The `sendPromptToChat` utility MUST append configured custom instructions to the
 #### Scenario: Order of injection
 - The order MUST be: Original Prompt -> Global Instruction -> Specific Instruction -> Language Instruction.
 
+### Requirement: Codex Temp File Retention
+When Codex mode writes prompt files under `~/.codex/.tmp/`, the extension MUST delete old Markdown files to prevent unbounded growth.
+
+#### Scenario: Cleanup Old Files
+- Given `openspec-for-copilot.aiAgent` is `codex`
+- And there are `.md` files in `~/.codex/.tmp/` older than 7 days
+- When the extension sends a prompt via Codex
+- Then the extension MUST delete those old `.md` files on a best-effort basis.
+
+#### Scenario: Do Not Delete Recent Files
+- Given `openspec-for-copilot.aiAgent` is `codex`
+- And there are `.md` files in `~/.codex/.tmp/` newer than 7 days
+- When the extension sends a prompt via Codex
+- Then the extension MUST NOT delete those recent `.md` files.
+
+### Requirement: AI Agent Configuration
+The extension MUST allow users to configure which AI agent to use for chat interactions.
+
+#### Scenario: Default Configuration
+- Given the user has not configured `openspec-for-copilot.aiAgent`
+- When the extension reads the configuration
+- Then the value MUST be `github-copilot`.
+
+#### Scenario: Select Codex
+- Given the user sets `openspec-for-copilot.aiAgent` to `codex`
+- When the extension sends a prompt to chat
+- Then the extension MUST use the Codex integration workflow.
+
+### Requirement: Codex Integration Workflow
+When the AI agent is set to `codex`, the extension MUST send prompts via the `chatgpt.addToThread` command using a temporary file.
+
+#### Scenario: Send Prompt to Codex
+- Given `openspec-for-copilot.aiAgent` is `codex`
+- When the extension sends a prompt "Create a spec for X"
+- Then a temporary file MUST be created at `~/.codex/.tmp/YYYYMMDD-<UUID>.md`.
+- And the file content MUST be "Create a spec for X".
+- And the file MUST be opened in the editor.
+- And the entire content of the file MUST be selected.
+- And the command `chatgpt.addToThread` MUST be executed.
+
+#### Scenario: Temporary File Path
+- The temporary file path MUST follow the pattern `~/.codex/.tmp/YYYYMMDD-<UUID>.md`.
+- The directory `~/.codex/.tmp/` MUST be created if it does not exist.
+

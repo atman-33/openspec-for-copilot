@@ -6,6 +6,8 @@ import {
 	DEFAULT_VIEW_VISIBILITY,
 	VSC_CONFIG_NAMESPACE,
 } from "../constants";
+
+export type AiAgent = "github-copilot" | "codex";
 export interface OpenSpecSettings {
 	paths: {
 		specs: string;
@@ -17,6 +19,7 @@ export interface OpenSpecSettings {
 		prompts: { visible: boolean };
 		settings: { visible: boolean };
 	};
+	aiAgent: AiAgent;
 	chatLanguage: string;
 	customInstructions: {
 		global: string;
@@ -101,6 +104,12 @@ export class ConfigManager {
 		return config.get<string>("chatLanguage") ?? DEFAULT_CONFIG.chatLanguage;
 	}
 
+	private getAiAgent(): AiAgent {
+		const config = workspace.getConfiguration(VSC_CONFIG_NAMESPACE);
+		const raw = config.get<string>("aiAgent") ?? DEFAULT_CONFIG.aiAgent;
+		return raw === "codex" ? "codex" : "github-copilot";
+	}
+
 	private getCustomInstructions(): OpenSpecSettings["customInstructions"] {
 		const config = workspace.getConfiguration(VSC_CONFIG_NAMESPACE);
 		return {
@@ -157,6 +166,7 @@ export class ConfigManager {
 		return {
 			paths: mergedPaths,
 			views: mergedViews,
+			aiAgent: overrides.aiAgent ?? defaults.aiAgent,
 			chatLanguage: overrides.chatLanguage ?? defaults.chatLanguage,
 			customInstructions: mergedCustomInstructions,
 		};
@@ -164,6 +174,7 @@ export class ConfigManager {
 
 	private getDefaultSettings(): OpenSpecSettings {
 		const configuredPaths = this.getConfiguredPaths();
+		const aiAgent = this.getAiAgent();
 		const chatLanguage = this.getChatLanguage();
 		const customInstructions = this.getCustomInstructions();
 
@@ -175,6 +186,7 @@ export class ConfigManager {
 				prompts: { visible: DEFAULT_VIEW_VISIBILITY.prompts },
 				settings: { visible: DEFAULT_VIEW_VISIBILITY.settings },
 			},
+			aiAgent,
 			chatLanguage,
 			customInstructions,
 		};
