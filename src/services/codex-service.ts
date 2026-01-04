@@ -1,10 +1,22 @@
 import { homedir } from "os";
 import { dirname, join } from "path";
 import { randomUUID } from "crypto";
-import { Position, Selection, Uri, commands, window, workspace } from "vscode";
+import {
+	FileType,
+	Position,
+	Selection,
+	Uri,
+	commands,
+	window,
+	workspace,
+} from "vscode";
 
 export class CodexService {
+	private static readonly RETENTION_DAYS = 7;
+
 	static addPromptToThread = async (prompt: string): Promise<void> => {
+		await this.cleanupOldTempFiles();
+
 		const targetUri = this.buildCodexTempFileUri();
 		await this.writeTempFile(targetUri, prompt);
 
@@ -14,6 +26,39 @@ export class CodexService {
 		this.selectAll(editor, document);
 
 		await commands.executeCommand("chatgpt.addToThread");
+	};
+
+	private static cleanupOldTempFiles = async (): Promise<void> => {
+		try {
+			const dir = join(homedir(), ".codex", ".tmp");
+			const dirUri = Uri.file(dir);
+			await workspace.fs.createDirectory(dirUri);
+
+			const entries = await workspace.fs.readDirectory(dirUri);
+			const now = Date.now();
+			const cutoff = now - CodexService.RETENTION_DAYS * 24 * 60 * 60 * 1000;
+
+			await Promise.all(
+				entries.map(async ([name, type]) => {
+					if (type !== FileType.File || !name.endsWith(".md")) {
+						return;
+					}
+
+					const fileUri = Uri.joinPath(dirUri, name);
+
+					try {
+						const stat = await workspace.fs.stat(fileUri);
+						if (stat.mtime < cutoff) {
+							await workspace.fs.delete(fileUri, { useTrash: false });
+						}
+					} catch {
+						// Best-effort cleanup; ignore failures.
+					}
+				})
+			);
+		} catch {
+			// Best-effort cleanup; ignore failures.
+		}
 	};
 
 	private static buildCodexTempFileUri = (): ReturnType<typeof Uri.file> => {
