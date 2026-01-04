@@ -123,6 +123,7 @@ All settings live under the `openspec-for-copilot` namespace.
 | `customInstructions.global` | string | `""` | Global custom instructions appended to all prompts. |
 | `customInstructions.createSpec` | string | `""` | Custom instructions for "Create Spec". |
 | `customInstructions.startAllTask` | string | `""` | Custom instructions for "Start All Tasks". |
+| `customInstructions.archiveChange` | string | `""` | Custom instructions for "Archive Change". |
 | `customInstructions.runPrompt` | string | `""` | Custom instructions for "Run Prompt". |
 
 Note: In Codex mode, prompts are written to temporary Markdown files under `~/.codex/.tmp/` and sent via `chatgpt.addToThread`.
