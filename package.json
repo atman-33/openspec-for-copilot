@@ -129,12 +129,19 @@
           "description": "Custom instructions appended when starting all tasks.",
           "order": 6
         },
+        "openspec-for-copilot.customInstructions.archiveChange": {
+          "type": "string",
+          "default": "",
+          "editPresentation": "multilineText",
+          "description": "Custom instructions appended when archiving a change.",
+          "order": 7
+        },
         "openspec-for-copilot.customInstructions.runPrompt": {
           "type": "string",
           "default": "",
           "editPresentation": "multilineText",
           "description": "Custom instructions appended when running a prompt.",
-          "order": 7
+          "order": 8
         }
       }
     },

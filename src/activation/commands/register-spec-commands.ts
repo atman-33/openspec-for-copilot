@@ -116,7 +116,9 @@ export const registerSpecCommands = (
 					outputChannel.appendLine(
 						`[Archive Change] Archiving change: ${changeId}`
 					);
-					await sendPromptToChat(fullPrompt);
+					await sendPromptToChat(fullPrompt, {
+						instructionType: "archiveChange",
+					});
 				} catch (error) {
 					window.showErrorMessage(
 						`Failed to read archive prompt: ${error instanceof Error ? error.message : String(error)}`

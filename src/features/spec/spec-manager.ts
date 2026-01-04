@@ -214,8 +214,30 @@ This document has not been created yet.`;
 			return;
 		}
 
-		// Append change ID
-		const finalPrompt = `${promptContent}\n\nid: ${changeId}`;
+		// If a detailed design exists, append a small runtime hint (do not modify the prompt template file).
+		const detailedDesignUri = Uri.file(
+			join(dirname(documentUri.fsPath), "detailed-design.md")
+		);
+		let detailedDesignHint = "";
+		try {
+			await workspace.fs.stat(detailedDesignUri);
+			const detailedDesignPath = workspace.asRelativePath(
+				detailedDesignUri,
+				false
+			);
+			detailedDesignHint =
+				"\n\n---\n\n" +
+				"# Additional guidance\n" +
+				"- If `detailed-design.md` exists for this change (" +
+				detailedDesignPath +
+				"), read it and use it as implementation guidance.\n" +
+				"- If it conflicts with `proposal.md` or `tasks.md`, call out the conflict and ask for confirmation before proceeding.";
+		} catch {
+			detailedDesignHint = "";
+		}
+
+		// Append change ID (keep it last for compatibility)
+		const finalPrompt = `${promptContent}${detailedDesignHint}\n\nid: ${changeId}`;
 
 		await sendPromptToChat(finalPrompt, { instructionType: "startAllTask" });
 	}

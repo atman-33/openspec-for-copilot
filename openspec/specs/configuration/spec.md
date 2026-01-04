@@ -44,11 +44,12 @@ The extension MUST provide a configuration setting for a global custom instructi
 - And they can enter a multiline string
 
 ### Requirement: Specific Custom Instruction Settings
-The extension MUST provide configuration settings for specific custom instructions for "Create Spec", "Start All Task", and "Run Prompt".
+The extension MUST provide configuration settings for specific custom instructions for "Create Spec", "Start All Task", "Archive Change", and "Run Prompt".
 
-#### Scenario: User configures specific instructions
+#### Scenario: User configures specific instructions including Archive Change
 - Given the user opens VS Code settings
 - When they search for "openspec custom instructions"
-- Then they see settings for "Create Spec", "Start All Task", and "Run Prompt"
+- Then they see settings for "Create Spec", "Start All Task", "Archive Change", and "Run Prompt"
+- And "Archive Change" appears immediately after "Start All Task"
 - And they can enter multiline strings for each
 

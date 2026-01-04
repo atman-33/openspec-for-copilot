@@ -3,7 +3,11 @@ import { CodexService } from "../services/codex-service";
 import { ConfigManager } from "./config-manager";
 
 export interface ChatContext {
-	instructionType?: "createSpec" | "startAllTask" | "runPrompt";
+	instructionType?:
+		| "createSpec"
+		| "startAllTask"
+		| "archiveChange"
+		| "runPrompt";
 }
 
 export const buildChatPrompt = (
