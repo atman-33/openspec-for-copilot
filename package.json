@@ -227,6 +227,12 @@
         "icon": "$(archive)"
       },
       {
+        "command": "openspec-for-copilot.spec.copyName",
+        "title": "Copy Name",
+        "category": "OpenSpec for Copilot",
+        "icon": "$(clippy)"
+      },
+      {
         "command": "openspec-for-copilot.spec.createGitHubIssue",
         "title": "Create GitHub Issue",
         "category": "OpenSpec for Copilot",
@@ -378,6 +384,11 @@
         }
       ],
       "view/item/context": [
+        {
+          "command": "openspec-for-copilot.spec.copyName",
+          "when": "view == openspec-for-copilot.views.specExplorer && (viewItem == change || viewItem == spec)",
+          "group": "6_cutcopypaste"
+        },
         {
           "command": "openspec-for-copilot.spec.delete",
           "when": "view == openspec-for-copilot.views.specExplorer && viewItem == spec",
