@@ -2,6 +2,29 @@
 
 ---
 
+## v0.7.0 2026-01-14
+
+### Added
+
+- Implement individual task execution via CodeLens and enhance task management
+- add "Copy Name" command to Spec Explorer context menu
+
+### Changed
+
+- Merge pull request #28 from atman-33/release/v0.7.0
+- Merge pull request #25 from dealenx/main
+- feature/add-task-execution
+- Exclude '.claude' directory from biome file includes
+- Add individual task execution functionality with CodeLens buttons
+- Add new agents for specialized tasks and enhance orchestration capabilities
+- update package-lock.json to version 0.6.0 and remove unnecessary peer dependencies
+- Merge pull request #24 from atman-33/version-bump/v0.6.0
+
+### Fixed
+
+- Add peer dependencies to various packages in package-lock.json
+- add missing peer property to several dependencies in package-lock.json
+
 ## v0.6.0 2026-01-04
 
 ### Added
