@@ -25,3 +25,6 @@ repomix-output*
 .codex
 .claude
 .skillportrc
+
+.github/agents
+.github/prompts
