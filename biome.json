@@ -17,7 +17,8 @@
       "!webview-ui/src/app.css",
       "!webview-ui/node_modules/**/*",
       "!.tmp/**/*",
-      "!.codex/**/*"
+      "!.codex/**/*",
+      "!.claude/**/*"
     ],
     "ignoreUnknown": false
   },
