@@ -6,6 +6,7 @@ export interface ChatContext {
 	instructionType?:
 		| "createSpec"
 		| "startAllTask"
+		| "startSingleTask"
 		| "archiveChange"
 		| "runPrompt";
 }

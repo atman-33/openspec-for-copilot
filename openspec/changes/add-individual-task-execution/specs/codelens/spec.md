@@ -1,9 +1,7 @@
-# codelens Specification
+# codelens Specification Delta
 
-## Purpose
-Defines the CodeLens functionality for task execution within the OpenSpec environment.
+## MODIFIED Requirements
 
-## Requirements
 ### Requirement: CodeLens for Tasks
 The extension MUST provide CodeLens actions in `tasks.md` files to initiate task execution, both for all tasks and for individual tasks.
 
@@ -21,6 +19,8 @@ Given a `tasks.md` file where all tasks are marked as complete (e.g., `- [x] Tas
 When the CodeLens is rendered at the top of the file
 Then it displays "$(check) All Tasks Completed"
 And clicking it performs no action (or triggers a status notification).
+
+## ADDED Requirements
 
 ### Requirement: Individual Task Execution via CodeLens
 The extension MUST provide a CodeLens action above each incomplete task line to enable individual task execution.
@@ -89,5 +89,3 @@ After completion:
 - Do NOT proceed to subsequent tasks
 ```
 And the final line contains `id: ${changeId}`.
-
-

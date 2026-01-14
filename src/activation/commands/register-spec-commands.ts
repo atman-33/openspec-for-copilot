@@ -64,6 +64,25 @@ export const registerSpecCommands = (
 			}
 		),
 		commands.registerCommand(
+			"openspec-for-copilot.spec.implTaskSingle",
+			async (documentUri: Uri, taskLineNumber: number, taskText: string) => {
+				outputChannel.appendLine(
+					`[Task Execute Single] Executing task ${taskLineNumber}: ${taskText}`
+				);
+				try {
+					await specManager.runOpenSpecApply(documentUri, {
+						taskNumber: taskLineNumber,
+						taskText,
+					});
+				} catch (error) {
+					const message =
+						error instanceof Error ? error.message : String(error);
+					outputChannel.appendLine(`[Task Execute Single] Failed: ${message}`);
+					window.showErrorMessage(`Failed to execute task: ${message}`);
+				}
+			}
+		),
+		commands.registerCommand(
 			"openspec-for-copilot.spec.open",
 			async (relativePath: string, type: string) => {
 				await specManager.openDocument(relativePath, type);

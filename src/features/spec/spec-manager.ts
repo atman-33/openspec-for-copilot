@@ -184,7 +184,10 @@ This document has not been created yet.`;
 		return await this.getSpecs();
 	}
 
-	async runOpenSpecApply(documentUri: Uri) {
+	async runOpenSpecApply(
+		documentUri: Uri,
+		taskContext?: { taskNumber: number; taskText: string }
+	) {
 		const workspaceFolder = workspace.workspaceFolders?.[0];
 		if (!workspaceFolder) {
 			window.showErrorMessage("No workspace folder open");
@@ -236,10 +239,25 @@ This document has not been created yet.`;
 			detailedDesignHint = "";
 		}
 
-		// Append change ID (keep it last for compatibility)
-		const finalPrompt = `${promptContent}${detailedDesignHint}\n\nid: ${changeId}`;
+		// Append task-specific execution instructions if in single-task mode
+		let taskExecutionHint = "";
+		if (taskContext) {
+			taskExecutionHint =
+				"\n\n---\n\n" +
+				"# Task Execution Mode\n" +
+				"Execute ONLY the following specific task:\n\n" +
+				`**Task ${taskContext.taskNumber}:** ${taskContext.taskText}\n\n` +
+				"After completion:\n" +
+				"- Update ONLY this task line from `- [ ]` to `- [x]`\n" +
+				"- Do NOT modify other task lines\n" +
+				"- Do NOT proceed to subsequent tasks";
+		}
 
-		await sendPromptToChat(finalPrompt, { instructionType: "startAllTask" });
+		// Append change ID (keep it last for compatibility)
+		const finalPrompt = `${promptContent}${detailedDesignHint}${taskExecutionHint}\n\nid: ${changeId}`;
+
+		const instructionType = taskContext ? "startSingleTask" : "startAllTask";
+		await sendPromptToChat(finalPrompt, { instructionType });
 	}
 
 	async getChangeSpecs(changeName: string): Promise<string[]> {
