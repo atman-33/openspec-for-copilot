@@ -36,6 +36,25 @@ This change introduces per-task execution buttons while preserving the existing 
 - Parallel task execution (individual tasks run sequentially as invoked)
 - Custom task execution order (tasks execute in the order they appear)
 
+## What Changes
+
+### Changes to codelens Specification
+The `openspec/specs/codelens/spec.md` specification is updated with:
+1. New requirement "Individual Task Execution via CodeLens" documenting the feature
+2. Multiple scenarios describing CodeLens button behavior for individual tasks
+3. Requirements for task-specific prompt generation with execution context
+4. Detailed-design integration guidance for task-specific implementations
+
+### Files Modified
+- `openspec/specs/codelens/spec.md`: Adds requirement section for individual task execution with comprehensive scenarios and task-specific prompt generation requirements
+
+### Implementation Status
+The corresponding implementation adds:
+- Individual task execution command `openspec-for-copilot.spec.implTaskSingle`
+- CodeLens button generation for each incomplete task in `SpecTaskCodeLensProvider`
+- Task-specific prompt generation in `SpecManager.runOpenSpecApply`
+- Proper task completion tracking to update only the executed task line
+
 ## Technical Approach
 
 ### CodeLens Provider Enhancement
