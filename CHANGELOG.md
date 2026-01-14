@@ -2,6 +2,20 @@
 
 ---
 
+## v0.7.0 2026-01-14
+
+### Added
+
+- Implement individual task execution via CodeLens and enhance task management
+
+### Changed
+
+- feature/add-task-execution
+- Exclude '.claude' directory from biome file includes
+- Add individual task execution functionality with CodeLens buttons
+- Add new agents for specialized tasks and enhance orchestration capabilities
+- Merge pull request #24 from atman-33/version-bump/v0.6.0
+
 ## v0.6.0 2026-01-04
 
 ### Added
