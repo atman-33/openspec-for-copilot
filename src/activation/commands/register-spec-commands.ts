@@ -1,4 +1,4 @@
-import { commands, window, workspace, Uri } from "vscode";
+import { commands, env, window, workspace, Uri } from "vscode";
 import type { ExtensionContext } from "vscode";
 import type { SpecExplorerProvider } from "../../providers/spec-explorer-provider";
 import type { ExtensionServices } from "../extension-services";
@@ -97,6 +97,18 @@ export const registerSpecCommands = (
 			"openspec-for-copilot.spec.delete",
 			async (item: any) => {
 				await specManager.delete(item.label);
+			}
+		),
+		commands.registerCommand(
+			"openspec-for-copilot.spec.copyName",
+			async (item: any) => {
+				const name: string | undefined = item?.specName ?? item?.label;
+				if (!name) {
+					window.showErrorMessage("Could not determine item name.");
+					return;
+				}
+				await env.clipboard.writeText(name);
+				window.setStatusBarMessage(`Copied: ${name}`, 2000);
 			}
 		),
 		commands.registerCommand(
