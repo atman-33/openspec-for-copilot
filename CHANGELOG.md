@@ -2,6 +2,26 @@
 
 ---
 
+## v1.0.0 2026-01-29
+
+### Added
+
+- migrate to OpenSpec v1 prompt file structure
+- add migration guidance for OpenSpec v1 with legacy support
+- migrate to OpenSpec v1 prompt file references
+
+### Changed
+
+- Merge pull request #32 from atman-33/feature/openspec-version-upgrade
+- add .github/instructions to .gitignore
+- add software development policies documentation
+- upgrade OpenSpec
+- chore/ignore-some-files
+- Remove .github/agents and .github/prompts from tracking
+- chore/archive-spec
+- add individual task execution functionality to CodeLens in tasks.md
+- Merge pull request #29 from atman-33/version-bump/v0.7.0
+
 ## v0.7.0 2026-01-14
 
 ### Added
