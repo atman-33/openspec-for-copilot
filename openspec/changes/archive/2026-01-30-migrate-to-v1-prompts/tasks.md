@@ -11,6 +11,6 @@
 ## 3. Verification
 
 - [x] 3.1 Run existing tests to ensure no regressions
-- [ ] 3.2 Manual test: Create Spec command works
-- [ ] 3.3 Manual test: Apply Tasks command works
-- [ ] 3.4 Manual test: Archive Change command works
+- [x] 3.2 Manual test: Create Spec command works
+- [x] 3.3 Manual test: Apply Tasks command works
+- [x] 3.4 Manual test: Archive Change command works

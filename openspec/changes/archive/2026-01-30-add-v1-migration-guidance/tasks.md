@@ -22,6 +22,6 @@
 
 - [x] 4.1 Run unit tests for new utility module
 - [x] 4.2 Run existing test suite to ensure no regressions
-- [ ] 4.3 Manual test: Trigger error with no prompt files present
-- [ ] 4.4 Manual test: Verify legacy file fallback with warning
-- [ ] 4.5 Manual test: Verify V1 files work without warnings
+- [x] 4.3 Manual test: Trigger error with no prompt files present
+- [x] 4.4 Manual test: Verify legacy file fallback with warning
+- [x] 4.5 Manual test: Verify V1 files work without warnings
