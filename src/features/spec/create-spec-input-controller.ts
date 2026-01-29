@@ -250,7 +250,7 @@ export class CreateSpecInputController {
 				workspaceFolder.uri,
 				".github",
 				"prompts",
-				"openspec-proposal.prompt.md"
+				"opsx-new.prompt.md"
 			);
 			let promptTemplate = "";
 			try {
@@ -258,7 +258,7 @@ export class CreateSpecInputController {
 				promptTemplate = new TextDecoder().decode(fileData);
 			} catch (error) {
 				throw new Error(
-					"Required prompt file not found: .github/prompts/openspec-proposal.prompt.md"
+					"Required prompt file not found: .github/prompts/opsx-new.prompt.md"
 				);
 			}
 

@@ -197,12 +197,12 @@ This document has not been created yet.`;
 		// Extract change ID from path: .../openspec/changes/<change-id>/tasks.md
 		const changeId = basename(dirname(documentUri.fsPath));
 
-		// Read prompt template from .github/prompts/openspec-apply.prompt.md
+		// Read prompt template from .github/prompts/opsx-apply.prompt.md
 		const promptPath = join(
 			workspaceFolder.uri.fsPath,
 			".github",
 			"prompts",
-			"openspec-apply.prompt.md"
+			"opsx-apply.prompt.md"
 		);
 
 		let promptContent = "";

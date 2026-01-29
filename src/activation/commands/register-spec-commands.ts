@@ -136,7 +136,7 @@ export const registerSpecCommands = (
 
 				const promptPath = Uri.joinPath(
 					ws.uri,
-					".github/prompts/openspec-archive.prompt.md"
+					".github/prompts/opsx-archive.prompt.md"
 				);
 
 				try {
