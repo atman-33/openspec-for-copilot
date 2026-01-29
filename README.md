@@ -64,6 +64,55 @@ Run the initialization:
 openspec init
 ```
 
+## Migrating to OpenSpec v1
+
+OpenSpec for Copilot v1.0.0+ requires OpenSpec CLI v1. If you're upgrading from an earlier version:
+
+### Prerequisites
+- Node.js 18 or higher
+- npm or yarn
+
+### Migration Steps
+
+1. **Install OpenSpec CLI v1:**
+   ```bash
+   npm install -g openspec@latest
+   ```
+
+2. **Initialize OpenSpec v1 in your workspace:**
+   ```bash
+   cd /path/to/your/workspace
+   openspec init
+   ```
+
+3. **Verify prompt files were created:**
+   Check that `.github/prompts/` contains:
+   - `opsx-new.prompt.md`
+   - `opsx-apply.prompt.md`
+   - `opsx-archive.prompt.md`
+   - `opsx-continue.prompt.md`
+   - `opsx-ff.prompt.md`
+   - `opsx-explore.prompt.md`
+   - `opsx-verify.prompt.md`
+   - `opsx-sync.prompt.md`
+   - `opsx-bulk-archive.prompt.md`
+   - `opsx-onboard.prompt.md`
+
+### Legacy File Support
+
+The extension will temporarily use legacy v0.x prompt files if v1 files are not found, but will display deprecation warnings. Legacy support will be removed in a future release.
+
+### Troubleshooting
+
+**"OpenSpec v1 prompt files not found" error:**
+- Ensure you've run `openspec init` in your workspace root
+- Verify `.github/prompts/` directory exists
+- Check that OpenSpec CLI is v1.0.0 or higher: `openspec --version`
+
+**"Using legacy OpenSpec v0.x prompt file" warning:**
+- Run `openspec init` to generate v1 files
+- The extension will continue working with legacy files but will show warnings
+
 ### Marketplace
 Search for "OpenSpec for Copilot" in the VS Code Marketplace and install the extension.
 

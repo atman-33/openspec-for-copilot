@@ -12,6 +12,7 @@ import { PromptLoader } from "../../services/prompt-loader";
 import { ConfigManager } from "../../utils/config-manager";
 import { NotificationUtils } from "../../utils/notification-utils";
 import { sendPromptToChat } from "../../utils/chat-prompt-runner";
+import { readPromptFile } from "../../utils/openspec-prompt-utils";
 import { CreateSpecInputController } from "./create-spec-input-controller";
 
 export type SpecDocumentType = "requirements" | "design" | "tasks";
@@ -197,22 +198,23 @@ This document has not been created yet.`;
 		// Extract change ID from path: .../openspec/changes/<change-id>/tasks.md
 		const changeId = basename(dirname(documentUri.fsPath));
 
-		// Read prompt template from .github/prompts/opsx-apply.prompt.md
-		const promptPath = join(
-			workspaceFolder.uri.fsPath,
-			".github",
-			"prompts",
-			"opsx-apply.prompt.md"
-		);
-
 		let promptContent = "";
 		try {
-			const promptUri = Uri.file(promptPath);
-			const promptData = await workspace.fs.readFile(promptUri);
-			promptContent = Buffer.from(promptData).toString("utf-8");
+			const result = await readPromptFile(
+				workspaceFolder.uri,
+				"opsx-apply.prompt.md",
+				"openspec-apply.prompt.md"
+			);
+			if (result.isLegacy) {
+				this.outputChannel.appendLine(
+					`[SpecManager] Using legacy prompt file: ${result.filePath}`
+				);
+			}
+			promptContent = result.content;
 		} catch (error) {
-			const message = `Failed to read prompt file at ${promptPath}`;
-			this.outputChannel.appendLine(`[SpecManager] ${message}: ${error}`);
+			const message =
+				error instanceof Error ? error.message : "Failed to read prompt file.";
+			this.outputChannel.appendLine(`[SpecManager] ${message}`);
 			window.showErrorMessage(message);
 			return;
 		}
