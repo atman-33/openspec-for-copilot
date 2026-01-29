@@ -27,5 +27,6 @@ repomix-output*
 .skillportrc
 
 .github/agents
+.github/instructions/*
 .github/prompts/*
 !.github/prompts/opsx-*
