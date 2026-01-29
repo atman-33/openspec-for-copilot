@@ -1,11 +1,16 @@
-import { commands, env, window, workspace, Uri } from "vscode";
-import type { ExtensionContext } from "vscode";
+import { commands, env, window, workspace } from "vscode";
+import type { ExtensionContext, Uri } from "vscode";
 import type { SpecExplorerProvider } from "../../providers/spec-explorer-provider";
 import type { ExtensionServices } from "../extension-services";
 import { createDetailedDesignCommandHandler } from "../../features/spec/commands/create-detailed-design";
 import { createGitHubIssueCommandHandler } from "../../features/spec/commands/create-github-issue";
 import { updateSpecsFromDetailedDesignCommandHandler } from "../../features/spec/commands/update-specs-from-detailed-design";
 import { sendPromptToChat } from "../../utils/chat-prompt-runner";
+import { readPromptFile } from "../../utils/openspec-prompt-utils";
+interface SpecCommandItem {
+	label?: string;
+	specName?: string;
+}
 
 export const registerSpecCommands = (
 	context: ExtensionContext,
@@ -95,13 +100,18 @@ export const registerSpecCommands = (
 		}),
 		commands.registerCommand(
 			"openspec-for-copilot.spec.delete",
-			async (item: any) => {
-				await specManager.delete(item.label);
+			async (item: SpecCommandItem) => {
+				const label = item?.label;
+				if (!label) {
+					window.showErrorMessage("Could not determine item name.");
+					return;
+				}
+				await specManager.delete(label);
 			}
 		),
 		commands.registerCommand(
 			"openspec-for-copilot.spec.copyName",
-			async (item: any) => {
+			async (item: SpecCommandItem) => {
 				const name: string | undefined = item?.specName ?? item?.label;
 				if (!name) {
 					window.showErrorMessage("Could not determine item name.");
@@ -121,7 +131,7 @@ export const registerSpecCommands = (
 		),
 		commands.registerCommand(
 			"openspec-for-copilot.spec.archiveChange",
-			async (item: any) => {
+			async (item: SpecCommandItem) => {
 				const changeId: string | undefined = item?.specName;
 				if (!changeId) {
 					window.showErrorMessage("Could not determine change ID.");
@@ -134,15 +144,18 @@ export const registerSpecCommands = (
 					return;
 				}
 
-				const promptPath = Uri.joinPath(
-					ws.uri,
-					".github/prompts/openspec-archive.prompt.md"
-				);
-
 				try {
-					const promptContent = await workspace.fs.readFile(promptPath);
-					const promptString = new TextDecoder().decode(promptContent);
-					const fullPrompt = `${promptString}\n\nid: ${changeId}`;
+					const result = await readPromptFile(
+						ws.uri,
+						"opsx-archive.prompt.md",
+						"openspec-archive.prompt.md"
+					);
+					if (result.isLegacy) {
+						outputChannel.appendLine(
+							`[Archive Change] Using legacy prompt file: ${result.filePath}`
+						);
+					}
+					const fullPrompt = `${result.content}\n\nid: ${changeId}`;
 
 					outputChannel.appendLine(
 						`[Archive Change] Archiving change: ${changeId}`
@@ -151,9 +164,9 @@ export const registerSpecCommands = (
 						instructionType: "archiveChange",
 					});
 				} catch (error) {
-					window.showErrorMessage(
-						`Failed to read archive prompt: ${error instanceof Error ? error.message : String(error)}`
-					);
+					const message =
+						error instanceof Error ? error.message : String(error);
+					window.showErrorMessage(`Failed to read archive prompt: ${message}`);
 				}
 			}
 		),

@@ -12,6 +12,7 @@ import type { PromptLoader } from "../../services/prompt-loader";
 import type { ConfigManager } from "../../utils/config-manager";
 import { sendPromptToChat } from "../../utils/chat-prompt-runner";
 import { getWebviewContent } from "../../utils/get-webview-content";
+import { readPromptFile } from "../../utils/openspec-prompt-utils";
 import type {
 	CreateSpecDraftState,
 	CreateSpecFormData,
@@ -246,22 +247,18 @@ export class CreateSpecInputController {
 		const payload = formatDescription(normalized);
 
 		try {
-			const promptUri = Uri.joinPath(
+			const result = await readPromptFile(
 				workspaceFolder.uri,
-				".github",
-				"prompts",
+				"opsx-new.prompt.md",
 				"openspec-proposal.prompt.md"
 			);
-			let promptTemplate = "";
-			try {
-				const fileData = await workspace.fs.readFile(promptUri);
-				promptTemplate = new TextDecoder().decode(fileData);
-			} catch (error) {
-				throw new Error(
-					"Required prompt file not found: .github/prompts/openspec-proposal.prompt.md"
+			if (result.isLegacy) {
+				this.outputChannel.appendLine(
+					`[CreateSpec] Using legacy prompt file: ${result.filePath}`
 				);
 			}
 
+			const promptTemplate = result.content;
 			const prompt = `${promptTemplate}\n\nThe following sections describe the specification and context for this change request.\n\n${payload}\n\nIMPORTANT:\nAfter generating the proposal documents, you MUST STOP and ask the user for confirmation.\nDo NOT proceed with any implementation steps until the user has explicitly approved the proposal.`;
 
 			await sendPromptToChat(prompt, { instructionType: "createSpec" });
