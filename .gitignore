@@ -17,6 +17,7 @@ coverage/
 *.snap.tmp
 .nyc_output/
 
+.agents
 .tmp
 .repomix
 repomix-output*
